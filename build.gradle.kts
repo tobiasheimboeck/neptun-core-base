@@ -10,7 +10,7 @@ allprojects {
 
     repositories {
         maven {
-            url = uri("https://nexus.world.neptuns/repository/maven-public/")
+            url = uri("https://nexus.neptuns.world/repository/maven-public/")
             credentials {
                 username = property("nexusUsername") as String
                 password = property("nexusPassword") as String
@@ -27,6 +27,8 @@ allprojects {
             compileOnly(libs.gson)
             compileOnly(libs.bundles.database)
             compileOnly(libs.bundles.kyori)
+
+            compileOnly(libs.neptun.controller.api)
         }
     }
 }

@@ -1,20 +1,28 @@
 package world.neptuns.core.base.api.player
 
+import kotlinx.coroutines.Deferred
+import world.neptuns.controller.api.service.NeptunService
 import world.neptuns.core.base.api.player.model.NeptunOfflinePlayer
-import world.neptuns.core.base.api.player.model.NeptunPlayer
+import world.neptuns.core.base.api.player.model.NeptunOnlinePlayer
 import java.util.*
 
 interface NeptunPlayerController {
 
-    val cachedOnlinePlayers: MutableMap<UUID, NeptunPlayer>
+    suspend fun isOnline(uuid: UUID): Deferred<Boolean>
 
-    fun getOnlinePlayer(uuid: UUID): NeptunPlayer?
-    fun getOfflinePlayer(uuid: UUID): NeptunOfflinePlayer?
+    suspend fun getOnlinePlayerAsync(uuid: UUID): Deferred<NeptunOnlinePlayer?>
+    fun getOnlinePlayerFromCurrentService(uuid: UUID): NeptunOnlinePlayer?
 
-    fun createOfflinePlayer(uuid: UUID)
-    fun deleteOfflinePlayer(uuid: UUID)
+    suspend fun getOnlinePlayersFromServiceAsync(neptunService: NeptunService): Deferred<List<NeptunOfflinePlayer>>
+    suspend fun getOnlinePlayersAsync(): Deferred<List<NeptunOnlinePlayer>>
+    fun getOnlinePlayersFromCurrentService(): List<NeptunOnlinePlayer>
 
-    fun cacheOnlinePlayer(uuid: UUID)
-    fun removeCachedOnlinePlayer(uuid: UUID)
+    suspend fun getOfflinePlayerAsync(uuid: UUID): Deferred<NeptunOfflinePlayer?>
+    suspend fun getOfflinePlayersAsync(): Deferred<List<NeptunOfflinePlayer>>
+
+    suspend fun getGloballyRegisteredPlayersAmount(): Deferred<Int>
+
+    fun handlePlayerCreation(uuid: UUID)
+    fun handlePlayerDeletion(uuid: UUID)
 
 }

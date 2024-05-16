@@ -16,6 +16,8 @@ async-paper-api = "2.15.0"
 
 kyori-adventure-api = "4.17.0"
 
+neptun-controller-api = "1.0-SNAPSHOT"
+
 [libraries]
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 
@@ -33,6 +35,8 @@ asyncp-paper-core = { group = "com.github.shynixn.mccoroutine", name = "mccorout
 
 kyori-adventure-api = { group = "net.kyori", name = "adventure-api", version.ref = "kyori-adventure-api" }
 kyori-minimessage-api = { group = "net.kyori", name = "adventure-text-minimessage", version.ref = "kyori-adventure-api" }
+
+neptun-controller-api = { group = "world.neptuns.network.controller", name = "controller-api", version.ref = "neptun-controller-api" }
 
 [bundles]
 database = ["redisson", "mariadb", "sql-core", "sql-dao", "sql-jdbc"]

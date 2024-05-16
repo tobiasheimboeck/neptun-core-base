@@ -1,5 +1,6 @@
 package world.neptuns.core.base.api.player.model
 
+import kotlinx.coroutines.Deferred
 import world.neptuns.core.base.api.player.PlayerSession
 import world.neptuns.core.base.api.skin.SkinProfile
 import java.util.*
@@ -15,6 +16,6 @@ interface NeptunOfflinePlayer {
     var crystals: Long
     var shards: Long
 
-    fun isOnline(): Boolean
+    suspend fun isOnline(): Deferred<Boolean>
 
 }

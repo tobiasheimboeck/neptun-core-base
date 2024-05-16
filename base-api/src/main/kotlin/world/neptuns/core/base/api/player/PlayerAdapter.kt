@@ -1,24 +1,10 @@
 package world.neptuns.core.base.api.player
 
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
-import world.neptuns.core.base.api.language.Language
-import world.neptuns.core.base.api.player.model.NeptunOfflinePlayer
-import world.neptuns.core.base.api.player.model.NeptunPlayer
 import java.util.*
 
 
 interface PlayerAdapter<T> {
-
-    fun getMinecraftPlayer(uuid: UUID): T?
-    fun getMinecraftPlayer(name: String): T?
-
-    fun getOnlinePlayer(uuid: UUID): NeptunPlayer?
-    fun getOnlinePlayer(name: String): NeptunPlayer?
-
-    fun getOfflinePlayer(uuid: UUID): NeptunOfflinePlayer?
-    fun getOfflinePlayer(name: String): NeptunOfflinePlayer?
-
-    fun getLanguage(uuid: UUID): Language
 
     fun broadcastMessage(broadcastType: BroadcastType?, key: String, toReplace: List<Pair<String, String>>)
     fun sendGlobalMessage(unqiueId: UUID?, key: String, toReplace: List<Pair<String, String>>)
