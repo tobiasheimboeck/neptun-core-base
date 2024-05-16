@@ -8,8 +8,6 @@ interface RegistryLoader<T> {
 
     fun register(type: T, clazz: Class<out T>)
 
-    fun get(clazz: Class<out T>): T?
-
-    fun getAll(): List<T>
+    fun <R : T> get(clazz: Class<R>): R?
 
 }

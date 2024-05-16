@@ -8,9 +8,5 @@ interface PlayerSession {
 
     var onlineTime: Long
 
-    fun updateOnlineTime() {
-        val playedDuration: Long = this.lastLogoutTimestamp - this.lastLoginTimestamp
-        this.onlineTime += playedDuration
-    }
 
 }

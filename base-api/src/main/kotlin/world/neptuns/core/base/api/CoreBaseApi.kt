@@ -9,12 +9,10 @@ import kotlin.coroutines.CoroutineContext
 interface CoreBaseApi {
 
     val minecraftDispatcher: CoroutineContext
-
-    fun getRepositoryLoader(): RepositoryLoader
+    val repositoryLoader: RepositoryLoader
+    val playerController: NeptunPlayerController
 
     fun getLanguageController(): LanguageController
-
-    fun getPlayerController(): NeptunPlayerController
 
     fun <T> registerPlayerAdapter(playerAdapter: PlayerAdapter<T>)
     fun <T> getPlayerAdapter(clazz: Class<T>): PlayerAdapter<T>

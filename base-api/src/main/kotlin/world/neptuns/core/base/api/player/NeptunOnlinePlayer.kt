@@ -1,4 +1,4 @@
-package world.neptuns.core.base.api.player.model
+package world.neptuns.core.base.api.player
 
 import world.neptuns.controller.api.NeptunControllerProvider
 import world.neptuns.controller.api.service.NeptunService
