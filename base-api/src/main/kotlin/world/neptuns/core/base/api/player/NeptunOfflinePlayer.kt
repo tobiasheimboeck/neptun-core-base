@@ -41,4 +41,9 @@ interface NeptunOfflinePlayer {
         SHARDS
     }
 
+    enum class Reward {
+        CRYSTALS,
+        SHARDS
+    }
+
 }

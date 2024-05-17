@@ -3,6 +3,7 @@ package world.neptuns.core.base.common.api.player
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.kyori.adventure.text.format.TextColor
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
@@ -12,12 +13,16 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import world.neptuns.controller.api.service.NeptunService
 import world.neptuns.core.base.api.NeptunCoreProvider
+import world.neptuns.core.base.api.language.LanguageKey
+import world.neptuns.core.base.api.language.properties.LanguageProperties
 import world.neptuns.core.base.api.player.NeptunOfflinePlayer
 import world.neptuns.core.base.api.player.NeptunOnlinePlayer
 import world.neptuns.core.base.api.player.NeptunPlayerController
+import world.neptuns.core.base.common.api.language.properties.LanguagePropertiesImpl
 import world.neptuns.core.base.common.api.skin.SkinProfileImpl
-import world.neptuns.core.base.common.repository.OfflinePlayerRepository
-import world.neptuns.core.base.common.repository.OnlinePlayerRepository
+import world.neptuns.core.base.common.repository.language.LanguagePropertiesTable
+import world.neptuns.core.base.common.repository.player.OfflinePlayerTable
+import world.neptuns.core.base.common.repository.player.OnlinePlayerRepository
 import java.util.*
 
 class NeptunPlayerControllerImpl : NeptunPlayerController {
@@ -42,30 +47,32 @@ class NeptunPlayerControllerImpl : NeptunPlayerController {
 
     override suspend fun getOfflinePlayerAsync(uuid: UUID): Deferred<NeptunOfflinePlayer?> {
         return suspendedTransactionAsync(Dispatchers.IO) {
-            constructOfflinePlayer(OfflinePlayerRepository.selectAll().where { OfflinePlayerRepository.uuid eq uuid }.limit(1).firstOrNull(), null)
+            constructOfflinePlayer(OfflinePlayerTable.selectAll().where { OfflinePlayerTable.uuid eq uuid }.limit(1).firstOrNull(), null)
         }
     }
 
     override suspend fun getOfflinePlayersAsync(): Deferred<List<NeptunOfflinePlayer>> {
         return suspendedTransactionAsync(Dispatchers.IO) {
-            OfflinePlayerRepository.selectAll().toList().map { constructOfflinePlayer(it, null)!! }
+            OfflinePlayerTable.selectAll().toList().map { constructOfflinePlayer(it, null)!! }
         }
     }
 
     override suspend fun getGloballyRegisteredPlayersAmount(): Deferred<Int> {
         return suspendedTransactionAsync(Dispatchers.IO) {
-            OfflinePlayerRepository.selectAll().toList().size
+            OfflinePlayerTable.selectAll().toList().size
         }
     }
 
     override suspend fun handlePlayerCreation(uuid: UUID, name: String, skinValue: String, skinSignature: String, proxyServiceName: String, minecraftServiceName: String) {
         newSuspendedTransaction(Dispatchers.IO) {
-            val resultRow = OfflinePlayerRepository.selectAll().where { OfflinePlayerRepository.uuid eq uuid }.limit(1).firstOrNull()
+            val resultRow = OfflinePlayerTable.selectAll().where { OfflinePlayerTable.uuid eq uuid }.limit(1).firstOrNull()
+
             val offlinePlayer: NeptunOfflinePlayer
+            val languageProperties: LanguageProperties
 
             if (resultRow == null) {
                 offlinePlayer = NeptunOfflinePlayerImpl.create(uuid, name, skinValue, skinValue)
-                OfflinePlayerRepository.insert {
+                OfflinePlayerTable.insert {
                     it[this.uuid] = offlinePlayer.uuid
                     it[this.name] = offlinePlayer.name
                     it[this.firstLoginTimestamp] = offlinePlayer.firstLoginTimestamp
@@ -77,9 +84,18 @@ class NeptunPlayerControllerImpl : NeptunPlayerController {
                     it[this.crystals] = offlinePlayer.crystals
                     it[this.shards] = offlinePlayer.shards
                 }
+
+                languageProperties = LanguagePropertiesImpl.createDefaultProperties(uuid)
+                LanguagePropertiesTable.insert {
+                    it[this.uuid] = offlinePlayer.uuid
+                    it[this.languageKey] = languageProperties.languageKey.asString()
+                    it[this.primaryColor] = languageProperties.primaryColor.asHexString()
+                    it[this.secondaryColor] = languageProperties.secondaryColor.asHexString()
+                    it[this.separatorColor] = languageProperties.separatorColor.asHexString()
+                }
             } else {
-                val usernameChanged = resultRow[OfflinePlayerRepository.name] != name
-                val username = if (usernameChanged) name else resultRow[OfflinePlayerRepository.name]
+                val usernameChanged = resultRow[OfflinePlayerTable.name] != name
+                val username = if (usernameChanged) name else resultRow[OfflinePlayerTable.name]
 
                 offlinePlayer = constructOfflinePlayer(resultRow, username)!!
                 if (usernameChanged) bulkUpdateEntry(uuid, NeptunOfflinePlayer.Update.NAME, username, false)
@@ -95,7 +111,7 @@ class NeptunPlayerControllerImpl : NeptunPlayerController {
             offlinePlayer.updateOnlineTime()
 
             transaction {
-                OfflinePlayerRepository.update({ OfflinePlayerRepository.uuid eq uuid }) {
+                OfflinePlayerTable.update({ OfflinePlayerTable.uuid eq uuid }) {
                     it[onlineTime] = offlinePlayer.onlineTime
                 }
             }
@@ -106,7 +122,7 @@ class NeptunPlayerControllerImpl : NeptunPlayerController {
 
     override suspend fun bulkUpdateEntry(key: UUID, updateType: NeptunOfflinePlayer.Update, newValue: Any, updateCache: Boolean, result: (Unit) -> Unit) {
         newSuspendedTransaction(Dispatchers.IO) {
-            OfflinePlayerRepository.update({ OfflinePlayerRepository.uuid eq key }) {
+            OfflinePlayerTable.update({ OfflinePlayerTable.uuid eq key }) {
                 when (updateType) {
                     NeptunOfflinePlayer.Update.ALL -> {
                         if (newValue !is NeptunOnlinePlayer)
@@ -170,18 +186,32 @@ class NeptunPlayerControllerImpl : NeptunPlayerController {
         }
     }
 
+    private fun constructLanguageProperties(resultRow: ResultRow?): LanguageProperties? {
+        return if (resultRow != null) {
+            LanguagePropertiesImpl(
+                resultRow[LanguagePropertiesTable.uuid],
+                LanguageKey.fromString(resultRow[LanguagePropertiesTable.languageKey]),
+                TextColor.fromHexString(resultRow[LanguagePropertiesTable.primaryColor])!!,
+                TextColor.fromHexString(resultRow[LanguagePropertiesTable.secondaryColor])!!,
+                TextColor.fromHexString(resultRow[LanguagePropertiesTable.separatorColor])!!
+            )
+        } else {
+            null
+        }
+    }
+
     private fun constructOfflinePlayer(resultRow: ResultRow?, name: String?): NeptunOfflinePlayer? {
         return if (resultRow != null) {
             NeptunOfflinePlayerImpl(
-                resultRow[OfflinePlayerRepository.uuid],
-                name ?: resultRow[OfflinePlayerRepository.name],
-                resultRow[OfflinePlayerRepository.firstLoginTimestamp],
-                resultRow[OfflinePlayerRepository.lastLoginTimestamp],
-                resultRow[OfflinePlayerRepository.lastLogoutTimestamp],
-                resultRow[OfflinePlayerRepository.onlineTime],
-                SkinProfileImpl(resultRow[OfflinePlayerRepository.skinValue], resultRow[OfflinePlayerRepository.skinSignature]),
-                resultRow[OfflinePlayerRepository.crystals],
-                resultRow[OfflinePlayerRepository.shards],
+                resultRow[OfflinePlayerTable.uuid],
+                name ?: resultRow[OfflinePlayerTable.name],
+                resultRow[OfflinePlayerTable.firstLoginTimestamp],
+                resultRow[OfflinePlayerTable.lastLoginTimestamp],
+                resultRow[OfflinePlayerTable.lastLogoutTimestamp],
+                resultRow[OfflinePlayerTable.onlineTime],
+                SkinProfileImpl(resultRow[OfflinePlayerTable.skinValue], resultRow[OfflinePlayerTable.skinSignature]),
+                resultRow[OfflinePlayerTable.crystals],
+                resultRow[OfflinePlayerTable.shards],
             )
         } else {
             null

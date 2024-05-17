@@ -1,8 +1,8 @@
-package world.neptuns.core.base.common.repository
+package world.neptuns.core.base.common.repository.player
 
 import org.jetbrains.exposed.sql.Table
 
-object OfflinePlayerRepository : Table("offline_players") {
+object OfflinePlayerTable : Table("offline_players") {
     val uuid = uuid("uuid")
     val name = varchar("name", 255)
     val firstLoginTimestamp = long("first_login_timestamp")

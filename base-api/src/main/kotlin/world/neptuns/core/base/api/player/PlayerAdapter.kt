@@ -6,8 +6,8 @@ import java.util.*
 
 interface PlayerAdapter<T> {
 
-    fun broadcastMessage(broadcastType: BroadcastType?, key: String, toReplace: List<Pair<String, String>>)
-    fun sendGlobalMessage(unqiueId: UUID?, key: String, toReplace: List<Pair<String, String>>)
+    fun broadcastMessage(broadcastType: BroadcastType, key: String, toReplace: List<Pair<String, String>>)
+    fun sendGlobalMessage(unqiueId: UUID, key: String, toReplace: List<Pair<String, String>>)
     fun sendRawMessage(player: T, message: String)
     fun sendMessage(player: T, key: String, vararg toReplace: TagResolver)
 

@@ -1,4 +1,4 @@
-package world.neptuns.core.base.common.repository
+package world.neptuns.core.base.common.repository.player
 
 import org.redisson.api.RedissonClient
 import world.neptuns.core.base.api.player.NeptunOnlinePlayer
