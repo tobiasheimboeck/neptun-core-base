@@ -19,7 +19,7 @@ interface NeptunPlayerController : Updatable<UUID, NeptunOfflinePlayer.Update, A
 
     suspend fun getGloballyRegisteredPlayersAmount(): Deferred<Int>
 
-    suspend fun handlePlayerCreation(uuid: UUID, name: String, skinValue: String, skinSignature: String, proxyServiceName: String, minecraftServiceName: String)
-    suspend fun handlePlayerDeletion(uuid: UUID)
+    suspend fun loadPlayer(uuid: UUID, name: String, skinValue: String, skinSignature: String, proxyServiceName: String, minecraftServiceName: String)
+    suspend fun unloadPlayer(uuid: UUID)
 
 }

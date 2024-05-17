@@ -7,6 +7,8 @@ import world.neptuns.core.base.api.file.FileController
 import world.neptuns.core.base.api.language.LanguageController
 import world.neptuns.core.base.api.language.LanguageKey
 import world.neptuns.core.base.api.language.LineKey
+import world.neptuns.core.base.api.language.color.LanguageColor
+import world.neptuns.core.base.api.language.color.LanguageColorController
 import world.neptuns.core.base.api.language.properties.LanguagePropertiesController
 import world.neptuns.core.base.api.player.NeptunPlayerController
 import world.neptuns.core.base.api.player.PlayerAdapter
@@ -28,9 +30,11 @@ interface CoreBaseApi {
 
     val languageController: LanguageController
     val languagePropertiesController: LanguagePropertiesController
+    val languageColorController: LanguageColorController
 
     fun newLanguageKey(countryCode: String, languageCode: String): LanguageKey
     fun newLineKey(namespace: String, value: String): LineKey
+    fun newLanguageColor(name: LineKey, permission: String?, hexFormat: String, description: LineKey, price: Long): LanguageColor
 
     fun <T> registerPlayerAdapter(playerAdapter: PlayerAdapter<T>)
     fun <T> playerAdapter(clazz: Class<T>): PlayerAdapter<T>

@@ -11,21 +11,28 @@ import world.neptuns.core.base.api.file.FileController
 import world.neptuns.core.base.api.language.LanguageController
 import world.neptuns.core.base.api.language.LanguageKey
 import world.neptuns.core.base.api.language.LineKey
+import world.neptuns.core.base.api.language.color.LanguageColor
+import world.neptuns.core.base.api.language.color.LanguageColorController
 import world.neptuns.core.base.api.language.properties.LanguagePropertiesController
 import world.neptuns.core.base.api.player.NeptunPlayerController
 import world.neptuns.core.base.api.player.PlayerAdapter
+import world.neptuns.core.base.api.player.currency.CurrencyRegistry
 import world.neptuns.core.base.api.repository.RepositoryLoader
 import world.neptuns.core.base.api.utils.PageConverter
 import world.neptuns.core.base.common.api.file.FileControllerImpl
 import world.neptuns.core.base.common.api.language.LanguageControllerImpl
 import world.neptuns.core.base.common.api.language.LanguageKeyImpl
 import world.neptuns.core.base.common.api.language.LineKeyImpl
+import world.neptuns.core.base.common.api.language.color.LanguageColorControllerImpl
+import world.neptuns.core.base.common.api.language.color.LanguageColorImpl
 import world.neptuns.core.base.common.api.language.properties.LanguagePropertiesControllerImpl
 import world.neptuns.core.base.common.api.player.NeptunPlayerControllerImpl
 import world.neptuns.core.base.common.api.repository.RepositoryLoaderImpl
 import world.neptuns.core.base.common.api.utils.PageConverterImpl
 import world.neptuns.core.base.common.file.MariaDbCredentials
 import world.neptuns.core.base.common.file.RedisCredentials
+import world.neptuns.core.base.common.repository.color.LanguageColorRepository
+import world.neptuns.core.base.common.repository.color.LanguageColorTable
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesRepository
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesTable
 import world.neptuns.core.base.common.repository.player.OfflinePlayerTable
@@ -41,13 +48,15 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
     override val playerController: NeptunPlayerController
     override val languageController: LanguageController = LanguageControllerImpl()
     override val languagePropertiesController: LanguagePropertiesController = LanguagePropertiesControllerImpl()
+    override val languageColorController: LanguageColorController = LanguageColorControllerImpl()
 
     init {
-        establishMariaDbConnection(OfflinePlayerTable, LanguagePropertiesTable)
+        establishMariaDbConnection(OfflinePlayerTable, LanguagePropertiesTable, LanguageColorTable)
         this.redissonClient = establishRedisConnection()
 
         this.repositoryLoader.register(OnlinePlayerRepository(redissonClient))
         this.repositoryLoader.register(LanguagePropertiesRepository(redissonClient))
+        this.repositoryLoader.register(LanguageColorRepository(redissonClient))
 
         this.playerController = NeptunPlayerControllerImpl()
     }
@@ -58,6 +67,10 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
 
     override fun newLineKey(namespace: String, value: String): LineKey {
         return LineKeyImpl(namespace, value)
+    }
+
+    override fun newLanguageColor(name: LineKey, permission: String?, hexFormat: String, description: LineKey, price: Long): LanguageColor {
+        return LanguageColorImpl(name, permission, hexFormat, CurrencyRegistry.Default.CRYSTALS, description, price)
     }
 
     override fun <T> registerPlayerAdapter(playerAdapter: PlayerAdapter<T>) {

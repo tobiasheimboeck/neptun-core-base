@@ -18,7 +18,7 @@ class VelocityPlayerListener(private val playerController: NeptunPlayerControlle
         val podName = NeptunControllerProvider.api.podName()
 
         NetworkControllerApi.launch {
-            playerController.handlePlayerCreation(player.uniqueId, player.username, property.value, property.signature, podName, "-/-")
+            playerController.loadPlayer(player.uniqueId, player.username, property.value, property.signature, podName, "-/-")
             continuation.resume()
         }
     }
@@ -28,7 +28,7 @@ class VelocityPlayerListener(private val playerController: NeptunPlayerControlle
         val player = event.player
 
         NetworkControllerApi.launch {
-            playerController.handlePlayerDeletion(player.uniqueId)
+            playerController.unloadPlayer(player.uniqueId)
         }
     }
 

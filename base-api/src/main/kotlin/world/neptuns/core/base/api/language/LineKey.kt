@@ -7,12 +7,22 @@ interface LineKey {
     val namespace: String
     val value: String
 
+    fun asString(): String = "${namespace.lowercase()}.${value.lowercase()}"
+
     companion object {
         fun key(namespace: String, value: String): LineKey {
             return NeptunCoreProvider.api.newLineKey(namespace, value)
         }
 
-        fun fromString(string: String): LanguageKey {
+        fun colorKey(value: String): LineKey {
+            return key("core.color", value)
+        }
+
+        fun colorDescriptionKey(value: String): LineKey {
+            return key("core.color", "$value.description")
+        }
+
+        fun fromString(string: String): LanguageKey { //TODO: Change that
             val strings = string.split(".")
             return LanguageKey.key(strings[0], strings[1])
         }

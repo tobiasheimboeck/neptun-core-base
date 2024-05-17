@@ -10,7 +10,7 @@ class NeptunBukkitPlugin : SuspendingJavaPlugin() {
 
     override suspend fun onEnableAsync() {
         val coreBaseApi = CoreBaseApiImpl(minecraftDispatcher, this.dataFolder.toPath())
-        coreBaseApi.getLanguageController().generateLanguages(this::class.java)
+        coreBaseApi.languageController.generateLanguages(this::class.java)
         coreBaseApi.registerPlayerAdapter(BukkitPlayerAdapter())
 
         NeptunCoreProvider.api = coreBaseApi

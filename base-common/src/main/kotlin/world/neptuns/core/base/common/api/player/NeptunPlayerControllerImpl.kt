@@ -65,7 +65,7 @@ class NeptunPlayerControllerImpl : NeptunPlayerController {
         }
     }
 
-    override suspend fun handlePlayerCreation(uuid: UUID, name: String, skinValue: String, skinSignature: String, proxyServiceName: String, minecraftServiceName: String) {
+    override suspend fun loadPlayer(uuid: UUID, name: String, skinValue: String, skinSignature: String, proxyServiceName: String, minecraftServiceName: String) {
         newSuspendedTransaction(Dispatchers.IO) {
             val resultRow = OfflinePlayerTable.selectAll().where { OfflinePlayerTable.uuid eq uuid }.limit(1).firstOrNull()
 
@@ -111,7 +111,7 @@ class NeptunPlayerControllerImpl : NeptunPlayerController {
         }
     }
 
-    override suspend fun handlePlayerDeletion(uuid: UUID) {
+    override suspend fun unloadPlayer(uuid: UUID) {
         withContext(Dispatchers.IO) {
             val offlinePlayer = getOfflinePlayerAsync(uuid).await() ?: return@withContext
             offlinePlayer.updateOnlineTime()

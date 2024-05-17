@@ -1,19 +1,20 @@
 package world.neptuns.core.base.api.player.currency
 
-import world.neptuns.core.base.api.player.NeptunOfflinePlayer
+import world.neptuns.core.base.api.player.currency.type.Crystals
+import world.neptuns.core.base.api.player.currency.type.Shards
+import world.neptuns.core.base.api.utils.ClassRegistry
 
 class CurrencyRegistry {
 
-    class Crystals : Currency("Crystals", false, listOf(EarnMethod.MINIGAME, EarnMethod.LOBBY_GAME, EarnMethod.DAILY_REWARD)) {
-        override fun onEarn(offlinePlayer: NeptunOfflinePlayer) {}
-        override fun onGift(senderOfflinePlayer: NeptunOfflinePlayer, receiverOfflinePlayer: NeptunOfflinePlayer) {}
-        override fun onSpend(offlinePlayer: NeptunOfflinePlayer) {}
-    }
+    object Default : ClassRegistry<Currency> {
+        override val elements: MutableSet<Currency> = mutableSetOf()
 
-    class Shards : Currency("Shards", false, listOf(EarnMethod.MINIGAME, EarnMethod.DAILY_REWARD)) {
-        override fun onEarn(offlinePlayer: NeptunOfflinePlayer) {}
-        override fun onGift(senderOfflinePlayer: NeptunOfflinePlayer, receiverOfflinePlayer: NeptunOfflinePlayer) {}
-        override fun onSpend(offlinePlayer: NeptunOfflinePlayer) {}
+        val CRYSTALS = Crystals()
+        val SHARDS = Shards()
+
+        init {
+            elements.addAll(listOf(CRYSTALS, SHARDS))
+        }
     }
 
 }
