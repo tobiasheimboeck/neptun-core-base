@@ -6,6 +6,6 @@ import java.util.*
 
 interface LanguagePropertiesController : Updatable<UUID, LanguageProperties.Update, Any> {
 
-    suspend fun getPropertiesAsync(uuid: UUID): Deferred<LanguageProperties>
+    suspend fun getPropertiesAsync(uuid: UUID): Deferred<LanguageProperties?>
 
 }

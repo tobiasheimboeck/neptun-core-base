@@ -16,12 +16,15 @@ import world.neptuns.core.base.api.player.PlayerAdapter
 import world.neptuns.core.base.api.repository.RepositoryLoader
 import world.neptuns.core.base.api.utils.PageConverter
 import world.neptuns.core.base.common.api.file.FileControllerImpl
+import world.neptuns.core.base.common.api.language.LanguageControllerImpl
 import world.neptuns.core.base.common.api.language.LanguageKeyImpl
+import world.neptuns.core.base.common.api.language.properties.LanguagePropertiesControllerImpl
 import world.neptuns.core.base.common.api.player.NeptunPlayerControllerImpl
 import world.neptuns.core.base.common.api.repository.RepositoryLoaderImpl
 import world.neptuns.core.base.common.api.utils.PageConverterImpl
 import world.neptuns.core.base.common.file.MariaDbCredentials
 import world.neptuns.core.base.common.file.RedisCredentials
+import world.neptuns.core.base.common.repository.language.LanguagePropertiesRepository
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesTable
 import world.neptuns.core.base.common.repository.player.OfflinePlayerTable
 import world.neptuns.core.base.common.repository.player.OnlinePlayerRepository
@@ -34,25 +37,21 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
     override val repositoryLoader: RepositoryLoader = RepositoryLoaderImpl()
     override val fileController: FileController = FileControllerImpl()
     override val playerController: NeptunPlayerController
+    override val languageController: LanguageController = LanguageControllerImpl()
+    override val languagePropertiesController: LanguagePropertiesController = LanguagePropertiesControllerImpl()
 
     init {
         establishMariaDbConnection(OfflinePlayerTable, LanguagePropertiesTable)
         this.redissonClient = establishRedisConnection()
 
         this.repositoryLoader.register(OnlinePlayerRepository(redissonClient))
+        this.repositoryLoader.register(LanguagePropertiesRepository(redissonClient))
+
         this.playerController = NeptunPlayerControllerImpl()
     }
 
     override fun newLanguageKey(countryCode: String, languageCode: String): LanguageKey {
         return LanguageKeyImpl(countryCode, languageCode)
-    }
-
-    override fun getLanguageController(): LanguageController {
-        TODO("Not yet implemented")
-    }
-
-    override fun getLanguagePropertiesController(): LanguagePropertiesController {
-        TODO("Not yet implemented")
     }
 
     override fun <T> registerPlayerAdapter(playerAdapter: PlayerAdapter<T>) {

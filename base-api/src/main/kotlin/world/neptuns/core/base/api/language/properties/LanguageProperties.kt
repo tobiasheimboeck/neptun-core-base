@@ -14,6 +14,7 @@ interface LanguageProperties {
     var separatorColor: TextColor
 
     enum class Update {
+        ALL,
         LANGUAGE_KEY,
         PRIMARY_COLOR,
         SECONDARY_COLOR,

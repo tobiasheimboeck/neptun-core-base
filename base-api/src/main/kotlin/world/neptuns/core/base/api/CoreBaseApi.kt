@@ -25,9 +25,10 @@ interface CoreBaseApi {
     val fileController: FileController
     val playerController: NeptunPlayerController
 
+    val languageController: LanguageController
+    val languagePropertiesController: LanguagePropertiesController
+
     fun newLanguageKey(countryCode: String, languageCode: String): LanguageKey
-    fun getLanguageController(): LanguageController
-    fun getLanguagePropertiesController(): LanguagePropertiesController
 
     fun <T> registerPlayerAdapter(playerAdapter: PlayerAdapter<T>)
     fun <T> playerAdapter(clazz: Class<T>): PlayerAdapter<T>
