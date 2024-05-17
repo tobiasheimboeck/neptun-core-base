@@ -6,6 +6,7 @@ import org.redisson.api.RedissonClient
 import world.neptuns.core.base.api.file.FileController
 import world.neptuns.core.base.api.language.LanguageController
 import world.neptuns.core.base.api.language.LanguageKey
+import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.properties.LanguagePropertiesController
 import world.neptuns.core.base.api.player.NeptunPlayerController
 import world.neptuns.core.base.api.player.PlayerAdapter
@@ -29,6 +30,7 @@ interface CoreBaseApi {
     val languagePropertiesController: LanguagePropertiesController
 
     fun newLanguageKey(countryCode: String, languageCode: String): LanguageKey
+    fun newLineKey(namespace: String, value: String): LineKey
 
     fun <T> registerPlayerAdapter(playerAdapter: PlayerAdapter<T>)
     fun <T> playerAdapter(clazz: Class<T>): PlayerAdapter<T>

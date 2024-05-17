@@ -20,6 +20,7 @@ import world.neptuns.core.base.api.player.NeptunOnlinePlayer
 import world.neptuns.core.base.api.player.NeptunPlayerController
 import world.neptuns.core.base.common.api.language.properties.LanguagePropertiesImpl
 import world.neptuns.core.base.common.api.skin.SkinProfileImpl
+import world.neptuns.core.base.common.repository.language.LanguagePropertiesRepository
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesTable
 import world.neptuns.core.base.common.repository.player.OfflinePlayerTable
 import world.neptuns.core.base.common.repository.player.OnlinePlayerRepository
@@ -28,6 +29,7 @@ import java.util.*
 class NeptunPlayerControllerImpl : NeptunPlayerController {
 
     private val onlinePlayerRepository = NeptunCoreProvider.api.repositoryLoader.get(OnlinePlayerRepository::class.java)!!
+    private val languagePropertiesRepository = NeptunCoreProvider.api.repositoryLoader.get(LanguagePropertiesRepository::class.java)!!
 
     override suspend fun isOnline(uuid: UUID): Deferred<Boolean> {
         return onlinePlayerRepository.contains(uuid)
@@ -99,9 +101,13 @@ class NeptunPlayerControllerImpl : NeptunPlayerController {
 
                 offlinePlayer = constructOfflinePlayer(resultRow, username)!!
                 if (usernameChanged) bulkUpdateEntry(uuid, NeptunOfflinePlayer.Update.NAME, username, false)
+
+                val resultRowLanguageProperties = LanguagePropertiesTable.selectAll().where { LanguagePropertiesTable.uuid eq uuid }.limit(1).firstOrNull()
+                languageProperties = constructLanguageProperties(resultRowLanguageProperties)!!
             }
 
             onlinePlayerRepository.insert(uuid, NeptunOnlinePlayerImpl.create(offlinePlayer, proxyServiceName, minecraftServiceName))
+            languagePropertiesRepository.insert(uuid, languageProperties)
         }
     }
 
@@ -117,6 +123,7 @@ class NeptunPlayerControllerImpl : NeptunPlayerController {
             }
 
             onlinePlayerRepository.delete(uuid)
+            languagePropertiesRepository.delete(uuid)
         }
     }
 

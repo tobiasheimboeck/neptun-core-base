@@ -10,6 +10,7 @@ import world.neptuns.core.base.api.CoreBaseApi
 import world.neptuns.core.base.api.file.FileController
 import world.neptuns.core.base.api.language.LanguageController
 import world.neptuns.core.base.api.language.LanguageKey
+import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.properties.LanguagePropertiesController
 import world.neptuns.core.base.api.player.NeptunPlayerController
 import world.neptuns.core.base.api.player.PlayerAdapter
@@ -18,6 +19,7 @@ import world.neptuns.core.base.api.utils.PageConverter
 import world.neptuns.core.base.common.api.file.FileControllerImpl
 import world.neptuns.core.base.common.api.language.LanguageControllerImpl
 import world.neptuns.core.base.common.api.language.LanguageKeyImpl
+import world.neptuns.core.base.common.api.language.LineKeyImpl
 import world.neptuns.core.base.common.api.language.properties.LanguagePropertiesControllerImpl
 import world.neptuns.core.base.common.api.player.NeptunPlayerControllerImpl
 import world.neptuns.core.base.common.api.repository.RepositoryLoaderImpl
@@ -52,6 +54,10 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
 
     override fun newLanguageKey(countryCode: String, languageCode: String): LanguageKey {
         return LanguageKeyImpl(countryCode, languageCode)
+    }
+
+    override fun newLineKey(namespace: String, value: String): LineKey {
+        return LineKeyImpl(namespace, value)
     }
 
     override fun <T> registerPlayerAdapter(playerAdapter: PlayerAdapter<T>) {
