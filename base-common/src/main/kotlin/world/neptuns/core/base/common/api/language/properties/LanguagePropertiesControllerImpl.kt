@@ -7,7 +7,7 @@ import net.kyori.adventure.text.format.TextColor
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.update
 import world.neptuns.core.base.api.NeptunCoreProvider
-import world.neptuns.core.base.api.language.LanguageKey
+import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.properties.LanguageProperties
 import world.neptuns.core.base.api.language.properties.LanguagePropertiesController
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesRepository
@@ -30,7 +30,7 @@ class LanguagePropertiesControllerImpl : LanguagePropertiesController {
                         if (newValue !is LanguageProperties)
                             throw UnsupportedOperationException("Object has to be an LanguageProperties instance!")
 
-                        it[languageKey] = newValue.languageKey.asString()
+                        it[languageKey] = newValue.langKey.asString()
                         it[primaryColor] = newValue.primaryColor.asHexString()
                         it[secondaryColor] = newValue.secondaryColor.asHexString()
                         it[separatorColor] = newValue.separatorColor.asHexString()
@@ -56,13 +56,13 @@ class LanguagePropertiesControllerImpl : LanguagePropertiesController {
                     if (newValue !is LanguageProperties)
                         throw UnsupportedOperationException("Object has to be an LanguageProperties instance!")
 
-                    languageProperties.languageKey = newValue.languageKey
+                    languageProperties.langKey = newValue.langKey
                     languageProperties.primaryColor = newValue.primaryColor
                     languageProperties.secondaryColor = newValue.secondaryColor
                     languageProperties.separatorColor = newValue.separatorColor
                 }
 
-                LanguageProperties.Update.LANGUAGE_KEY -> languageProperties.languageKey = newValue as LanguageKey
+                LanguageProperties.Update.LANGUAGE_KEY -> languageProperties.langKey = newValue as LangKey
                 LanguageProperties.Update.PRIMARY_COLOR -> languageProperties.primaryColor = newValue as TextColor
                 LanguageProperties.Update.SECONDARY_COLOR -> languageProperties.secondaryColor = newValue as TextColor
                 LanguageProperties.Update.SEPARATOR_COLOR -> languageProperties.separatorColor = newValue as TextColor

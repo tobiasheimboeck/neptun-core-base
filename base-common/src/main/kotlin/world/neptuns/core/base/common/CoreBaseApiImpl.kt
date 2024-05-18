@@ -9,7 +9,7 @@ import org.redisson.config.Config
 import world.neptuns.core.base.api.CoreBaseApi
 import world.neptuns.core.base.api.file.FileController
 import world.neptuns.core.base.api.language.LanguageController
-import world.neptuns.core.base.api.language.LanguageKey
+import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.color.LanguageColor
 import world.neptuns.core.base.api.language.color.LanguageColorController
@@ -21,7 +21,7 @@ import world.neptuns.core.base.api.repository.RepositoryLoader
 import world.neptuns.core.base.api.utils.PageConverter
 import world.neptuns.core.base.common.api.file.FileControllerImpl
 import world.neptuns.core.base.common.api.language.LanguageControllerImpl
-import world.neptuns.core.base.common.api.language.LanguageKeyImpl
+import world.neptuns.core.base.common.api.language.LangKeyImpl
 import world.neptuns.core.base.common.api.language.LineKeyImpl
 import world.neptuns.core.base.common.api.language.color.LanguageColorControllerImpl
 import world.neptuns.core.base.common.api.language.color.LanguageColorImpl
@@ -61,8 +61,8 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
         this.playerController = NeptunPlayerControllerImpl()
     }
 
-    override fun newLanguageKey(countryCode: String, languageCode: String): LanguageKey {
-        return LanguageKeyImpl(countryCode, languageCode)
+    override fun newLanguageKey(countryCode: String, languageCode: String): LangKey {
+        return LangKeyImpl(countryCode, languageCode)
     }
 
     override fun newLineKey(namespace: String, value: String): LineKey {

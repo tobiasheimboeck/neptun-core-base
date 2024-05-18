@@ -22,9 +22,11 @@ interface LineKey {
             return key("core.color", "$value.description")
         }
 
-        fun fromString(string: String): LanguageKey { //TODO: Change that
-            val strings = string.split(".")
-            return LanguageKey.key(strings[0], strings[1])
+        fun fromString(string: String): LineKey {
+            val keySplitted = string.split(".")
+            val keyNamespace = "${keySplitted[0]}.${keySplitted[1]}"
+            val keyValue = keySplitted.subList(2, keySplitted.size).joinToString(".")
+            return key(keyNamespace, keyValue)
         }
     }
 

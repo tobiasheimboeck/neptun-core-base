@@ -2,7 +2,7 @@ package world.neptuns.core.base.api.language
 
 import world.neptuns.core.base.api.NeptunCoreProvider
 
-interface LanguageKey {
+interface LangKey {
 
     val countryCode: String
     val languageCode: String
@@ -10,15 +10,15 @@ interface LanguageKey {
     fun asString(): String = "${countryCode.lowercase()}_${languageCode.uppercase()}"
 
     companion object {
-        fun key(countryCode: String, languageCode: String): LanguageKey {
+        fun key(countryCode: String, languageCode: String): LangKey {
             return NeptunCoreProvider.api.newLanguageKey(countryCode, languageCode)
         }
 
-        fun defaultKey(): LanguageKey {
+        fun defaultKey(): LangKey {
             return key("en", "US")
         }
 
-        fun fromString(string: String): LanguageKey {
+        fun fromString(string: String): LangKey {
             val strings = string.split("-")
             return key(strings[0], strings[1])
         }

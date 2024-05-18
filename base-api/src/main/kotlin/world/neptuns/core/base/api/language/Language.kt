@@ -5,7 +5,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 
 interface Language {
 
-    val name: LanguageKey
+    val key: LangKey
     val messages: Map<LineKey, String>
 
     fun lineAsString(key: LineKey, toReplace: Any): String

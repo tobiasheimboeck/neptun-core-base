@@ -1,17 +1,13 @@
 package world.neptuns.core.base.api.language
 
-import java.util.*
-
 interface LanguageController {
 
-    val cachedLanguages: MutableList<Language>
+    val messages: MutableList<Language>
 
-    fun getLanguage(name: String): Language?
+    fun getLanguage(key: LangKey): Language?
 
-    fun getLanguage(uuid: UUID): Language?
+    fun generateLanguages(loaderClass: Class<*>)
 
-    fun generateLanguages(mainClass: Class<*>)
-
-    fun addContentToLanguage(mainClass: Class<*>)
+    fun addContentToLanguage(loaderClass: Class<*>)
 
 }

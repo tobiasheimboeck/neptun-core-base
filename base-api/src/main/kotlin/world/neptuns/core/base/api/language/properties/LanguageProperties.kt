@@ -1,14 +1,14 @@
 package world.neptuns.core.base.api.language.properties
 
 import net.kyori.adventure.text.format.TextColor
-import world.neptuns.core.base.api.language.LanguageKey
+import world.neptuns.core.base.api.language.LangKey
 import java.io.Serializable
 import java.util.*
 
 interface LanguageProperties : Serializable {
 
     val uuid: UUID
-    var languageKey: LanguageKey
+    var langKey: LangKey
 
     var primaryColor: TextColor
     var secondaryColor: TextColor

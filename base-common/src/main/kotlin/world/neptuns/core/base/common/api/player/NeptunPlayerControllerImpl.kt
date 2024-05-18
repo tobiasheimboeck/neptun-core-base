@@ -13,7 +13,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import world.neptuns.controller.api.service.NeptunService
 import world.neptuns.core.base.api.NeptunCoreProvider
-import world.neptuns.core.base.api.language.LanguageKey
+import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.properties.LanguageProperties
 import world.neptuns.core.base.api.player.NeptunOfflinePlayer
 import world.neptuns.core.base.api.player.NeptunOnlinePlayer
@@ -90,7 +90,7 @@ class NeptunPlayerControllerImpl : NeptunPlayerController {
                 languageProperties = LanguagePropertiesImpl.createDefaultProperties(uuid)
                 LanguagePropertiesTable.insert {
                     it[this.uuid] = offlinePlayer.uuid
-                    it[this.languageKey] = languageProperties.languageKey.asString()
+                    it[this.languageKey] = languageProperties.langKey.asString()
                     it[this.primaryColor] = languageProperties.primaryColor.asHexString()
                     it[this.secondaryColor] = languageProperties.secondaryColor.asHexString()
                     it[this.separatorColor] = languageProperties.separatorColor.asHexString()
@@ -197,7 +197,7 @@ class NeptunPlayerControllerImpl : NeptunPlayerController {
         return if (resultRow != null) {
             LanguagePropertiesImpl(
                 resultRow[LanguagePropertiesTable.uuid],
-                LanguageKey.fromString(resultRow[LanguagePropertiesTable.languageKey]),
+                LangKey.fromString(resultRow[LanguagePropertiesTable.languageKey]),
                 TextColor.fromHexString(resultRow[LanguagePropertiesTable.primaryColor])!!,
                 TextColor.fromHexString(resultRow[LanguagePropertiesTable.secondaryColor])!!,
                 TextColor.fromHexString(resultRow[LanguagePropertiesTable.separatorColor])!!

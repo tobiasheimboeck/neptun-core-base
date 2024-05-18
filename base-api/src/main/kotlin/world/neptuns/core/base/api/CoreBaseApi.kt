@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder
 import org.redisson.api.RedissonClient
 import world.neptuns.core.base.api.file.FileController
 import world.neptuns.core.base.api.language.LanguageController
-import world.neptuns.core.base.api.language.LanguageKey
+import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.color.LanguageColor
 import world.neptuns.core.base.api.language.color.LanguageColorController
@@ -32,7 +32,7 @@ interface CoreBaseApi {
     val languagePropertiesController: LanguagePropertiesController
     val languageColorController: LanguageColorController
 
-    fun newLanguageKey(countryCode: String, languageCode: String): LanguageKey
+    fun newLanguageKey(countryCode: String, languageCode: String): LangKey
     fun newLineKey(namespace: String, value: String): LineKey
     fun newLanguageColor(name: LineKey, permission: String?, hexFormat: String, description: LineKey, price: Long): LanguageColor
 

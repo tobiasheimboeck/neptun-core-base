@@ -1,27 +1,32 @@
 package world.neptuns.core.base.common.api.language
 
+import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.Language
 import world.neptuns.core.base.api.language.LanguageController
-import java.util.*
+import world.neptuns.core.base.common.api.language.utils.LanguageFileUtils
 
 class LanguageControllerImpl : LanguageController {
 
-    override val cachedLanguages: MutableList<Language> = mutableListOf()
+    override val messages: MutableList<Language> = mutableListOf()
 
-    override fun getLanguage(name: String): Language? {
-        TODO("Not yet implemented")
+    override fun getLanguage(key: LangKey): Language? {
+        return this.messages.find { it.key.asString() == key.asString() }
     }
 
-    override fun getLanguage(uuid: UUID): Language? {
-        TODO("Not yet implemented")
+    override fun generateLanguages(loaderClass: Class<*>) {
+        createLanguage("/lang", loaderClass)
+        createLanguage("/lang/shared", loaderClass)
     }
 
-    override fun generateLanguages(mainClass: Class<*>) {
-        TODO("Not yet implemented")
+    override fun addContentToLanguage(loaderClass: Class<*>) {
+        createLanguage("/lang", loaderClass)
     }
 
-    override fun addContentToLanguage(mainClass: Class<*>) {
-        TODO("Not yet implemented")
+    private fun createLanguage(rawPath: String, loaderClass: Class<*>) {
+        for (langKey in LanguageFileUtils.getLanguageKeysFromJarFile(rawPath, loaderClass)) {
+            val fileContent = LanguageFileUtils.getLanguageFileContent(rawPath, langKey, loaderClass)
+            this.messages.add(LanguageImpl(langKey, fileContent))
+        }
     }
 
 }
