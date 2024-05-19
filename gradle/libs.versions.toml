@@ -11,8 +11,10 @@ sql-jdbc = "0.50.1"
 redisson = "3.28.0"
 
 velocity-api = "3.3.0-SNAPSHOT"
+async-velocity-api = "2.16.0"
+
 paper-api = "1.20.4-R0.1-SNAPSHOT"
-async-paper-api = "2.15.0"
+async-paper-api = "2.16.0"
 
 kyori-adventure-api = "4.17.0"
 
@@ -28,10 +30,13 @@ sql-jdbc = { group = "org.jetbrains.exposed", name = "exposed-jdbc", version.ref
 
 redisson = { group = "org.redisson", name = "redisson", version.ref = "redisson" }
 
+async-velocity-api = { group = "com.github.shynixn.mccoroutine", name = "mccoroutine-velocity-api", version.ref = "async-velocity-api" }
+async-velocity-core = { group = "com.github.shynixn.mccoroutine", name = "mccoroutine-velocity-core", version.ref = "async-velocity-api" }
 velocity-api = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity-api" }
+
 paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper-api" }
-asyncp-paper-api = { group = "com.github.shynixn.mccoroutine", name = "mccoroutine-bukkit-api", version.ref = "async-paper-api" }
-asyncp-paper-core = { group = "com.github.shynixn.mccoroutine", name = "mccoroutine-bukkit-core", version.ref = "async-paper-api" }
+async-paper-api = { group = "com.github.shynixn.mccoroutine", name = "mccoroutine-bukkit-api", version.ref = "async-paper-api" }
+async-paper-core = { group = "com.github.shynixn.mccoroutine", name = "mccoroutine-bukkit-core", version.ref = "async-paper-api" }
 
 kyori-adventure-api = { group = "net.kyori", name = "adventure-api", version.ref = "kyori-adventure-api" }
 kyori-minimessage-api = { group = "net.kyori", name = "adventure-text-minimessage", version.ref = "kyori-adventure-api" }
@@ -40,5 +45,6 @@ neptun-controller-api = { group = "world.neptuns.network.controller", name = "co
 
 [bundles]
 database = ["redisson", "mariadb", "sql-core", "sql-dao", "sql-jdbc"]
-paper = ["paper-api", "asyncp-paper-api", "asyncp-paper-core"]
+velocity = ["velocity-api", "async-velocity-api", "async-velocity-core"]
+paper = ["paper-api", "async-paper-api", "async-paper-core"]
 kyori = ["kyori-adventure-api", "kyori-minimessage-api"]

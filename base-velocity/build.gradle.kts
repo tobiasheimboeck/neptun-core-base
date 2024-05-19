@@ -8,7 +8,7 @@ plugins {
 }
 
 dependencies {
-    compileOnly(libs.velocity.api)
+    compileOnly(libs.bundles.velocity)
     kapt(libs.velocity.api)
 
     compileOnly(project(":base-api"))

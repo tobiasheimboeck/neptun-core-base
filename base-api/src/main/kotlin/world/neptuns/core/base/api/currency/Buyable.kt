@@ -1,4 +1,4 @@
-package world.neptuns.core.base.api.player.currency
+package world.neptuns.core.base.api.currency
 
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.player.NeptunOfflinePlayer

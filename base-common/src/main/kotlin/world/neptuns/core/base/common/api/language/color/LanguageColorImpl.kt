@@ -2,7 +2,7 @@ package world.neptuns.core.base.common.api.language.color
 
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.color.LanguageColor
-import world.neptuns.core.base.api.player.currency.type.Crystals
+import world.neptuns.core.base.api.currency.type.Crystals
 
 class LanguageColorImpl(
     override val name: LineKey,

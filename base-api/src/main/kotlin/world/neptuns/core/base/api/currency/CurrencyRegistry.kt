@@ -1,7 +1,7 @@
-package world.neptuns.core.base.api.player.currency
+package world.neptuns.core.base.api.currency
 
-import world.neptuns.core.base.api.player.currency.type.Crystals
-import world.neptuns.core.base.api.player.currency.type.Shards
+import world.neptuns.core.base.api.currency.type.Crystals
+import world.neptuns.core.base.api.currency.type.Shards
 import world.neptuns.core.base.api.utils.ClassRegistry
 
 class CurrencyRegistry {

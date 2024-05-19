@@ -8,7 +8,6 @@ plugins {
 
 dependencies {
     compileOnly(libs.bundles.paper)
-
     compileOnly(project(":base-api"))
     implementation(project(":base-common"))
 }

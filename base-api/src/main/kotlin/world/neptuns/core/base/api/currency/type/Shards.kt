@@ -1,7 +1,7 @@
-package world.neptuns.core.base.api.player.currency.type
+package world.neptuns.core.base.api.currency.type
 
 import world.neptuns.core.base.api.player.NeptunOfflinePlayer
-import world.neptuns.core.base.api.player.currency.Currency
+import world.neptuns.core.base.api.currency.Currency
 
 class Shards : Currency("Shards", false, listOf(EarnMethod.MINIGAME, EarnMethod.DAILY_REWARD)) {
 
