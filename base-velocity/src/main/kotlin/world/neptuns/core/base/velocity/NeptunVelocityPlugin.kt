@@ -5,9 +5,11 @@ import com.github.shynixn.mccoroutine.velocity.velocityDispatcher
 import com.google.inject.Inject
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
+import com.velocitypowered.api.plugin.Dependency
 import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.plugin.annotation.DataDirectory
 import com.velocitypowered.api.proxy.ProxyServer
+import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.common.CoreBaseApiImpl
 import world.neptuns.core.base.velocity.command.VelocityCommandExecutorAsync
 import world.neptuns.core.base.velocity.player.VelocityPlayerAdapter
@@ -15,11 +17,14 @@ import java.nio.file.Path
 
 @Plugin(
     id = "neptun_core_base",
-    name = "neptun_core_base"
+    name = "neptun_core_base",
+    version = "1.0.0",
+    authors = ["TGamings"],
+    dependencies = [Dependency(id = "neptun_network_controller")]
 )
 class NeptunVelocityPlugin @Inject constructor(
     private val suspendingPluginContainer: SuspendingPluginContainer,
-    private val proxyServer: ProxyServer,
+    val proxyServer: ProxyServer,
     @DataDirectory private val dataFolder: Path
 ) {
 
@@ -35,6 +40,8 @@ class NeptunVelocityPlugin @Inject constructor(
         coreBaseApi.languageController.generateLanguages(this::class.java)
         coreBaseApi.registerPlayerAdapter(VelocityPlayerAdapter())
         coreBaseApi.registerCommandExecutorClass(VelocityCommandExecutorAsync::class.java)
+
+        NeptunCoreProvider.api = coreBaseApi
     }
 
     companion object {
