@@ -4,30 +4,34 @@ import world.neptuns.core.base.api.NeptunCoreProvider
 
 interface LineKey {
 
-    val namespace: String
+    val namespace: LangNamespace
     val value: String
 
-    fun asString(): String = "${namespace.lowercase()}.${value.lowercase()}"
+    fun asString(): String = "${namespace.value.lowercase()}.${value.lowercase()}"
 
     companion object {
-        fun key(namespace: String, value: String): LineKey {
+        fun key(namespace: LangNamespace, value: String): LineKey {
             return NeptunCoreProvider.api.newLineKey(namespace, value)
         }
 
+        fun key(string: String): LineKey {
+            val keySplitted = string.split(".")
+            val keyValue = keySplitted.subList(2, keySplitted.size).joinToString(".")
+            return key(LangNamespace.create(keySplitted[0], keySplitted[1]), keyValue)
+        }
+
+        fun coreKey(value: String): LineKey {
+            return key("core.base.$value")
+        }
+
         fun colorKey(value: String): LineKey {
-            return key("core.color", value)
+            return key("core.base.color.$value")
         }
 
         fun colorDescriptionKey(value: String): LineKey {
-            return key("core.color", "$value.description")
+            return key("core.base.color.$value.description")
         }
 
-        fun fromString(string: String): LineKey {
-            val keySplitted = string.split(".")
-            val keyNamespace = "${keySplitted[0]}.${keySplitted[1]}"
-            val keyValue = keySplitted.subList(2, keySplitted.size).joinToString(".")
-            return key(keyNamespace, keyValue)
-        }
     }
 
 }

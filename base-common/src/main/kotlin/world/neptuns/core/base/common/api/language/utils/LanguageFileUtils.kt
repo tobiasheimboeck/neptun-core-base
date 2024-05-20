@@ -2,6 +2,7 @@ package world.neptuns.core.base.common.api.language.utils
 
 import world.neptuns.core.base.api.CoreBaseApi
 import world.neptuns.core.base.api.language.LangKey
+import world.neptuns.core.base.api.language.LangNamespace
 import world.neptuns.core.base.api.language.LineKey
 import java.io.BufferedReader
 import java.io.IOException
@@ -49,10 +50,9 @@ object LanguageFileUtils {
 
                     for ((key, value) in map) {
                         val keySplitted = key.split(".")
-                        val keyNamespace = "${keySplitted[0]}.${keySplitted[1]}"
                         val keyValue = keySplitted.subList(2, keySplitted.size).joinToString(".")
 
-                        content[LineKey.key(keyNamespace, keyValue)] = value
+                        content[LineKey.key(LangNamespace.create(keySplitted[0], keySplitted[1]), keyValue)] = value
                     }
                 }
             }

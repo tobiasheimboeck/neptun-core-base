@@ -4,7 +4,7 @@ interface LanguageController {
 
     val messages: MutableList<Language>
 
-    fun getLanguage(key: LangKey): Language?
+    fun getLanguage(key: LangKey): Language
 
     fun generateLanguages(loaderClass: Class<*>)
 

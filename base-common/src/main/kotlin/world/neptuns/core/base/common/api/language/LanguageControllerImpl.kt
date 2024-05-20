@@ -9,8 +9,8 @@ class LanguageControllerImpl : LanguageController {
 
     override val messages: MutableList<Language> = mutableListOf()
 
-    override fun getLanguage(key: LangKey): Language? {
-        return this.messages.find { it.key.asString() == key.asString() }
+    override fun getLanguage(key: LangKey): Language {
+        return this.messages.find { it.key.asString() == key.asString() } ?: this.messages.find { it.key.asString() == LangKey.defaultKey().asString() }!!
     }
 
     override fun generateLanguages(loaderClass: Class<*>) {

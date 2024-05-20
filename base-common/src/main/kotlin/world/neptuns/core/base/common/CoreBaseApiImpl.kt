@@ -13,6 +13,7 @@ import world.neptuns.core.base.api.command.NeptunCommandExecutor
 import world.neptuns.core.base.api.currency.CurrencyRegistry
 import world.neptuns.core.base.api.file.FileController
 import world.neptuns.core.base.api.language.LangKey
+import world.neptuns.core.base.api.language.LangNamespace
 import world.neptuns.core.base.api.language.LanguageController
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.color.LanguageColor
@@ -25,6 +26,7 @@ import world.neptuns.core.base.api.utils.PageConverter
 import world.neptuns.core.base.common.api.command.NeptunCommandControllerImpl
 import world.neptuns.core.base.common.api.file.FileControllerImpl
 import world.neptuns.core.base.common.api.language.LangKeyImpl
+import world.neptuns.core.base.common.api.language.LangNamespaceImpl
 import world.neptuns.core.base.common.api.language.LanguageControllerImpl
 import world.neptuns.core.base.common.api.language.LineKeyImpl
 import world.neptuns.core.base.common.api.language.color.LanguageColorControllerImpl
@@ -72,7 +74,11 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
         return LangKeyImpl(countryCode, languageCode)
     }
 
-    override fun newLineKey(namespace: String, value: String): LineKey {
+    override fun newNamespace(value: String, subPrefix: String?): LangNamespace {
+        return LangNamespaceImpl(value, subPrefix)
+    }
+
+    override fun newLineKey(namespace: LangNamespace, value: String): LineKey {
         return LineKeyImpl(namespace, value)
     }
 
