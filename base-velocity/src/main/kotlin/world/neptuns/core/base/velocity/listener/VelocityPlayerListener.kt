@@ -1,6 +1,5 @@
 package world.neptuns.core.base.velocity.listener
 
-import com.velocitypowered.api.event.Continuation
 import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.connection.DisconnectEvent
@@ -19,14 +18,13 @@ import java.util.*
 class VelocityPlayerListener(private val neptunPlugin: NeptunPluginAdapter, private val playerController: NeptunPlayerController) {
 
     @Subscribe(order = PostOrder.FIRST)
-    fun onPlayerLogin(event: LoginEvent, continuation: Continuation) {
+    fun onPlayerLogin(event: LoginEvent) {
         val player = event.player
         val property = player.gameProfile.properties.first()
         val podName = NeptunControllerProvider.api.podName()
 
         GlobalScope.launch(NeptunCoreProvider.api.minecraftDispatcher) {
             playerController.loadPlayer(player.uniqueId, player.username, property.value, property.signature, podName, "-/-")
-            continuation.resume()
         }
     }
 

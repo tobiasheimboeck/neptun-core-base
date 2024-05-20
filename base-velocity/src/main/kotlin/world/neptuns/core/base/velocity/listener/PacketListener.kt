@@ -12,6 +12,7 @@ import world.neptuns.controller.api.packet.NetworkChannelRegistry
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.common.packet.MessageToPlayerPacket
+import world.neptuns.core.base.common.packet.PlayerConnectToServicePacket
 
 internal class PacketListener(private val proxyServer: ProxyServer) {
 
@@ -21,6 +22,7 @@ internal class PacketListener(private val proxyServer: ProxyServer) {
     suspend fun listen() {
         this.packetController.listenForPacket(NetworkChannelRegistry.PROXY, MessageToPlayerPacket::class.java) { packet ->
             val player = this.proxyServer.getPlayer(packet.uuid).orElse(null)
+            val playerAdapter = NeptunCoreProvider.api.playerAdapter(Player::class.java)
 
             val placeholders = mutableListOf<TagResolver>()
 
@@ -29,11 +31,22 @@ internal class PacketListener(private val proxyServer: ProxyServer) {
                 placeholders.add(tagResolver)
             }
 
-            val playerAdapter = NeptunCoreProvider.api.playerAdapter(Player::class.java)
-
             GlobalScope.launch(NeptunCoreProvider.api.minecraftDispatcher) {
                 playerAdapter.sendMessage(player, LineKey.key(packet.key), *placeholders.toTypedArray())
             }
+        }
+
+        this.packetController.listenForPacket(NetworkChannelRegistry.PROXY, PlayerConnectToServicePacket::class.java) { packet ->
+            val player = this.proxyServer.getPlayer(packet.uuid).orElse(null)
+            val playerAdapter = NeptunCoreProvider.api.playerAdapter(Player::class.java)
+
+            if (packet.isLobbyRequest) {
+                playerAdapter.transferPlayerToLobby(player.uniqueId)
+                return@listenForPacket
+            }
+
+            val serviceName = packet.serviceName ?: return@listenForPacket
+            playerAdapter.transferPlayerToService(packet.uuid, serviceName)
         }
     }
 

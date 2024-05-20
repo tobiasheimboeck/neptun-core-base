@@ -23,12 +23,15 @@ import world.neptuns.core.base.common.api.skin.SkinProfileImpl
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesRepository
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesTable
 import world.neptuns.core.base.common.repository.player.OfflinePlayerTable
+import world.neptuns.core.base.common.repository.player.OnlinePlayerCache
 import world.neptuns.core.base.common.repository.player.OnlinePlayerRepository
 import java.util.*
 
 class NeptunPlayerControllerImpl : NeptunPlayerController {
 
     private val onlinePlayerRepository = NeptunCoreProvider.api.repositoryLoader.get(OnlinePlayerRepository::class.java)!!
+    private val onlinePlayerCache = NeptunCoreProvider.api.cacheLoader.get(OnlinePlayerCache::class.java)!!
+
     private val languagePropertiesRepository = NeptunCoreProvider.api.repositoryLoader.get(LanguagePropertiesRepository::class.java)!!
 
     override suspend fun isOnline(uuid: UUID): Deferred<Boolean> {

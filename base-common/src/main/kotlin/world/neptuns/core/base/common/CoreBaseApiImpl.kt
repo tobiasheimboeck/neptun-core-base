@@ -7,6 +7,7 @@ import org.redisson.api.RedissonClient
 import org.redisson.codec.SerializationCodec
 import org.redisson.config.Config
 import world.neptuns.core.base.api.CoreBaseApi
+import world.neptuns.core.base.api.cache.CacheLoader
 import world.neptuns.core.base.api.command.NeptunCommand
 import world.neptuns.core.base.api.command.NeptunCommandController
 import world.neptuns.core.base.api.command.NeptunCommandExecutor
@@ -23,6 +24,7 @@ import world.neptuns.core.base.api.player.NeptunPlayerController
 import world.neptuns.core.base.api.player.PlayerAdapter
 import world.neptuns.core.base.api.repository.RepositoryLoader
 import world.neptuns.core.base.api.utils.PageConverter
+import world.neptuns.core.base.common.api.cache.CacheLoaderImpl
 import world.neptuns.core.base.common.api.command.NeptunCommandControllerImpl
 import world.neptuns.core.base.common.api.file.FileControllerImpl
 import world.neptuns.core.base.common.api.language.LangKeyImpl
@@ -42,6 +44,7 @@ import world.neptuns.core.base.common.repository.color.LanguageColorTable
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesRepository
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesTable
 import world.neptuns.core.base.common.repository.player.OfflinePlayerTable
+import world.neptuns.core.base.common.repository.player.OnlinePlayerCache
 import world.neptuns.core.base.common.repository.player.OnlinePlayerRepository
 import java.nio.file.Path
 import kotlin.coroutines.CoroutineContext
@@ -50,6 +53,7 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
 
     override val redissonClient: RedissonClient
     override val repositoryLoader: RepositoryLoader = RepositoryLoaderImpl()
+    override val cacheLoader: CacheLoader = CacheLoaderImpl()
     override val fileController: FileController = FileControllerImpl()
     override val playerController: NeptunPlayerController
     override val languageController: LanguageController = LanguageControllerImpl()
@@ -66,6 +70,8 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
         this.repositoryLoader.register(OnlinePlayerRepository(redissonClient))
         this.repositoryLoader.register(LanguagePropertiesRepository(redissonClient))
         this.repositoryLoader.register(LanguageColorRepository(redissonClient))
+
+        this.cacheLoader.register(OnlinePlayerCache())
 
         this.playerController = NeptunPlayerControllerImpl()
     }

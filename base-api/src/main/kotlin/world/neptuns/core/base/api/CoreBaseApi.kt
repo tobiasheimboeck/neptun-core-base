@@ -3,6 +3,7 @@ package world.neptuns.core.base.api
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import org.redisson.api.RedissonClient
+import world.neptuns.core.base.api.cache.CacheLoader
 import world.neptuns.core.base.api.command.NeptunCommandController
 import world.neptuns.core.base.api.command.NeptunCommandExecutor
 import world.neptuns.core.base.api.file.FileController
@@ -27,6 +28,7 @@ interface CoreBaseApi {
     val redissonClient: RedissonClient
 
     val repositoryLoader: RepositoryLoader
+    val cacheLoader: CacheLoader
 
     val fileController: FileController
     val playerController: NeptunPlayerController
