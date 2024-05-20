@@ -12,6 +12,7 @@ import com.velocitypowered.api.proxy.ProxyServer
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.common.CoreBaseApiImpl
 import world.neptuns.core.base.velocity.command.VelocityCommandExecutorAsync
+import world.neptuns.core.base.velocity.listener.PacketListener
 import world.neptuns.core.base.velocity.player.VelocityPlayerAdapter
 import java.nio.file.Path
 
@@ -38,10 +39,13 @@ class NeptunVelocityPlugin @Inject constructor(
 
         val coreBaseApi = CoreBaseApiImpl(suspendingPluginContainer.pluginContainer.velocityDispatcher, this.dataFolder)
         coreBaseApi.languageController.generateLanguages(this::class.java)
-        coreBaseApi.registerPlayerAdapter(VelocityPlayerAdapter())
+        coreBaseApi.registerPlayerAdapter(VelocityPlayerAdapter(this.proxyServer))
         coreBaseApi.registerCommandExecutorClass(VelocityCommandExecutorAsync::class.java)
 
         NeptunCoreProvider.api = coreBaseApi
+
+        val packetListener = PacketListener(this.proxyServer)
+        packetListener.listen()
     }
 
     companion object {

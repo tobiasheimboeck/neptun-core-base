@@ -99,6 +99,10 @@ class LanguageImpl(override val key: LangKey, override val messages: Map<LineKey
         return components
     }
 
+    override fun hasMultipleLines(lineKey: LineKey): Boolean{
+        return this.messages[lineKey]?.contains("\n") ?: false
+    }
+
     private fun errorResult(builder: MiniMessage.Builder): Component {
         return builder.tags(TagResolver.builder().resolver(StandardTags.color()).build()).build()
             .deserialize("<red>$key not found...")

@@ -1,5 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.internal.KaptWithoutKotlincTask
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
@@ -34,6 +35,10 @@ tasks {
         mergeServiceFiles()
         exclude("kotlin/**")
         dependsOn(":base-common:shadowJar")
+    }
+
+    named<KotlinCompile>("compileKotlin") {
+        dependsOn(":controller-common:shadowJar")
     }
 }
 
