@@ -10,8 +10,8 @@ open class MapCache<K, V> : Cache {
         this.mapCache[key] = value
     }
 
-    fun update(key: K, value: V) {
-        this.mapCache.replace(key, value)
+    fun update(key: K, newValue: V) {
+        this.mapCache.replace(key, newValue)
     }
 
     fun delete(key: K) {

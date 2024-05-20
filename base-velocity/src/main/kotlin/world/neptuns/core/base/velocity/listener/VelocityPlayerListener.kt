@@ -31,7 +31,7 @@ class VelocityPlayerListener(private val neptunPlugin: NeptunPluginAdapter, priv
     @Subscribe(order = PostOrder.LAST)
     fun onPlayerDisconnect(event: DisconnectEvent) {
         val player = event.player
-        val playerAdapter = NeptunCoreProvider.api.playerAdapter(Player::class.java)
+        val playerAdapter = NeptunCoreProvider.api.getPlayerAdapter(Player::class.java)
 
         GlobalScope.launch(NeptunCoreProvider.api.minecraftDispatcher) {
             for (friendUniqueId in listOf(UUID.randomUUID())) {

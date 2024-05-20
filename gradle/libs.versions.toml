@@ -2,6 +2,7 @@
 java = "17"
 
 gson = "2.10.1"
+guava = "33.2.0-jre"
 
 mariadb = "3.0.7"
 sql-core = "0.50.1"
@@ -22,6 +23,7 @@ neptun-controller-api = "1.0-SNAPSHOT"
 
 [libraries]
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
 
 mariadb = { group = "org.mariadb.jdbc", name = "mariadb-java-client", version.ref = "mariadb" }
 sql-core = { group = "org.jetbrains.exposed", name = "exposed-core", version.ref = "sql-core" }

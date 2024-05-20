@@ -1,14 +1,14 @@
 package world.neptuns.core.base.api.language.color
 
-import kotlinx.coroutines.Deferred
+import world.neptuns.core.base.api.cache.LocalCacheFunctions
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.player.NeptunOfflinePlayer
 import java.util.*
 
-interface LanguageColorController {
+interface LanguageColorController : LocalCacheFunctions<UUID, List<LanguageColor>> {
 
-    suspend fun getColorAsync(uuid: UUID, name: LineKey): Deferred<LanguageColor?>
-    suspend fun getColorsAsync(uuid: UUID): Deferred<List<LanguageColor>>
+    suspend fun getColor(uuid: UUID, name: LineKey): LanguageColor?
+    suspend fun getColors(uuid: UUID): List<LanguageColor>
 
     suspend fun buyOrSelectColor(offlinePlayer: NeptunOfflinePlayer, languageColor: LanguageColor)
 

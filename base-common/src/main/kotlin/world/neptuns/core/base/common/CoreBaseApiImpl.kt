@@ -39,6 +39,7 @@ import world.neptuns.core.base.common.api.repository.RepositoryLoaderImpl
 import world.neptuns.core.base.common.api.utils.PageConverterImpl
 import world.neptuns.core.base.common.file.MariaDbCredentials
 import world.neptuns.core.base.common.file.RedisCredentials
+import world.neptuns.core.base.common.repository.color.LanguageColorCache
 import world.neptuns.core.base.common.repository.color.LanguageColorRepository
 import world.neptuns.core.base.common.repository.color.LanguageColorTable
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesCache
@@ -53,13 +54,18 @@ import kotlin.coroutines.CoroutineContext
 class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, override val dataFolder: Path) : CoreBaseApi {
 
     override val redissonClient: RedissonClient
+
     override val repositoryLoader: RepositoryLoader = RepositoryLoaderImpl()
     override val cacheLoader: CacheLoader = CacheLoaderImpl()
+
     override val fileController: FileController = FileControllerImpl()
     override val languageController: LanguageController = LanguageControllerImpl()
-    override val languagePropertiesController: LanguagePropertiesController = LanguagePropertiesControllerImpl()
-    override val languageColorController: LanguageColorController = LanguageColorControllerImpl()
+
+    override val languageColorController: LanguageColorController
+    override val languagePropertiesController: LanguagePropertiesController
     override val playerController: NeptunPlayerController
+
+    private lateinit var playerAdapter: PlayerAdapter<*>
 
     override val commandController: NeptunCommandController = NeptunCommandControllerImpl()
     private lateinit var commandExecutorClass: Class<*>
@@ -73,8 +79,11 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
         this.repositoryLoader.register(LanguageColorRepository(redissonClient))
 
         this.cacheLoader.register(OnlinePlayerCache())
+        this.cacheLoader.register(LanguageColorCache())
         this.cacheLoader.register(LanguagePropertiesCache())
 
+        this.languageColorController = LanguageColorControllerImpl()
+        this.languagePropertiesController = LanguagePropertiesControllerImpl()
         this.playerController = NeptunPlayerControllerImpl()
     }
 
@@ -95,11 +104,12 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
     }
 
     override fun <T> registerPlayerAdapter(playerAdapter: PlayerAdapter<T>) {
-        TODO("Not yet implemented")
+        this.playerAdapter = playerAdapter
     }
 
-    override fun <T> playerAdapter(clazz: Class<T>): PlayerAdapter<T> {
-        TODO("Not yet implemented")
+    @Suppress("UNCHECKED_CAST")
+    override fun <T> getPlayerAdapter(clazz: Class<T>): PlayerAdapter<T> {
+        return this.playerAdapter as PlayerAdapter<T>
     }
 
     override fun <T> registerCommandExecutorClass(clazz: Class<T>) {
@@ -133,7 +143,7 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
 
         transaction {
             addLogger(StdOutSqlLogger)
-            SchemaUtils.create(*tables)
+            SchemaUtils.create(LanguageColorTable, LanguagePropertiesTable, OfflinePlayerTable)
         }
     }
 

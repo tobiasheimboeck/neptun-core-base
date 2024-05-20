@@ -8,8 +8,6 @@ import world.neptuns.controller.api.NeptunControllerProvider
 import world.neptuns.controller.api.packet.NetworkChannelRegistry
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.command.NeptunCommandPlatform
-import world.neptuns.core.base.api.extension.getLanguage
-import world.neptuns.core.base.api.extension.getLanguageProperties
 import world.neptuns.core.base.api.language.Language
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.properties.LanguageProperties
@@ -24,7 +22,7 @@ class BukkitPlayerAdapter : PlayerAdapter<Player> {
     }
 
     override suspend fun transferPlayerToPlayersService(uuid: UUID, targetUuid: UUID) {
-        val targetPlayer = NeptunCoreProvider.api.playerController.getOnlinePlayer(targetUuid).await() ?: return
+        val targetPlayer = NeptunCoreProvider.api.playerController.getOnlinePlayer(targetUuid) ?: return
         NeptunControllerProvider.api.packetController.sendPacket(PlayerConnectToServicePacket(uuid, false, targetPlayer.currentServiceName))
     }
 
@@ -54,26 +52,26 @@ class BukkitPlayerAdapter : PlayerAdapter<Player> {
     }
 
     override suspend fun sendPlayerListHeader(player: Player, key: LineKey, vararg toReplace: TagResolver) {
-        validateNeptunPlayer(player.uniqueId) { properties, language ->
+        validateLanguageProperties(player.uniqueId) { properties, language ->
             player.sendPlayerListHeader(language.line(properties, key, *toReplace))
         }
     }
 
     override suspend fun sendPlayerListFooter(player: Player, key: LineKey, vararg toReplace: TagResolver) {
-        validateNeptunPlayer(player.uniqueId) { properties, language ->
+        validateLanguageProperties(player.uniqueId) { properties, language ->
             player.sendPlayerListFooter(language.line(properties, key, *toReplace))
         }
     }
 
     override suspend fun sendTitle(player: Player, key: LineKey, vararg toReplace: TagResolver) {
-        validateNeptunPlayer(player.uniqueId) { properties, language ->
+        validateLanguageProperties(player.uniqueId) { properties, language ->
             val components = if (language.hasMultipleLines(key)) language.lines(properties, key, *toReplace) else listOf(language.line(properties, key, *toReplace))
             repeat(components.size) { player.showTitle(Title.title(components[0], components[1])) }
         }
     }
 
     override suspend fun sendActionBar(player: Player, key: LineKey, vararg toReplace: TagResolver) {
-        validateNeptunPlayer(player.uniqueId) { properties, language ->
+        validateLanguageProperties(player.uniqueId) { properties, language ->
             val components = if (language.hasMultipleLines(key)) language.lines(properties, key, *toReplace) else listOf(language.line(properties, key, *toReplace))
             player.showTitle(Title.title(components[0], components[1]))
         }
@@ -84,20 +82,15 @@ class BukkitPlayerAdapter : PlayerAdapter<Player> {
     }
 
     override suspend fun sendMessage(player: Player, key: LineKey, vararg toReplace: TagResolver) {
-        validateNeptunPlayer(player.uniqueId) { properties, language ->
+        validateLanguageProperties(player.uniqueId) { properties, language ->
             val components = if (language.hasMultipleLines(key)) language.lines(properties, key, *toReplace) else listOf(language.line(properties, key, *toReplace))
             components.forEach(player::sendMessage)
         }
     }
 
-    private suspend fun validateNeptunPlayer(uuid: UUID, result: (LanguageProperties, Language) -> Unit) {
-        val neptunPlayer = NeptunCoreProvider.api.playerController.getOnlinePlayer(uuid).await()
-            ?: return
-
-        val properties = neptunPlayer.getLanguageProperties() ?: return
-        val language = neptunPlayer.getLanguage() ?: return
-
-        result.invoke(properties, language)
+    private suspend fun validateLanguageProperties(uuid: UUID, result: (LanguageProperties, Language) -> Unit) {
+        val properties = NeptunCoreProvider.api.languagePropertiesController.getProperties(uuid) ?: return
+        result.invoke(properties, NeptunCoreProvider.api.languageController.getLanguage(properties.langKey))
     }
 
 }

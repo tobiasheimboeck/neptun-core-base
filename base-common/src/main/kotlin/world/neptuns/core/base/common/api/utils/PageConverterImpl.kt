@@ -10,7 +10,7 @@ class PageConverterImpl<T>(override val data: List<T>) : PageConverter<T> {
     @Suppress("UNCHECKED_CAST")
     override fun <P> showPage(player: P, elementsPerPage: Int, pageNumber: Int, result: (List<T>) -> Unit) {
         val pages = splitTextToPages(elementsPerPage)
-        val playerAdapter = NeptunCoreProvider.api.playerAdapter(player!!::class.java) as PlayerAdapter<P>
+        val playerAdapter = NeptunCoreProvider.api.getPlayerAdapter(player!!::class.java) as PlayerAdapter<P>
 
         if (pageNumber < 0) {
             playerAdapter.sendMessage(player, "core.page.numberToLow")

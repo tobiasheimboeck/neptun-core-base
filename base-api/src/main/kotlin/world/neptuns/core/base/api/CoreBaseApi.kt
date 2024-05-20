@@ -46,7 +46,7 @@ interface CoreBaseApi {
     fun newLanguageColor(name: LineKey, permission: String?, hexFormat: String, description: LineKey, price: Long): LanguageColor
 
     fun <T> registerPlayerAdapter(playerAdapter: PlayerAdapter<T>)
-    fun <T> playerAdapter(clazz: Class<T>): PlayerAdapter<T>
+    fun <T> getPlayerAdapter(clazz: Class<T>): PlayerAdapter<T>
 
     fun <T> registerCommandExecutorClass(clazz: Class<T>)
     fun registerCommand(commandExecutor: NeptunCommandExecutor)

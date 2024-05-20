@@ -22,7 +22,7 @@ internal class PacketListener(private val proxyServer: ProxyServer) {
     suspend fun listen() {
         this.packetController.listenForPacket(NetworkChannelRegistry.PROXY, MessageToPlayerPacket::class.java) { packet ->
             val player = this.proxyServer.getPlayer(packet.uuid).orElse(null)
-            val playerAdapter = NeptunCoreProvider.api.playerAdapter(Player::class.java)
+            val playerAdapter = NeptunCoreProvider.api.getPlayerAdapter(Player::class.java)
 
             val placeholders = mutableListOf<TagResolver>()
 
@@ -38,7 +38,7 @@ internal class PacketListener(private val proxyServer: ProxyServer) {
 
         this.packetController.listenForPacket(NetworkChannelRegistry.PROXY, PlayerConnectToServicePacket::class.java) { packet ->
             val player = this.proxyServer.getPlayer(packet.uuid).orElse(null)
-            val playerAdapter = NeptunCoreProvider.api.playerAdapter(Player::class.java)
+            val playerAdapter = NeptunCoreProvider.api.getPlayerAdapter(Player::class.java)
 
             if (packet.isLobbyRequest) {
                 playerAdapter.transferPlayerToLobby(player.uniqueId)
