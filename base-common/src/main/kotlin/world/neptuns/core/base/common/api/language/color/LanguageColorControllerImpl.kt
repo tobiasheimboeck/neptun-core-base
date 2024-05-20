@@ -14,6 +14,7 @@ import java.util.*
 
 class LanguageColorControllerImpl : LanguageColorController {
 
+    //TODO: Class impl rework
     private val languageColorRepository = NeptunCoreProvider.api.repositoryLoader.get(LanguageColorRepository::class.java)!!
 
     override suspend fun getColorAsync(uuid: UUID, name: LineKey): Deferred<LanguageColor?> {

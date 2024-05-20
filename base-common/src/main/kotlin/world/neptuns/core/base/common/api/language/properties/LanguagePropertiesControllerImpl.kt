@@ -1,6 +1,5 @@
 package world.neptuns.core.base.common.api.language.properties
 
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.format.TextColor
@@ -10,6 +9,7 @@ import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.properties.LanguageProperties
 import world.neptuns.core.base.api.language.properties.LanguagePropertiesController
+import world.neptuns.core.base.common.repository.language.LanguagePropertiesCache
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesRepository
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesTable
 import java.util.*
@@ -17,9 +17,18 @@ import java.util.*
 class LanguagePropertiesControllerImpl : LanguagePropertiesController {
 
     private val languagePropertiesRepository = NeptunCoreProvider.api.repositoryLoader.get(LanguagePropertiesRepository::class.java)!!
+    private val languagePropertiesCache = NeptunCoreProvider.api.cacheLoader.get(LanguagePropertiesCache::class.java)!!
 
-    override suspend fun getPropertiesAsync(uuid: UUID): Deferred<LanguageProperties?> {
-        return this.languagePropertiesRepository.get(uuid)
+    override suspend fun getProperties(uuid: UUID): LanguageProperties? {
+        return this.languagePropertiesCache.get(uuid) ?: this.languagePropertiesRepository.get(uuid).await()
+    }
+
+    override suspend fun load(key: UUID, value: LanguageProperties) {
+        this.languagePropertiesCache.insert(key, value)
+    }
+
+    override suspend fun unload(key: UUID) {
+        this.languagePropertiesCache.delete(key)
     }
 
     override suspend fun bulkUpdateEntry(key: UUID, updateType: LanguageProperties.Update, newValue: Any, updateCache: Boolean, result: (Unit) -> Unit) {
@@ -49,7 +58,7 @@ class LanguagePropertiesControllerImpl : LanguagePropertiesController {
 
     override suspend fun updateCachedEntry(key: UUID, updateType: LanguageProperties.Update, newValue: Any, result: (Unit) -> Unit) {
         withContext(Dispatchers.IO) {
-            val languageProperties = getPropertiesAsync(key).await() ?: return@withContext
+            val languageProperties = getProperties(key) ?: return@withContext
 
             when (updateType) {
                 LanguageProperties.Update.ALL -> {
@@ -69,6 +78,7 @@ class LanguagePropertiesControllerImpl : LanguagePropertiesController {
             }
 
             languagePropertiesRepository.update(key, languageProperties)
+            TODO("Send update packet to service where an instance of LanguageProperties with this uuid is cached")
         }
     }
 

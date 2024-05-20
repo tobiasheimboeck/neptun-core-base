@@ -34,20 +34,20 @@ class NeptunPlayerControllerImpl : NeptunPlayerController {
 
     private val languagePropertiesRepository = NeptunCoreProvider.api.repositoryLoader.get(LanguagePropertiesRepository::class.java)!!
 
-    override suspend fun isOnline(uuid: UUID): Deferred<Boolean> {
-        return onlinePlayerRepository.contains(uuid)
+    override suspend fun isOnline(uuid: UUID): Boolean {
+        return this.onlinePlayerCache.contains(uuid) || this.onlinePlayerRepository.contains(uuid).await()
     }
 
-    override suspend fun getOnlinePlayerAsync(uuid: UUID): Deferred<NeptunOnlinePlayer?> {
-        return onlinePlayerRepository.get(uuid)
+    override suspend fun getOnlinePlayer(uuid: UUID): NeptunOnlinePlayer? {
+        return this.onlinePlayerCache.get(uuid) ?: this.onlinePlayerRepository.get(uuid).await()
     }
 
-    override suspend fun getOnlinePlayersFromServiceAsync(neptunService: NeptunService): Deferred<List<NeptunOfflinePlayer>> {
-        return this.onlinePlayerRepository.getAll { it.currentServiceName == neptunService.id }
+    override suspend fun getOnlinePlayersFromService(neptunService: NeptunService): List<NeptunOfflinePlayer> {
+        return this.onlinePlayerCache.getAll { it.currentServiceName == neptunService.id }
     }
 
-    override suspend fun getOnlinePlayersAsync(): Deferred<List<NeptunOnlinePlayer>> {
-        return this.onlinePlayerRepository.getAll()
+    override suspend fun getOnlinePlayers(): List<NeptunOnlinePlayer> {
+        return this.onlinePlayerCache.getAll().ifEmpty { this.onlinePlayerRepository.getAll().await() }
     }
 
     override suspend fun getOfflinePlayerAsync(uuid: UUID): Deferred<NeptunOfflinePlayer?> {
@@ -109,8 +109,12 @@ class NeptunPlayerControllerImpl : NeptunPlayerController {
                 languageProperties = constructLanguageProperties(resultRowLanguageProperties)!!
             }
 
-            onlinePlayerRepository.insert(uuid, NeptunOnlinePlayerImpl.create(offlinePlayer, proxyServiceName, minecraftServiceName))
+            val neptunOnlinePlayer = NeptunOnlinePlayerImpl.create(offlinePlayer, proxyServiceName, minecraftServiceName)
+            onlinePlayerRepository.insert(uuid, neptunOnlinePlayer)
+            load(uuid, neptunOnlinePlayer)
+
             languagePropertiesRepository.insert(uuid, languageProperties)
+            NeptunCoreProvider.api.languagePropertiesController.load(uuid, languageProperties)
         }
     }
 
@@ -126,8 +130,19 @@ class NeptunPlayerControllerImpl : NeptunPlayerController {
             }
 
             onlinePlayerRepository.delete(uuid)
+            unload(uuid)
+
             languagePropertiesRepository.delete(uuid)
+            NeptunCoreProvider.api.languagePropertiesController.unload(uuid)
         }
+    }
+
+    override suspend fun load(key: UUID, value: NeptunOnlinePlayer) {
+        this.onlinePlayerCache.insert(key, value)
+    }
+
+    override suspend fun unload(key: UUID) {
+        this.onlinePlayerCache.delete(key)
     }
 
     override suspend fun bulkUpdateEntry(key: UUID, updateType: NeptunOfflinePlayer.Update, newValue: Any, updateCache: Boolean, result: (Unit) -> Unit) {
@@ -165,7 +180,7 @@ class NeptunPlayerControllerImpl : NeptunPlayerController {
 
     override suspend fun updateCachedEntry(key: UUID, updateType: NeptunOfflinePlayer.Update, newValue: Any, result: (Unit) -> Unit) {
         withContext(Dispatchers.IO) {
-            val onlinePlayer = getOnlinePlayerAsync(key).await() ?: return@withContext
+            val onlinePlayer = getOnlinePlayer(key) ?: return@withContext
 
             when (updateType) {
                 NeptunOfflinePlayer.Update.ALL -> {
@@ -193,6 +208,7 @@ class NeptunPlayerControllerImpl : NeptunPlayerController {
             }
 
             onlinePlayerRepository.update(key, onlinePlayer)
+            TODO("Send update packet to service where an instance of NeptunOnlinePlayer with this uuid is cached")
         }
     }
 

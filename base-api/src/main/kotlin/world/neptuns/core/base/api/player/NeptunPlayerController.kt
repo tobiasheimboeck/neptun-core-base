@@ -3,16 +3,17 @@ package world.neptuns.core.base.api.player
 import kotlinx.coroutines.Deferred
 import world.neptuns.controller.api.service.NeptunService
 import world.neptuns.controller.api.utils.Updatable
+import world.neptuns.core.base.api.cache.LocalCacheFunctions
 import java.util.*
 
-interface NeptunPlayerController : Updatable<UUID, NeptunOfflinePlayer.Update, Any> {
+interface NeptunPlayerController : LocalCacheFunctions<UUID, NeptunOnlinePlayer>, Updatable<UUID, NeptunOfflinePlayer.Update, Any> {
 
-    suspend fun isOnline(uuid: UUID): Deferred<Boolean>
+    suspend fun isOnline(uuid: UUID): Boolean
 
-    suspend fun getOnlinePlayerAsync(uuid: UUID): Deferred<NeptunOnlinePlayer?>
+    suspend fun getOnlinePlayer(uuid: UUID): NeptunOnlinePlayer?
 
-    suspend fun getOnlinePlayersFromServiceAsync(neptunService: NeptunService): Deferred<List<NeptunOfflinePlayer>>
-    suspend fun getOnlinePlayersAsync(): Deferred<List<NeptunOnlinePlayer>>
+    suspend fun getOnlinePlayersFromService(neptunService: NeptunService): List<NeptunOfflinePlayer>
+    suspend fun getOnlinePlayers(): List<NeptunOnlinePlayer>
 
     suspend fun getOfflinePlayerAsync(uuid: UUID): Deferred<NeptunOfflinePlayer?>
     suspend fun getOfflinePlayersAsync(): Deferred<List<NeptunOfflinePlayer>>

@@ -28,7 +28,7 @@ class VelocityPlayerAdapter(private val proxyServer: ProxyServer) : PlayerAdapte
     }
 
     override suspend fun transferPlayerToPlayersService(uuid: UUID, targetUuid: UUID) {
-        val neptunPlayer = NeptunCoreProvider.api.playerController.getOnlinePlayerAsync(targetUuid).await() ?: return
+        val neptunPlayer = NeptunCoreProvider.api.playerController.getOnlinePlayer(targetUuid).await() ?: return
         transferPlayerToService(uuid, neptunPlayer.currentServiceName)
     }
 
@@ -103,7 +103,7 @@ class VelocityPlayerAdapter(private val proxyServer: ProxyServer) : PlayerAdapte
     }
 
     private suspend fun validateNeptunPlayer(uuid: UUID, result: (LanguageProperties, Language) -> Unit) {
-        val neptunPlayer = NeptunCoreProvider.api.playerController.getOnlinePlayerAsync(uuid).await()
+        val neptunPlayer = NeptunCoreProvider.api.playerController.getOnlinePlayer(uuid).await()
             ?: return
 
         val properties = neptunPlayer.getLanguageProperties() ?: return

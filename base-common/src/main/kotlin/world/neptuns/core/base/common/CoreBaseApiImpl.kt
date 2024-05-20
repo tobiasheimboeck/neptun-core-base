@@ -41,6 +41,7 @@ import world.neptuns.core.base.common.file.MariaDbCredentials
 import world.neptuns.core.base.common.file.RedisCredentials
 import world.neptuns.core.base.common.repository.color.LanguageColorRepository
 import world.neptuns.core.base.common.repository.color.LanguageColorTable
+import world.neptuns.core.base.common.repository.language.LanguagePropertiesCache
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesRepository
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesTable
 import world.neptuns.core.base.common.repository.player.OfflinePlayerTable
@@ -55,10 +56,10 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
     override val repositoryLoader: RepositoryLoader = RepositoryLoaderImpl()
     override val cacheLoader: CacheLoader = CacheLoaderImpl()
     override val fileController: FileController = FileControllerImpl()
-    override val playerController: NeptunPlayerController
     override val languageController: LanguageController = LanguageControllerImpl()
     override val languagePropertiesController: LanguagePropertiesController = LanguagePropertiesControllerImpl()
     override val languageColorController: LanguageColorController = LanguageColorControllerImpl()
+    override val playerController: NeptunPlayerController
 
     override val commandController: NeptunCommandController = NeptunCommandControllerImpl()
     private lateinit var commandExecutorClass: Class<*>
@@ -72,6 +73,7 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
         this.repositoryLoader.register(LanguageColorRepository(redissonClient))
 
         this.cacheLoader.register(OnlinePlayerCache())
+        this.cacheLoader.register(LanguagePropertiesCache())
 
         this.playerController = NeptunPlayerControllerImpl()
     }

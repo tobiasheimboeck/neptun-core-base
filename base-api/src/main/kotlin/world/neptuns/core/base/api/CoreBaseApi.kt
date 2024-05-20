@@ -31,11 +31,11 @@ interface CoreBaseApi {
     val cacheLoader: CacheLoader
 
     val fileController: FileController
-    val playerController: NeptunPlayerController
 
     val languageController: LanguageController
     val languagePropertiesController: LanguagePropertiesController
     val languageColorController: LanguageColorController
+    val playerController: NeptunPlayerController
 
     val commandController: NeptunCommandController
 

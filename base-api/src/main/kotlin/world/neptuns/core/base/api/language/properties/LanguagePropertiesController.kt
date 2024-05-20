@@ -1,11 +1,11 @@
 package world.neptuns.core.base.api.language.properties
 
-import kotlinx.coroutines.Deferred
 import world.neptuns.controller.api.utils.Updatable
+import world.neptuns.core.base.api.cache.LocalCacheFunctions
 import java.util.*
 
-interface LanguagePropertiesController : Updatable<UUID, LanguageProperties.Update, Any> {
+interface LanguagePropertiesController : LocalCacheFunctions<UUID, LanguageProperties>, Updatable<UUID, LanguageProperties.Update, Any> {
 
-    suspend fun getPropertiesAsync(uuid: UUID): Deferred<LanguageProperties?>
+    suspend fun getProperties(uuid: UUID): LanguageProperties?
 
 }
