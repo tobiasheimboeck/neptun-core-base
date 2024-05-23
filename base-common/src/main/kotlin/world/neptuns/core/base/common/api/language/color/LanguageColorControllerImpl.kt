@@ -1,12 +1,13 @@
 package world.neptuns.core.base.common.api.language.color
 
-import org.jetbrains.exposed.sql.insert
+import kotlinx.coroutines.Dispatchers
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.color.LanguageColor
 import world.neptuns.core.base.api.language.color.LanguageColorController
-import world.neptuns.core.base.api.player.NeptunOfflinePlayer
+import world.neptuns.core.base.api.language.color.LanguageColorRegistry
 import world.neptuns.core.base.common.repository.color.LanguageColorCache
 import world.neptuns.core.base.common.repository.color.LanguageColorRepository
 import world.neptuns.core.base.common.repository.color.LanguageColorTable
@@ -14,7 +15,6 @@ import java.util.*
 
 class LanguageColorControllerImpl : LanguageColorController {
 
-    //TODO: Class impl rework
     private val languageColorRepository = NeptunCoreProvider.api.repositoryLoader.get(LanguageColorRepository::class.java)!!
     private val languageColorCache = NeptunCoreProvider.api.cacheLoader.get(LanguageColorCache::class.java)!!
 
@@ -24,29 +24,22 @@ class LanguageColorControllerImpl : LanguageColorController {
     }
 
     override suspend fun getColors(uuid: UUID): List<LanguageColor> {
-        return if (this.languageColorCache.contains(uuid))
-            this.languageColorCache.getValues(uuid)
-        else
-            this.languageColorRepository.getValues(uuid).await()
-    }
-
-    override suspend fun buyOrSelectColor(offlinePlayer: NeptunOfflinePlayer, languageColor: LanguageColor) {
-        val transactionStatus = languageColor.buy(offlinePlayer)
-        if (!transactionStatus) return
-
-        newSuspendedTransaction {
-            LanguageColorTable.insert {
-                it[this.uuid] = uuid
-                it[this.name] = name
-                it[this.hexFormat] = hexFormat
-            }
-        }
-
-        this.languageColorRepository.insert(offlinePlayer.uuid, languageColor)
+        return if (this.languageColorCache.contains(uuid)) this.languageColorCache.getValues(uuid)
+        else this.languageColorRepository.getValues(uuid).await()
     }
 
     override suspend fun loadColors(uuid: UUID) {
+        newSuspendedTransaction(Dispatchers.IO) {
+            for (resultRow in LanguageColorTable.selectAll().where { LanguageColorTable.uuid eq uuid }.toList()) {
+                val languageColor = getLanguageColor(
+                    LineKey.Companion.key(resultRow[LanguageColorTable.name]),
+                    resultRow[LanguageColorTable.hexFormat]
+                )
 
+                languageColorRepository.insert(uuid, languageColor)
+                languageColorCache.insert(uuid, languageColor)
+            }
+        }
     }
 
     override suspend fun unloadColors(uuid: UUID) {
@@ -61,6 +54,12 @@ class LanguageColorControllerImpl : LanguageColorController {
 
     override suspend fun unload(key: UUID) {
         this.languageColorCache.deleteAll(key)
+    }
+
+    private fun getLanguageColor(lineKey: LineKey, hexFormat: String): LanguageColor {
+        return LanguageColorRegistry.Default.elements.find { it.name.asString() == lineKey.asString() }
+            ?: LanguageColorRegistry.Official.elements.find { it.name.asString() == lineKey.asString() }
+            ?: LanguageColorRegistry.Custom.create(lineKey, null, hexFormat, 0L)
     }
 
 }

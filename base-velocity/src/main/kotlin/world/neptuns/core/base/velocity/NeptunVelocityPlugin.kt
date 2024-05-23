@@ -10,6 +10,8 @@ import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.plugin.annotation.DataDirectory
 import com.velocitypowered.api.proxy.ProxyServer
 import world.neptuns.core.base.api.NeptunCoreProvider
+import world.neptuns.core.base.api.language.LangNamespace
+import world.neptuns.core.base.api.utils.NeptunPluginAdapter
 import world.neptuns.core.base.common.CoreBaseApiImpl
 import world.neptuns.core.base.velocity.command.VelocityCommandExecutorAsync
 import world.neptuns.core.base.velocity.listener.PacketListener
@@ -27,7 +29,9 @@ class NeptunVelocityPlugin @Inject constructor(
     private val suspendingPluginContainer: SuspendingPluginContainer,
     val proxyServer: ProxyServer,
     @DataDirectory private val dataFolder: Path
-) {
+) : NeptunPluginAdapter {
+
+    override val namespace: LangNamespace = LangNamespace.create("core.proxy", null)
 
     init {
         suspendingPluginContainer.initialize(this)
@@ -39,7 +43,7 @@ class NeptunVelocityPlugin @Inject constructor(
 
         val coreBaseApi = CoreBaseApiImpl(suspendingPluginContainer.pluginContainer.velocityDispatcher, this.dataFolder)
         coreBaseApi.languageController.generateLanguages(this::class.java)
-        coreBaseApi.registerPlayerAdapter(VelocityPlayerAdapter(this.proxyServer))
+        coreBaseApi.registerPlayerAdapter(VelocityPlayerAdapter(this.proxyServer, this))
         coreBaseApi.registerCommandExecutorClass(VelocityCommandExecutorAsync::class.java)
 
         NeptunCoreProvider.api = coreBaseApi

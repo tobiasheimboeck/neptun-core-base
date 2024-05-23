@@ -99,8 +99,8 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
         return LineKeyImpl(namespace, value)
     }
 
-    override fun newLanguageColor(name: LineKey, permission: String?, hexFormat: String, description: LineKey, price: Long): LanguageColor {
-        return LanguageColorImpl(name, permission, hexFormat, CurrencyRegistry.Default.CRYSTALS, description, price)
+    override fun newLanguageColor(name: LineKey, permission: String?, hexFormat: String, price: Long): LanguageColor {
+        return LanguageColorImpl(name, permission, hexFormat, CurrencyRegistry.Default.CRYSTALS, price)
     }
 
     override fun <T> registerPlayerAdapter(playerAdapter: PlayerAdapter<T>) {
@@ -143,7 +143,7 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
 
         transaction {
             addLogger(StdOutSqlLogger)
-            SchemaUtils.create(LanguageColorTable, LanguagePropertiesTable, OfflinePlayerTable)
+            SchemaUtils.create(*tables)
         }
     }
 

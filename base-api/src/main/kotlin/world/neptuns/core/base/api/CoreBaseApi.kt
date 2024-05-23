@@ -43,7 +43,7 @@ interface CoreBaseApi {
     fun newNamespace(value: String, subPrefix: String?): LangNamespace
     fun newLineKey(namespace: LangNamespace, value: String): LineKey
 
-    fun newLanguageColor(name: LineKey, permission: String?, hexFormat: String, description: LineKey, price: Long): LanguageColor
+    fun newLanguageColor(name: LineKey, permission: String?, hexFormat: String, price: Long): LanguageColor
 
     fun <T> registerPlayerAdapter(playerAdapter: PlayerAdapter<T>)
     fun <T> getPlayerAdapter(clazz: Class<T>): PlayerAdapter<T>

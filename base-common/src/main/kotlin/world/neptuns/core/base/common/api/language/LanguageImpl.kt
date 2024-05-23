@@ -99,7 +99,7 @@ class LanguageImpl(override val key: LangKey, override val messages: Map<LineKey
         return components
     }
 
-    override fun hasMultipleLines(lineKey: LineKey): Boolean{
+    override fun hasMultipleLines(lineKey: LineKey): Boolean {
         return this.messages[lineKey]?.contains("\n") ?: false
     }
 
@@ -127,7 +127,14 @@ class LanguageImpl(override val key: LangKey, override val messages: Map<LineKey
 
         val prefixText = this.messages[lineKey]
             ?: throw NullPointerException("Prefix with key ${lineKey.asString()} not found!")
-        if (prefixName != null) prefixText.replace("<prefix_text>", validPrefixName!!)
+
+        if (prefixName != null) {
+            prefixText.replace("<prefix_text>", validPrefixName!!)
+        } else if (lineKey.namespace.subPrefix != null) {
+            val subPrefix = lineKey.namespace.subPrefix!!
+            val correctedSubPrefixName = subPrefix.substring(0, 1).uppercase(Locale.getDefault()) + subPrefix.substring(1)
+            prefixText.replace("<prefix_text>", correctedSubPrefixName)
+        }
 
         return Placeholder.component(if (prefixName == null) "prefix " else "prefix_$prefixName", MiniMessage.builder()
             .tags(TagResolver.builder()

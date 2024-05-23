@@ -35,7 +35,7 @@ tasks {
     }
 
     named<KotlinCompile>("compileKotlin") {
-        dependsOn(":controller-common:shadowJar")
+        dependsOn(":base-common:shadowJar")
     }
 }
 

@@ -12,10 +12,11 @@ import world.neptuns.core.base.api.language.Language
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.properties.LanguageProperties
 import world.neptuns.core.base.api.player.PlayerAdapter
+import world.neptuns.core.base.api.utils.NeptunPluginAdapter
 import world.neptuns.core.base.common.packet.*
 import java.util.*
 
-class BukkitPlayerAdapter : PlayerAdapter<Player> {
+class BukkitPlayerAdapter(override val pluginAdapter: NeptunPluginAdapter) : PlayerAdapter<Player> {
 
     override fun getMinecraftPlayer(uuid: UUID): Player? {
         return Bukkit.getPlayer(uuid)

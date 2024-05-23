@@ -1,6 +1,5 @@
 package world.neptuns.core.base.api.player
 
-import kotlinx.coroutines.Deferred
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.skin.SkinProfile
 import java.util.*
@@ -25,7 +24,7 @@ interface NeptunOfflinePlayer {
         this.onlineTime += playedDuration
     }
 
-    suspend fun isOnline(): Deferred<Boolean> {
+    suspend fun isOnline(): Boolean {
         return NeptunCoreProvider.api.playerController.isOnline(uuid)
     }
 

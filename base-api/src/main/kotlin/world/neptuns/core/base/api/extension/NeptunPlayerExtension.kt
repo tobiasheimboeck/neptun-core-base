@@ -27,5 +27,5 @@ suspend fun NeptunOfflinePlayer.getSeparatorColor(): TextColor? {
 }
 
 suspend fun NeptunOfflinePlayer.getLanguageProperties(): LanguageProperties? {
-    return NeptunCoreProvider.api.languagePropertiesController.getPropertiesAsync(this.uuid).await()
+    return NeptunCoreProvider.api.languagePropertiesController.getProperties(this.uuid)
 }

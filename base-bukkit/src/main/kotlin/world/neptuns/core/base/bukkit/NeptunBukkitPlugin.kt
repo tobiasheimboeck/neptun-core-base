@@ -12,12 +12,12 @@ import world.neptuns.core.base.common.CoreBaseApiImpl
 
 class NeptunBukkitPlugin : SuspendingJavaPlugin(), NeptunPluginAdapter {
 
-    override val namespace: LangNamespace = LangNamespace.create("core.lobby", "Lobby")
+    override val namespace: LangNamespace = LangNamespace.create("core.lobby", null)
 
     override suspend fun onEnableAsync() {
         val coreBaseApi = CoreBaseApiImpl(minecraftDispatcher, this.dataFolder.toPath())
         coreBaseApi.languageController.generateLanguages(this::class.java)
-        coreBaseApi.registerPlayerAdapter(BukkitPlayerAdapter())
+        coreBaseApi.registerPlayerAdapter(BukkitPlayerAdapter(this))
         coreBaseApi.registerCommandExecutorClass(BukkitCommandExecutorAsync::class.java)
 
         NeptunCoreProvider.api = coreBaseApi
