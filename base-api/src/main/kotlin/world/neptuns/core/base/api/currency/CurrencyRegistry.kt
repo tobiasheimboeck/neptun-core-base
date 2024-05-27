@@ -2,7 +2,7 @@ package world.neptuns.core.base.api.currency
 
 import world.neptuns.core.base.api.currency.type.Crystals
 import world.neptuns.core.base.api.currency.type.Shards
-import world.neptuns.core.base.api.utils.ClassRegistry
+import world.neptuns.streamline.api.utils.ClassRegistry
 
 class CurrencyRegistry {
 

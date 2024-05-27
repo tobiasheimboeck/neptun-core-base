@@ -1,6 +1,6 @@
 package world.neptuns.core.base.api.language.prefix
 
-import world.neptuns.core.base.api.utils.ClassRegistry
+import world.neptuns.streamline.api.utils.ClassRegistry
 
 class PrefixFormatRegistry {
 

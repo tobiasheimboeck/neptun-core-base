@@ -3,6 +3,8 @@ package world.neptuns.core.base.common.api.command
 import world.neptuns.core.base.api.command.NeptunCommand
 import world.neptuns.core.base.api.command.NeptunCommandController
 import world.neptuns.core.base.api.command.NeptunCommandExecutor
+import world.neptuns.core.base.api.event.NeptunCommandRegisteredEvent
+import world.neptuns.streamline.api.NeptunStreamlineProvider
 
 class NeptunCommandControllerImpl : NeptunCommandController {
 
@@ -15,6 +17,8 @@ class NeptunCommandControllerImpl : NeptunCommandController {
 
         this.commandExecutors[neptunCommand.name] = executor
         this.commands.add(neptunCommand)
+
+        NeptunStreamlineProvider.api.eventController.fire(NeptunCommandRegisteredEvent(neptunCommand))
 
         return neptunCommand
     }

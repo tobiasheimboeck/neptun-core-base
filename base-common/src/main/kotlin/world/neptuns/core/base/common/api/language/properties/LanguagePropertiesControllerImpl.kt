@@ -1,37 +1,36 @@
 package world.neptuns.core.base.common.api.language.properties
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.format.TextColor
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.update
-import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.properties.LanguageProperties
 import world.neptuns.core.base.api.language.properties.LanguagePropertiesController
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesCache
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesRepository
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesTable
+import world.neptuns.streamline.api.NeptunStreamlineProvider
 import java.util.*
 
-class LanguagePropertiesControllerImpl : LanguagePropertiesController {
+class LanguagePropertiesControllerImpl(override val updateChannel: String) : LanguagePropertiesController {
 
-    private val languagePropertiesRepository = NeptunCoreProvider.api.repositoryLoader.get(LanguagePropertiesRepository::class.java)!!
-    private val languagePropertiesCache = NeptunCoreProvider.api.cacheLoader.get(LanguagePropertiesCache::class.java)!!
+    private val languagePropertiesRepository = NeptunStreamlineProvider.api.repositoryLoader.get(LanguagePropertiesRepository::class.java)!!
+    private val languagePropertiesCache = NeptunStreamlineProvider.api.cacheLoader.get(LanguagePropertiesCache::class.java)!!
 
     override suspend fun getProperties(uuid: UUID): LanguageProperties? {
         return this.languagePropertiesCache.get(uuid) ?: this.languagePropertiesRepository.get(uuid).await()
     }
 
-    override suspend fun load(key: UUID, value: LanguageProperties) {
+    override suspend fun addToLocalCache(key: UUID, value: LanguageProperties) {
         this.languagePropertiesCache.insert(key, value)
     }
 
-    override suspend fun unload(key: UUID) {
+    override suspend fun removeFromLocalCache(key: UUID) {
         this.languagePropertiesCache.delete(key)
     }
 
-    override suspend fun bulkUpdateEntry(key: UUID, updateType: LanguageProperties.Update, newValue: Any, updateCache: Boolean, result: (Unit) -> Unit) {
+    override suspend fun bulkUpdateEntry(updateType: LanguageProperties.Update, key: UUID, newValue: Any, updateCache: Boolean, result: (Unit) -> Unit) {
         newSuspendedTransaction(Dispatchers.IO) {
             LanguagePropertiesTable.update({ LanguagePropertiesTable.uuid eq key }) {
                 when (updateType) {
@@ -53,32 +52,31 @@ class LanguagePropertiesControllerImpl : LanguagePropertiesController {
             }
         }
 
-        if (updateCache) updateCachedEntry(key, updateType, newValue, result)
+        if (updateCache) updateCachedEntry(updateType, key, newValue, result)
     }
 
-    override suspend fun updateCachedEntry(key: UUID, updateType: LanguageProperties.Update, newValue: Any, result: (Unit) -> Unit) {
-        withContext(Dispatchers.IO) {
-            val languageProperties = getProperties(key) ?: return@withContext
+    override suspend fun updateCachedEntry(updateType: LanguageProperties.Update, key: UUID, newValue: Any, result: (Unit) -> Unit) {
+        val languageProperties = getProperties(key) ?: return
 
-            when (updateType) {
-                LanguageProperties.Update.ALL -> {
-                    if (newValue !is LanguageProperties)
-                        throw UnsupportedOperationException("Object has to be an LanguageProperties instance!")
+        when (updateType) {
+            LanguageProperties.Update.ALL -> {
+                if (newValue !is LanguageProperties)
+                    throw UnsupportedOperationException("Object has to be an LanguageProperties instance!")
 
-                    languageProperties.langKey = newValue.langKey
-                    languageProperties.primaryColor = newValue.primaryColor
-                    languageProperties.secondaryColor = newValue.secondaryColor
-                    languageProperties.separatorColor = newValue.separatorColor
-                }
-
-                LanguageProperties.Update.LANGUAGE_KEY -> languageProperties.langKey = newValue as LangKey
-                LanguageProperties.Update.PRIMARY_COLOR -> languageProperties.primaryColor = newValue as TextColor
-                LanguageProperties.Update.SECONDARY_COLOR -> languageProperties.secondaryColor = newValue as TextColor
-                LanguageProperties.Update.SEPARATOR_COLOR -> languageProperties.separatorColor = newValue as TextColor
+                languageProperties.langKey = newValue.langKey
+                languageProperties.primaryColor = newValue.primaryColor
+                languageProperties.secondaryColor = newValue.secondaryColor
+                languageProperties.separatorColor = newValue.separatorColor
             }
 
-            languagePropertiesRepository.update(key, languageProperties)
-            TODO("Send update packet to service where an instance of LanguageProperties with this uuid is cached")
+            LanguageProperties.Update.LANGUAGE_KEY -> languageProperties.langKey = newValue as LangKey
+            LanguageProperties.Update.PRIMARY_COLOR -> languageProperties.primaryColor = newValue as TextColor
+            LanguageProperties.Update.SECONDARY_COLOR -> languageProperties.secondaryColor = newValue as TextColor
+            LanguageProperties.Update.SEPARATOR_COLOR -> languageProperties.separatorColor = newValue as TextColor
+        }
+
+        if (languagePropertiesRepository.update(key, languageProperties).await()) {
+            sendUpdatePacket(updateType, key, newValue)
         }
     }
 

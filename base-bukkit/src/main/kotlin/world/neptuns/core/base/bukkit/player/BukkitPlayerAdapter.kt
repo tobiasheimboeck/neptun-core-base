@@ -4,8 +4,6 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.kyori.adventure.title.Title
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import world.neptuns.controller.api.NeptunControllerProvider
-import world.neptuns.controller.api.packet.NetworkChannelRegistry
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.command.NeptunCommandPlatform
 import world.neptuns.core.base.api.language.Language
@@ -14,6 +12,8 @@ import world.neptuns.core.base.api.language.properties.LanguageProperties
 import world.neptuns.core.base.api.player.PlayerAdapter
 import world.neptuns.core.base.api.utils.NeptunPluginAdapter
 import world.neptuns.core.base.common.packet.*
+import world.neptuns.streamline.api.NeptunStreamlineProvider
+import world.neptuns.streamline.api.packet.NetworkChannelRegistry
 import java.util.*
 
 class BukkitPlayerAdapter(override val pluginAdapter: NeptunPluginAdapter) : PlayerAdapter<Player> {
@@ -24,32 +24,32 @@ class BukkitPlayerAdapter(override val pluginAdapter: NeptunPluginAdapter) : Pla
 
     override suspend fun transferPlayerToPlayersService(uuid: UUID, targetUuid: UUID) {
         val targetPlayer = NeptunCoreProvider.api.playerController.getOnlinePlayer(targetUuid) ?: return
-        NeptunControllerProvider.api.packetController.sendPacket(PlayerConnectToServicePacket(uuid, false, targetPlayer.currentServiceName))
+        NeptunStreamlineProvider.api.packetController.sendPacket(PlayerConnectToServicePacket(uuid, false, targetPlayer.currentServiceName))
     }
 
-    override fun transferPlayerToService(uuid: UUID, serviceName: String) {
-        NeptunControllerProvider.api.packetController.sendPacket(PlayerConnectToServicePacket(uuid, false, serviceName))
+    override suspend fun transferPlayerToService(uuid: UUID, serviceName: String) {
+        NeptunStreamlineProvider.api.packetController.sendPacket(PlayerConnectToServicePacket(uuid, false, serviceName))
     }
 
-    override fun transferPlayerToLobby(uuid: UUID) {
-        NeptunControllerProvider.api.packetController.sendPacket(PlayerConnectToServicePacket(uuid, true, null))
+    override suspend fun transferPlayerToLobby(uuid: UUID) {
+        NeptunStreamlineProvider.api.packetController.sendPacket(PlayerConnectToServicePacket(uuid, true, null))
     }
 
-    override fun teleport(uuid: UUID, x: Double, y: Double, z: Double, yaw: Float, pitch: Float, worldName: String?) {
-        NeptunControllerProvider.api.packetController.sendPacket(PlayerTeleportPacket(uuid, null, x, y, z, yaw, pitch))
+    override suspend fun teleport(uuid: UUID, x: Double, y: Double, z: Double, yaw: Float, pitch: Float, worldName: String?) {
+        NeptunStreamlineProvider.api.packetController.sendPacket(PlayerTeleportPacket(uuid, null, x, y, z, yaw, pitch))
     }
 
-    override fun teleport(uuid: UUID, x: Double, y: Double, z: Double, worldName: String?) {
+    override suspend fun teleport(uuid: UUID, x: Double, y: Double, z: Double, worldName: String?) {
         teleport(uuid, x, y, z, 0f, 0f, worldName)
     }
 
-    override fun teleportToPlayer(uuid: UUID, targetUuid: UUID) {
-        NeptunControllerProvider.api.packetController.sendPacket(PlayerTeleportToPlayerPacket(uuid, targetUuid))
+    override suspend fun teleportToPlayer(uuid: UUID, targetUuid: UUID) {
+        NeptunStreamlineProvider.api.packetController.sendPacket(PlayerTeleportToPlayerPacket(uuid, targetUuid))
     }
 
-    override fun executeCommand(platform: NeptunCommandPlatform, player: Player, command: String) {
+    override suspend fun executeCommand(platform: NeptunCommandPlatform, player: Player, command: String) {
         val channel = if (platform == NeptunCommandPlatform.VELOCITY) NetworkChannelRegistry.PROXY else NetworkChannelRegistry.SERVICE
-        NeptunControllerProvider.api.packetController.sendPacket(PlayerPerformCommandPacket(channel, player.uniqueId, command))
+        NeptunStreamlineProvider.api.packetController.sendPacket(PlayerPerformCommandPacket(channel, player.uniqueId, command))
     }
 
     override suspend fun sendPlayerListHeader(player: Player, key: LineKey, vararg toReplace: TagResolver) {
@@ -79,7 +79,7 @@ class BukkitPlayerAdapter(override val pluginAdapter: NeptunPluginAdapter) : Pla
     }
 
     override suspend fun sendGlobalMessage(uuid: UUID, key: LineKey, toReplace: List<Pair<String, String>>) {
-        NeptunControllerProvider.api.packetController.sendPacket(MessageToPlayerPacket(uuid, key.asString(), toReplace))
+        NeptunStreamlineProvider.api.packetController.sendPacket(MessageToPlayerPacket(uuid, key.asString(), toReplace))
     }
 
     override suspend fun sendMessage(player: Player, key: LineKey, vararg toReplace: TagResolver) {
@@ -91,7 +91,8 @@ class BukkitPlayerAdapter(override val pluginAdapter: NeptunPluginAdapter) : Pla
 
     private suspend fun validateLanguageProperties(uuid: UUID, result: (LanguageProperties, Language) -> Unit) {
         val properties = NeptunCoreProvider.api.languagePropertiesController.getProperties(uuid) ?: return
-        result.invoke(properties, NeptunCoreProvider.api.languageController.getLanguage(properties.langKey))
+        val language = NeptunCoreProvider.api.languageController.getLanguage(properties.langKey) ?: return
+        result.invoke(properties, language)
     }
 
 }

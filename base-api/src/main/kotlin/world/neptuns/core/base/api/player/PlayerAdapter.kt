@@ -43,15 +43,15 @@ interface PlayerAdapter<T> {
         sendPlayerListFooter(player, LineKey.key(pluginAdapter.namespace, key), *toReplace)
     }
 
-    fun executeCommand(platform: NeptunCommandPlatform, player: T, command: String)
+    suspend fun executeCommand(platform: NeptunCommandPlatform, player: T, command: String)
 
     suspend fun transferPlayerToPlayersService(uuid: UUID, targetUuid: UUID)
-    fun transferPlayerToService(uuid: UUID, serviceName: String)
-    fun transferPlayerToLobby(uuid: UUID)
+    suspend fun transferPlayerToService(uuid: UUID, serviceName: String)
+    suspend fun transferPlayerToLobby(uuid: UUID)
 
-    fun teleport(uuid: UUID, x: Double, y: Double, z: Double, yaw: Float, pitch: Float, worldName: String?)
-    fun teleport(uuid: UUID, x: Double, y: Double, z: Double, worldName: String?)
-    fun teleportToPlayer(uuid: UUID, targetUuid: UUID)
+    suspend fun teleport(uuid: UUID, x: Double, y: Double, z: Double, yaw: Float, pitch: Float, worldName: String?)
+    suspend fun teleport(uuid: UUID, x: Double, y: Double, z: Double, worldName: String?)
+    suspend fun teleportToPlayer(uuid: UUID, targetUuid: UUID)
 
     enum class BroadcastType {
         PROXIES, CURRENT_SERVICE

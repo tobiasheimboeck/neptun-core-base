@@ -2,11 +2,11 @@ package world.neptuns.core.base.api.player
 
 import kotlinx.coroutines.Deferred
 import world.neptuns.controller.api.service.NeptunService
-import world.neptuns.controller.api.utils.Updatable
-import world.neptuns.core.base.api.cache.LocalCacheFunctions
+import world.neptuns.streamline.api.cache.container.Cachable
+import world.neptuns.streamline.api.utils.Updatable
 import java.util.*
 
-interface NeptunPlayerController : LocalCacheFunctions<UUID, NeptunOnlinePlayer>, Updatable<UUID, NeptunOfflinePlayer.Update, Any> {
+interface NeptunPlayerController : Cachable<UUID, NeptunOnlinePlayer>, Updatable<UUID, NeptunOfflinePlayer.Update, Any> {
 
     suspend fun isOnline(uuid: UUID): Boolean
 

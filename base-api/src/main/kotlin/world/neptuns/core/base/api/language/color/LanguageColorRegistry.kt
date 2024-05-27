@@ -3,7 +3,7 @@ package world.neptuns.core.base.api.language.color
 import net.kyori.adventure.text.format.NamedTextColor
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.language.LineKey
-import world.neptuns.core.base.api.utils.ClassRegistry
+import world.neptuns.streamline.api.utils.ClassRegistry
 
 class LanguageColorRegistry {
 

@@ -1,10 +1,10 @@
 package world.neptuns.core.base.api.language.color
 
-import world.neptuns.core.base.api.cache.LocalCacheFunctions
 import world.neptuns.core.base.api.language.LineKey
+import world.neptuns.streamline.api.cache.container.Cachable
 import java.util.*
 
-interface LanguageColorController : LocalCacheFunctions<UUID, List<LanguageColor>> {
+interface LanguageColorController : Cachable<UUID, List<LanguageColor>> {
 
     suspend fun getColor(uuid: UUID, name: LineKey): LanguageColor?
     suspend fun getColors(uuid: UUID): List<LanguageColor>

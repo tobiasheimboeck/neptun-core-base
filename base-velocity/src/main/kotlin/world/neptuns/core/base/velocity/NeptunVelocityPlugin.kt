@@ -1,6 +1,7 @@
 package world.neptuns.core.base.velocity
 
 import com.github.shynixn.mccoroutine.velocity.SuspendingPluginContainer
+import com.github.shynixn.mccoroutine.velocity.registerSuspend
 import com.github.shynixn.mccoroutine.velocity.velocityDispatcher
 import com.google.inject.Inject
 import com.velocitypowered.api.event.Subscribe
@@ -14,7 +15,9 @@ import world.neptuns.core.base.api.language.LangNamespace
 import world.neptuns.core.base.api.utils.NeptunPluginAdapter
 import world.neptuns.core.base.common.CoreBaseApiImpl
 import world.neptuns.core.base.velocity.command.VelocityCommandExecutorAsync
+import world.neptuns.core.base.velocity.command.impl.LanguageCommand
 import world.neptuns.core.base.velocity.listener.PacketListener
+import world.neptuns.core.base.velocity.listener.VelocityPlayerListener
 import world.neptuns.core.base.velocity.player.VelocityPlayerAdapter
 import java.nio.file.Path
 
@@ -28,7 +31,7 @@ import java.nio.file.Path
 class NeptunVelocityPlugin @Inject constructor(
     private val suspendingPluginContainer: SuspendingPluginContainer,
     val proxyServer: ProxyServer,
-    @DataDirectory private val dataFolder: Path
+    @DataDirectory private val dataFolder: Path,
 ) : NeptunPluginAdapter {
 
     override val namespace: LangNamespace = LangNamespace.create("core.proxy", null)
@@ -47,9 +50,12 @@ class NeptunVelocityPlugin @Inject constructor(
         coreBaseApi.registerCommandExecutorClass(VelocityCommandExecutorAsync::class.java)
 
         NeptunCoreProvider.api = coreBaseApi
-
         val packetListener = PacketListener(this.proxyServer)
         packetListener.listen()
+
+        this.proxyServer.eventManager.registerSuspend(this, VelocityPlayerListener(coreBaseApi.playerController))
+
+        coreBaseApi.registerCommand(LanguageCommand(coreBaseApi.languageColorController, coreBaseApi.languagePropertiesController, coreBaseApi.languageController))
     }
 
     companion object {

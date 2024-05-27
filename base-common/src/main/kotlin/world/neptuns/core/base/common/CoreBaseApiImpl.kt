@@ -7,7 +7,6 @@ import org.redisson.api.RedissonClient
 import org.redisson.codec.SerializationCodec
 import org.redisson.config.Config
 import world.neptuns.core.base.api.CoreBaseApi
-import world.neptuns.core.base.api.cache.CacheLoader
 import world.neptuns.core.base.api.command.NeptunCommand
 import world.neptuns.core.base.api.command.NeptunCommandController
 import world.neptuns.core.base.api.command.NeptunCommandExecutor
@@ -22,9 +21,7 @@ import world.neptuns.core.base.api.language.color.LanguageColorController
 import world.neptuns.core.base.api.language.properties.LanguagePropertiesController
 import world.neptuns.core.base.api.player.NeptunPlayerController
 import world.neptuns.core.base.api.player.PlayerAdapter
-import world.neptuns.core.base.api.repository.RepositoryLoader
 import world.neptuns.core.base.api.utils.PageConverter
-import world.neptuns.core.base.common.api.cache.CacheLoaderImpl
 import world.neptuns.core.base.common.api.command.NeptunCommandControllerImpl
 import world.neptuns.core.base.common.api.file.FileControllerImpl
 import world.neptuns.core.base.common.api.language.LangKeyImpl
@@ -35,7 +32,6 @@ import world.neptuns.core.base.common.api.language.color.LanguageColorController
 import world.neptuns.core.base.common.api.language.color.LanguageColorImpl
 import world.neptuns.core.base.common.api.language.properties.LanguagePropertiesControllerImpl
 import world.neptuns.core.base.common.api.player.NeptunPlayerControllerImpl
-import world.neptuns.core.base.common.api.repository.RepositoryLoaderImpl
 import world.neptuns.core.base.common.api.utils.PageConverterImpl
 import world.neptuns.core.base.common.file.MariaDbCredentials
 import world.neptuns.core.base.common.file.RedisCredentials
@@ -48,15 +44,15 @@ import world.neptuns.core.base.common.repository.language.LanguagePropertiesTabl
 import world.neptuns.core.base.common.repository.player.OfflinePlayerTable
 import world.neptuns.core.base.common.repository.player.OnlinePlayerCache
 import world.neptuns.core.base.common.repository.player.OnlinePlayerRepository
+import world.neptuns.streamline.api.NeptunStreamlineProvider
+import world.neptuns.streamline.api.packet.NetworkChannelRegistry
+import world.neptuns.streamline.common.NeptunStreamlineConnector
 import java.nio.file.Path
 import kotlin.coroutines.CoroutineContext
 
 class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, override val dataFolder: Path) : CoreBaseApi {
 
     override val redissonClient: RedissonClient
-
-    override val repositoryLoader: RepositoryLoader = RepositoryLoaderImpl()
-    override val cacheLoader: CacheLoader = CacheLoaderImpl()
 
     override val fileController: FileController = FileControllerImpl()
     override val languageController: LanguageController = LanguageControllerImpl()
@@ -74,17 +70,21 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
         establishMariaDbConnection(OfflinePlayerTable, LanguagePropertiesTable, LanguageColorTable)
         this.redissonClient = establishRedisConnection()
 
-        this.repositoryLoader.register(OnlinePlayerRepository(redissonClient))
-        this.repositoryLoader.register(LanguagePropertiesRepository(redissonClient))
-        this.repositoryLoader.register(LanguageColorRepository(redissonClient))
+        NeptunStreamlineConnector.init(redissonClient)
 
-        this.cacheLoader.register(OnlinePlayerCache())
-        this.cacheLoader.register(LanguageColorCache())
-        this.cacheLoader.register(LanguagePropertiesCache())
+        val repositoryLoader = NeptunStreamlineProvider.api.repositoryLoader
+        repositoryLoader.register(OnlinePlayerRepository(redissonClient))
+        repositoryLoader.register(LanguagePropertiesRepository(redissonClient))
+        repositoryLoader.register(LanguageColorRepository(redissonClient))
+
+        val cacheLoader = NeptunStreamlineProvider.api.cacheLoader
+        cacheLoader.register(OnlinePlayerCache())
+        cacheLoader.register(LanguageColorCache())
+        cacheLoader.register(LanguagePropertiesCache())
 
         this.languageColorController = LanguageColorControllerImpl()
-        this.languagePropertiesController = LanguagePropertiesControllerImpl()
-        this.playerController = NeptunPlayerControllerImpl()
+        this.languagePropertiesController = LanguagePropertiesControllerImpl(NetworkChannelRegistry.PROXY_AND_SERVICE)
+        this.playerController = NeptunPlayerControllerImpl(NetworkChannelRegistry.PROXY_AND_SERVICE)
     }
 
     override fun newLanguageKey(countryCode: String, languageCode: String): LangKey {

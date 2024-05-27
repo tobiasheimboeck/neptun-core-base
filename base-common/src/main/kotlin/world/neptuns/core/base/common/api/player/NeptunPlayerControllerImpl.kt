@@ -15,6 +15,7 @@ import world.neptuns.controller.api.service.NeptunService
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.properties.LanguageProperties
+import world.neptuns.core.base.api.packet.NeptunPlayerDataLoadedPacket
 import world.neptuns.core.base.api.player.NeptunOfflinePlayer
 import world.neptuns.core.base.api.player.NeptunOnlinePlayer
 import world.neptuns.core.base.api.player.NeptunPlayerController
@@ -25,14 +26,15 @@ import world.neptuns.core.base.common.repository.language.LanguagePropertiesTabl
 import world.neptuns.core.base.common.repository.player.OfflinePlayerTable
 import world.neptuns.core.base.common.repository.player.OnlinePlayerCache
 import world.neptuns.core.base.common.repository.player.OnlinePlayerRepository
+import world.neptuns.streamline.api.NeptunStreamlineProvider
 import java.util.*
 
-class NeptunPlayerControllerImpl : NeptunPlayerController {
+class NeptunPlayerControllerImpl(override val updateChannel: String) : NeptunPlayerController {
 
-    private val onlinePlayerRepository = NeptunCoreProvider.api.repositoryLoader.get(OnlinePlayerRepository::class.java)!!
-    private val onlinePlayerCache = NeptunCoreProvider.api.cacheLoader.get(OnlinePlayerCache::class.java)!!
+    private val onlinePlayerRepository = NeptunStreamlineProvider.api.repositoryLoader.get(OnlinePlayerRepository::class.java)!!
+    private val onlinePlayerCache = NeptunStreamlineProvider.api.cacheLoader.get(OnlinePlayerCache::class.java)!!
 
-    private val languagePropertiesRepository = NeptunCoreProvider.api.repositoryLoader.get(LanguagePropertiesRepository::class.java)!!
+    private val languagePropertiesRepository = NeptunStreamlineProvider.api.repositoryLoader.get(LanguagePropertiesRepository::class.java)!!
 
     override suspend fun isOnline(uuid: UUID): Boolean {
         return this.onlinePlayerCache.contains(uuid) || this.onlinePlayerRepository.contains(uuid).await()
@@ -103,18 +105,22 @@ class NeptunPlayerControllerImpl : NeptunPlayerController {
                 val username = if (usernameChanged) name else resultRow[OfflinePlayerTable.name]
 
                 offlinePlayer = constructOfflinePlayer(resultRow, username)!!
-                if (usernameChanged) bulkUpdateEntry(uuid, NeptunOfflinePlayer.Update.NAME, username, false)
+                if (usernameChanged) bulkUpdateEntry(NeptunOfflinePlayer.Update.NAME, uuid, username, false)
 
                 val resultRowLanguageProperties = LanguagePropertiesTable.selectAll().where { LanguagePropertiesTable.uuid eq uuid }.limit(1).firstOrNull()
                 languageProperties = constructLanguageProperties(resultRowLanguageProperties)!!
             }
 
             val neptunOnlinePlayer = NeptunOnlinePlayerImpl.create(offlinePlayer, proxyServiceName, minecraftServiceName)
-            onlinePlayerRepository.insert(uuid, neptunOnlinePlayer)
-            load(uuid, neptunOnlinePlayer)
+            val playerResult = onlinePlayerRepository.insert(uuid, neptunOnlinePlayer)
+            addToLocalCache(uuid, neptunOnlinePlayer)
 
-            languagePropertiesRepository.insert(uuid, languageProperties)
-            NeptunCoreProvider.api.languagePropertiesController.load(uuid, languageProperties)
+            val propertiesResult = languagePropertiesRepository.insert(uuid, languageProperties)
+            NeptunCoreProvider.api.languagePropertiesController.addToLocalCache(uuid, languageProperties)
+
+            if (playerResult.await() && propertiesResult.await()) {
+                NeptunStreamlineProvider.api.packetController.sendPacket(NeptunPlayerDataLoadedPacket(neptunOnlinePlayer.uuid))
+            }
         }
     }
 
@@ -130,22 +136,22 @@ class NeptunPlayerControllerImpl : NeptunPlayerController {
             }
 
             onlinePlayerRepository.delete(uuid)
-            unload(uuid)
+            removeFromLocalCache(uuid)
 
             languagePropertiesRepository.delete(uuid)
-            NeptunCoreProvider.api.languagePropertiesController.unload(uuid)
+            NeptunCoreProvider.api.languagePropertiesController.removeFromLocalCache(uuid)
         }
     }
 
-    override suspend fun load(key: UUID, value: NeptunOnlinePlayer) {
+    override suspend fun addToLocalCache(key: UUID, value: NeptunOnlinePlayer) {
         this.onlinePlayerCache.insert(key, value)
     }
 
-    override suspend fun unload(key: UUID) {
+    override suspend fun removeFromLocalCache(key: UUID) {
         this.onlinePlayerCache.delete(key)
     }
 
-    override suspend fun bulkUpdateEntry(key: UUID, updateType: NeptunOfflinePlayer.Update, newValue: Any, updateCache: Boolean, result: (Unit) -> Unit) {
+    override suspend fun bulkUpdateEntry(updateType: NeptunOfflinePlayer.Update, key: UUID, newValue: Any, updateCache: Boolean, result: (Unit) -> Unit) {
         newSuspendedTransaction(Dispatchers.IO) {
             OfflinePlayerTable.update({ OfflinePlayerTable.uuid eq key }) {
                 when (updateType) {
@@ -175,40 +181,39 @@ class NeptunPlayerControllerImpl : NeptunPlayerController {
             }
         }
 
-        if (updateCache) updateCachedEntry(key, updateType, newValue, result)
+        if (updateCache) updateCachedEntry(updateType, key, newValue, result)
     }
 
-    override suspend fun updateCachedEntry(key: UUID, updateType: NeptunOfflinePlayer.Update, newValue: Any, result: (Unit) -> Unit) {
-        withContext(Dispatchers.IO) {
-            val onlinePlayer = getOnlinePlayer(key) ?: return@withContext
+    override suspend fun updateCachedEntry(updateType: NeptunOfflinePlayer.Update, key: UUID, newValue: Any, result: (Unit) -> Unit) {
+        val onlinePlayer = getOnlinePlayer(key) ?: return
 
-            when (updateType) {
-                NeptunOfflinePlayer.Update.ALL -> {
-                    if (newValue !is NeptunOnlinePlayer)
-                        throw UnsupportedOperationException("Object has to be an NeptunOnlinePlayer instance!")
+        when (updateType) {
+            NeptunOfflinePlayer.Update.ALL -> {
+                if (newValue !is NeptunOnlinePlayer)
+                    throw UnsupportedOperationException("Object has to be an NeptunOnlinePlayer instance!")
 
-                    onlinePlayer.name = newValue.name
-                    onlinePlayer.lastLoginTimestamp = newValue.lastLoginTimestamp
-                    onlinePlayer.lastLogoutTimestamp = newValue.lastLogoutTimestamp
-                    onlinePlayer.onlineTime = newValue.onlineTime
-                    onlinePlayer.skinProfile.value = newValue.skinProfile.value
-                    onlinePlayer.skinProfile.signature = newValue.skinProfile.signature
-                    onlinePlayer.crystals = newValue.crystals
-                    onlinePlayer.shards = newValue.shards
-                }
-
-                NeptunOfflinePlayer.Update.NAME -> onlinePlayer.name = newValue as String
-                NeptunOfflinePlayer.Update.LAST_LOGIN_TIMESTAMP -> onlinePlayer.lastLoginTimestamp = newValue as Long
-                NeptunOfflinePlayer.Update.LAST_LOGOUT_TIMESTAMP -> onlinePlayer.lastLogoutTimestamp = newValue as Long
-                NeptunOfflinePlayer.Update.ONLINE_TIME -> onlinePlayer.onlineTime = newValue as Long
-                NeptunOfflinePlayer.Update.SKIN_VALUE -> onlinePlayer.skinProfile.value = newValue as String
-                NeptunOfflinePlayer.Update.SKIN_SIGNATURE -> onlinePlayer.skinProfile.signature = newValue as String
-                NeptunOfflinePlayer.Update.CRYSTALS -> onlinePlayer.crystals = newValue as Long
-                NeptunOfflinePlayer.Update.SHARDS -> onlinePlayer.shards = newValue as Long
+                onlinePlayer.name = newValue.name
+                onlinePlayer.lastLoginTimestamp = newValue.lastLoginTimestamp
+                onlinePlayer.lastLogoutTimestamp = newValue.lastLogoutTimestamp
+                onlinePlayer.onlineTime = newValue.onlineTime
+                onlinePlayer.skinProfile.value = newValue.skinProfile.value
+                onlinePlayer.skinProfile.signature = newValue.skinProfile.signature
+                onlinePlayer.crystals = newValue.crystals
+                onlinePlayer.shards = newValue.shards
             }
 
-            onlinePlayerRepository.update(key, onlinePlayer)
-            TODO("Send update packet to service where an instance of NeptunOnlinePlayer with this uuid is cached")
+            NeptunOfflinePlayer.Update.NAME -> onlinePlayer.name = newValue as String
+            NeptunOfflinePlayer.Update.LAST_LOGIN_TIMESTAMP -> onlinePlayer.lastLoginTimestamp = newValue as Long
+            NeptunOfflinePlayer.Update.LAST_LOGOUT_TIMESTAMP -> onlinePlayer.lastLogoutTimestamp = newValue as Long
+            NeptunOfflinePlayer.Update.ONLINE_TIME -> onlinePlayer.onlineTime = newValue as Long
+            NeptunOfflinePlayer.Update.SKIN_VALUE -> onlinePlayer.skinProfile.value = newValue as String
+            NeptunOfflinePlayer.Update.SKIN_SIGNATURE -> onlinePlayer.skinProfile.signature = newValue as String
+            NeptunOfflinePlayer.Update.CRYSTALS -> onlinePlayer.crystals = newValue as Long
+            NeptunOfflinePlayer.Update.SHARDS -> onlinePlayer.shards = newValue as Long
+        }
+
+        if (onlinePlayerRepository.update(key, onlinePlayer).await()) {
+            sendUpdatePacket(updateType, key, newValue)
         }
     }
 

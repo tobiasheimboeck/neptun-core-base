@@ -11,6 +11,8 @@ sql-jdbc = "0.50.1"
 
 redisson = "3.28.0"
 
+streamline-api = "1.0-SNAPSHOT"
+
 velocity-api = "3.3.0-SNAPSHOT"
 async-velocity-api = "2.16.0"
 
@@ -32,6 +34,9 @@ sql-jdbc = { group = "org.jetbrains.exposed", name = "exposed-jdbc", version.ref
 
 redisson = { group = "org.redisson", name = "redisson", version.ref = "redisson" }
 
+streamline-api = { group = "world.neptuns.streamline", name = "streamline-api", version.ref = "streamline-api" }
+streamline-common = { group = "world.neptuns.streamline", name = "streamline-common", version.ref = "streamline-api" }
+
 async-velocity-api = { group = "com.github.shynixn.mccoroutine", name = "mccoroutine-velocity-api", version.ref = "async-velocity-api" }
 async-velocity-core = { group = "com.github.shynixn.mccoroutine", name = "mccoroutine-velocity-core", version.ref = "async-velocity-api" }
 velocity-api = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity-api" }
@@ -47,6 +52,7 @@ neptun-controller-api = { group = "world.neptuns.network.controller", name = "co
 
 [bundles]
 database = ["redisson", "mariadb", "sql-core", "sql-dao", "sql-jdbc"]
+streamline = ["streamline-api", "streamline-common"]
 velocity = ["velocity-api", "async-velocity-api", "async-velocity-core"]
 paper = ["paper-api", "async-paper-api", "async-paper-core"]
 kyori = ["kyori-adventure-api", "kyori-minimessage-api"]

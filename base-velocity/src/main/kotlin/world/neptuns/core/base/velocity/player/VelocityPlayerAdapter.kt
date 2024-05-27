@@ -4,8 +4,6 @@ import com.velocitypowered.api.proxy.Player
 import com.velocitypowered.api.proxy.ProxyServer
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.kyori.adventure.title.Title
-import world.neptuns.controller.api.NeptunControllerProvider
-import world.neptuns.controller.api.packet.NetworkChannelRegistry
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.command.NeptunCommandPlatform
 import world.neptuns.core.base.api.language.Language
@@ -17,6 +15,8 @@ import world.neptuns.core.base.common.packet.MessageToPlayerPacket
 import world.neptuns.core.base.common.packet.PlayerPerformCommandPacket
 import world.neptuns.core.base.common.packet.PlayerTeleportPacket
 import world.neptuns.core.base.common.packet.PlayerTeleportToPlayerPacket
+import world.neptuns.streamline.api.NeptunStreamlineProvider
+import world.neptuns.streamline.api.packet.NetworkChannelRegistry
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
@@ -31,14 +31,14 @@ class VelocityPlayerAdapter(private val proxyServer: ProxyServer, override val p
         transferPlayerToService(uuid, neptunPlayer.currentServiceName)
     }
 
-    override fun transferPlayerToService(uuid: UUID, serviceName: String) {
+    override suspend fun transferPlayerToService(uuid: UUID, serviceName: String) {
         this.proxyServer.getServer(serviceName).ifPresent {
             val player = getMinecraftPlayer(uuid) ?: return@ifPresent
             player.createConnectionRequest(it).fireAndForget()
         }
     }
 
-    override fun transferPlayerToLobby(uuid: UUID) {
+    override suspend fun transferPlayerToLobby(uuid: UUID) {
         val player = getMinecraftPlayer(uuid) ?: return
 
         val lobbyServers = this.proxyServer.allServers.filter { it.serverInfo.name.startsWith("Lobby") }
@@ -47,21 +47,21 @@ class VelocityPlayerAdapter(private val proxyServer: ProxyServer, override val p
         player.createConnectionRequest(lobbyServer).fireAndForget()
     }
 
-    override fun teleport(uuid: UUID, x: Double, y: Double, z: Double, yaw: Float, pitch: Float, worldName: String?) {
-        NeptunControllerProvider.api.packetController.sendPacket(PlayerTeleportPacket(uuid, null, x, y, z, yaw, pitch))
+    override suspend fun teleport(uuid: UUID, x: Double, y: Double, z: Double, yaw: Float, pitch: Float, worldName: String?) {
+        NeptunStreamlineProvider.api.packetController.sendPacket(PlayerTeleportPacket(uuid, null, x, y, z, yaw, pitch))
     }
 
-    override fun teleport(uuid: UUID, x: Double, y: Double, z: Double, worldName: String?) {
+    override suspend fun teleport(uuid: UUID, x: Double, y: Double, z: Double, worldName: String?) {
         teleport(uuid, x, y, z, 0f, 0f, worldName)
     }
 
-    override fun teleportToPlayer(uuid: UUID, targetUuid: UUID) {
-        NeptunControllerProvider.api.packetController.sendPacket(PlayerTeleportToPlayerPacket(uuid, targetUuid))
+    override suspend fun teleportToPlayer(uuid: UUID, targetUuid: UUID) {
+        NeptunStreamlineProvider.api.packetController.sendPacket(PlayerTeleportToPlayerPacket(uuid, targetUuid))
     }
 
-    override fun executeCommand(platform: NeptunCommandPlatform, player: Player, command: String) {
+    override suspend fun executeCommand(platform: NeptunCommandPlatform, player: Player, command: String) {
         val channel = if (platform == NeptunCommandPlatform.VELOCITY) NetworkChannelRegistry.PROXY else NetworkChannelRegistry.SERVICE
-        NeptunControllerProvider.api.packetController.sendPacket(PlayerPerformCommandPacket(channel, player.uniqueId, command))
+        NeptunStreamlineProvider.api.packetController.sendPacket(PlayerPerformCommandPacket(channel, player.uniqueId, command))
     }
 
     override suspend fun sendPlayerListHeader(player: Player, key: LineKey, vararg toReplace: TagResolver) {
@@ -91,7 +91,7 @@ class VelocityPlayerAdapter(private val proxyServer: ProxyServer, override val p
     }
 
     override suspend fun sendGlobalMessage(uuid: UUID, key: LineKey, toReplace: List<Pair<String, String>>) {
-        NeptunControllerProvider.api.packetController.sendPacket(MessageToPlayerPacket(uuid, key.asString(), toReplace))
+        NeptunStreamlineProvider.api.packetController.sendPacket(MessageToPlayerPacket(uuid, key.asString(), toReplace))
     }
 
     override suspend fun sendMessage(player: Player, key: LineKey, vararg toReplace: TagResolver) {
@@ -103,7 +103,8 @@ class VelocityPlayerAdapter(private val proxyServer: ProxyServer, override val p
 
     private suspend fun validateLanguageProperties(uuid: UUID, result: (LanguageProperties, Language) -> Unit) {
         val properties = NeptunCoreProvider.api.languagePropertiesController.getProperties(uuid) ?: return
-        result.invoke(properties, NeptunCoreProvider.api.languageController.getLanguage(properties.langKey))
+        val language = NeptunCoreProvider.api.languageController.getLanguage(properties.langKey) ?: return
+        result.invoke(properties, language)
     }
 
 }

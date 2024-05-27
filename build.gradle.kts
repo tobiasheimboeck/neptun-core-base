@@ -27,6 +27,7 @@ allprojects {
             compileOnly(libs.gson)
             compileOnly(libs.guava)
             compileOnly(libs.bundles.database)
+            compileOnly(libs.bundles.streamline)
             compileOnly(libs.bundles.kyori)
             compileOnly(libs.neptun.controller.api)
         }
