@@ -7,9 +7,17 @@ import com.velocitypowered.api.event.connection.LoginEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import world.neptuns.controller.api.NeptunControllerProvider
+import world.neptuns.core.base.api.language.properties.LanguagePropertiesController
+import world.neptuns.core.base.api.packet.NeptunPlayerDataLoadedPacket
 import world.neptuns.core.base.api.player.NeptunPlayerController
+import world.neptuns.core.base.common.api.language.properties.LanguagePropertiesImpl
+import world.neptuns.core.base.common.api.player.NeptunOfflinePlayerImpl
+import world.neptuns.streamline.api.NeptunStreamlineProvider
 
-class VelocityPlayerListener(private val playerController: NeptunPlayerController) {
+class VelocityPlayerListener(
+    private val playerController: NeptunPlayerController,
+    private val languagePropertiesController: LanguagePropertiesController,
+) {
 
     @Subscribe(order = PostOrder.EARLY)
     suspend fun onPlayerLogin(event: LoginEvent) {
@@ -18,7 +26,13 @@ class VelocityPlayerListener(private val playerController: NeptunPlayerControlle
         val podName = NeptunControllerProvider.api.podName()
 
         withContext(Dispatchers.IO) {
-            playerController.loadPlayer(player.uniqueId, player.username, property.value, property.signature, podName, "-/-")
+            val playerResult = playerController.createOrLoadEntry(player.uniqueId, NeptunOfflinePlayerImpl.create(player.uniqueId, player.username, property.value, property.signature), podName)
+            val propertiesResult = languagePropertiesController.createOrLoadEntry(player.uniqueId, LanguagePropertiesImpl.create(player.uniqueId))
+
+            if (playerResult.await() && propertiesResult.await()) {
+                NeptunStreamlineProvider.api.packetController.sendPacket(NeptunPlayerDataLoadedPacket(player.uniqueId))
+                println("==> Sent player data loaded packet")
+            }
         }
     }
 
@@ -27,7 +41,8 @@ class VelocityPlayerListener(private val playerController: NeptunPlayerControlle
         val player = event.player
 
         withContext(Dispatchers.IO) {
-            playerController.unloadPlayer(player.uniqueId)
+            playerController.unloadEntry(player.uniqueId)
+            languagePropertiesController.unloadEntry(player.uniqueId)
         }
     }
 

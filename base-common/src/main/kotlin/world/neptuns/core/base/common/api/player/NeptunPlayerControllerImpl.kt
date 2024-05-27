@@ -2,27 +2,17 @@ package world.neptuns.core.base.common.api.player
 
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import net.kyori.adventure.text.format.TextColor
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import world.neptuns.controller.api.service.NeptunService
-import world.neptuns.core.base.api.NeptunCoreProvider
-import world.neptuns.core.base.api.language.LangKey
-import world.neptuns.core.base.api.language.properties.LanguageProperties
-import world.neptuns.core.base.api.packet.NeptunPlayerDataLoadedPacket
 import world.neptuns.core.base.api.player.NeptunOfflinePlayer
 import world.neptuns.core.base.api.player.NeptunOnlinePlayer
 import world.neptuns.core.base.api.player.NeptunPlayerController
-import world.neptuns.core.base.common.api.language.properties.LanguagePropertiesImpl
 import world.neptuns.core.base.common.api.skin.SkinProfileImpl
-import world.neptuns.core.base.common.repository.language.LanguagePropertiesRepository
-import world.neptuns.core.base.common.repository.language.LanguagePropertiesTable
 import world.neptuns.core.base.common.repository.player.OfflinePlayerTable
 import world.neptuns.core.base.common.repository.player.OnlinePlayerCache
 import world.neptuns.core.base.common.repository.player.OnlinePlayerRepository
@@ -33,8 +23,6 @@ class NeptunPlayerControllerImpl(override val updateChannel: String) : NeptunPla
 
     private val onlinePlayerRepository = NeptunStreamlineProvider.api.repositoryLoader.get(OnlinePlayerRepository::class.java)!!
     private val onlinePlayerCache = NeptunStreamlineProvider.api.cacheLoader.get(OnlinePlayerCache::class.java)!!
-
-    private val languagePropertiesRepository = NeptunStreamlineProvider.api.repositoryLoader.get(LanguagePropertiesRepository::class.java)!!
 
     override suspend fun isOnline(uuid: UUID): Boolean {
         return this.onlinePlayerCache.contains(uuid) || this.onlinePlayerRepository.contains(uuid).await()
@@ -54,13 +42,14 @@ class NeptunPlayerControllerImpl(override val updateChannel: String) : NeptunPla
 
     override suspend fun getOfflinePlayerAsync(uuid: UUID): Deferred<NeptunOfflinePlayer?> {
         return suspendedTransactionAsync(Dispatchers.IO) {
-            constructOfflinePlayer(OfflinePlayerTable.selectAll().where { OfflinePlayerTable.uuid eq uuid }.limit(1).firstOrNull(), null)
+            val resultRow = OfflinePlayerTable.selectAll().where { OfflinePlayerTable.uuid eq uuid }.limit(1).firstOrNull()
+            resultRow?.let { constructEntry(it) }
         }
     }
 
     override suspend fun getOfflinePlayersAsync(): Deferred<List<NeptunOfflinePlayer>> {
         return suspendedTransactionAsync(Dispatchers.IO) {
-            OfflinePlayerTable.selectAll().toList().map { constructOfflinePlayer(it, null)!! }
+            OfflinePlayerTable.selectAll().toList().map { constructEntry(it) }
         }
     }
 
@@ -70,84 +59,60 @@ class NeptunPlayerControllerImpl(override val updateChannel: String) : NeptunPla
         }
     }
 
-    override suspend fun loadPlayer(uuid: UUID, name: String, skinValue: String, skinSignature: String, proxyServiceName: String, minecraftServiceName: String) {
-        newSuspendedTransaction(Dispatchers.IO) {
-            val resultRow = OfflinePlayerTable.selectAll().where { OfflinePlayerTable.uuid eq uuid }.limit(1).firstOrNull()
+    override suspend fun createOrLoadEntry(key: UUID, defaultValue: NeptunOfflinePlayer?, vararg data: Any): Deferred<Boolean> {
+        return suspendedTransactionAsync {
+            val resultRow = OfflinePlayerTable.selectAll().where { OfflinePlayerTable.uuid eq key }.limit(1).firstOrNull()
+            val loadedOfflinePlayer: NeptunOfflinePlayer
 
-            val offlinePlayer: NeptunOfflinePlayer
-            val languageProperties: LanguageProperties
-
-            if (resultRow == null) {
-                offlinePlayer = NeptunOfflinePlayerImpl.create(uuid, name, skinValue, skinValue)
+            if (resultRow == null && defaultValue != null) {
                 OfflinePlayerTable.insert {
-                    it[this.uuid] = offlinePlayer.uuid
-                    it[this.name] = offlinePlayer.name
-                    it[this.firstLoginTimestamp] = offlinePlayer.firstLoginTimestamp
-                    it[this.lastLoginTimestamp] = offlinePlayer.lastLoginTimestamp
-                    it[this.lastLogoutTimestamp] = offlinePlayer.lastLogoutTimestamp
-                    it[this.onlineTime] = offlinePlayer.onlineTime
-                    it[this.skinValue] = offlinePlayer.skinProfile.value
-                    it[this.skinSignature] = offlinePlayer.skinProfile.signature
-                    it[this.crystals] = offlinePlayer.crystals
-                    it[this.shards] = offlinePlayer.shards
+                    it[this.uuid] = uuid
+                    it[this.name] = defaultValue.name
+                    it[this.firstLoginTimestamp] = defaultValue.firstLoginTimestamp
+                    it[this.lastLoginTimestamp] = defaultValue.lastLoginTimestamp
+                    it[this.lastLogoutTimestamp] = defaultValue.lastLogoutTimestamp
+                    it[this.onlineTime] = defaultValue.onlineTime
+                    it[this.crystals] = defaultValue.crystals
+                    it[this.shards] = defaultValue.shards
+                    it[this.skinValue] = defaultValue.skinProfile.value
+                    it[this.skinSignature] = defaultValue.skinProfile.signature
                 }
 
-                languageProperties = LanguagePropertiesImpl.createDefaultProperties(uuid)
-                LanguagePropertiesTable.insert {
-                    it[this.uuid] = offlinePlayer.uuid
-                    it[this.languageKey] = languageProperties.langKey.asString()
-                    it[this.primaryColor] = languageProperties.primaryColor.asHexString()
-                    it[this.secondaryColor] = languageProperties.secondaryColor.asHexString()
-                    it[this.separatorColor] = languageProperties.separatorColor.asHexString()
-                }
+                loadedOfflinePlayer = defaultValue
             } else {
-                val usernameChanged = resultRow[OfflinePlayerTable.name] != name
-                val username = if (usernameChanged) name else resultRow[OfflinePlayerTable.name]
-
-                offlinePlayer = constructOfflinePlayer(resultRow, username)!!
-                if (usernameChanged) bulkUpdateEntry(NeptunOfflinePlayer.Update.NAME, uuid, username, false)
-
-                val resultRowLanguageProperties = LanguagePropertiesTable.selectAll().where { LanguagePropertiesTable.uuid eq uuid }.limit(1).firstOrNull()
-                languageProperties = constructLanguageProperties(resultRowLanguageProperties)!!
+                loadedOfflinePlayer = constructEntry(resultRow!!)
             }
 
-            val neptunOnlinePlayer = NeptunOnlinePlayerImpl.create(offlinePlayer, proxyServiceName, minecraftServiceName)
-            val playerResult = onlinePlayerRepository.insert(uuid, neptunOnlinePlayer)
-            addToLocalCache(uuid, neptunOnlinePlayer)
-
-            val propertiesResult = languagePropertiesRepository.insert(uuid, languageProperties)
-            NeptunCoreProvider.api.languagePropertiesController.addToLocalCache(uuid, languageProperties)
-
-            if (playerResult.await() && propertiesResult.await()) {
-                NeptunStreamlineProvider.api.packetController.sendPacket(NeptunPlayerDataLoadedPacket(neptunOnlinePlayer.uuid))
-            }
+            val onlinePlayer = NeptunOnlinePlayerImpl.create(loadedOfflinePlayer, data[0] as String, "-")
+            cacheEntry(onlinePlayer.uuid, onlinePlayer)
+            onlinePlayerRepository.insert(onlinePlayer.uuid, onlinePlayer).await()
         }
     }
 
-    override suspend fun unloadPlayer(uuid: UUID) {
-        withContext(Dispatchers.IO) {
-            val offlinePlayer = getOfflinePlayerAsync(uuid).await() ?: return@withContext
-            offlinePlayer.updateOnlineTime()
-
-            transaction {
-                OfflinePlayerTable.update({ OfflinePlayerTable.uuid eq uuid }) {
-                    it[onlineTime] = offlinePlayer.onlineTime
-                }
-            }
-
-            onlinePlayerRepository.delete(uuid)
-            removeFromLocalCache(uuid)
-
-            languagePropertiesRepository.delete(uuid)
-            NeptunCoreProvider.api.languagePropertiesController.removeFromLocalCache(uuid)
-        }
+    override suspend fun unloadEntry(key: UUID) {
+        TODO("Not yet implemented")
     }
 
-    override suspend fun addToLocalCache(key: UUID, value: NeptunOnlinePlayer) {
-        this.onlinePlayerCache.insert(key, value)
+    override fun constructEntry(resultRow: ResultRow): NeptunOfflinePlayer {
+        return NeptunOfflinePlayerImpl(
+            resultRow[OfflinePlayerTable.uuid],
+            resultRow[OfflinePlayerTable.name],
+            resultRow[OfflinePlayerTable.firstLoginTimestamp],
+            resultRow[OfflinePlayerTable.lastLoginTimestamp],
+            resultRow[OfflinePlayerTable.lastLogoutTimestamp],
+            resultRow[OfflinePlayerTable.onlineTime],
+            SkinProfileImpl(resultRow[OfflinePlayerTable.skinValue], resultRow[OfflinePlayerTable.skinSignature]),
+            resultRow[OfflinePlayerTable.crystals],
+            resultRow[OfflinePlayerTable.shards],
+        )
     }
 
-    override suspend fun removeFromLocalCache(key: UUID) {
+    override fun cacheEntry(key: UUID, value: NeptunOfflinePlayer) {
+        this.onlinePlayerCache.insert(key, value as NeptunOnlinePlayer)
+
+    }
+
+    override fun removeEntryFromCache(key: UUID) {
         this.onlinePlayerCache.delete(key)
     }
 
@@ -214,38 +179,6 @@ class NeptunPlayerControllerImpl(override val updateChannel: String) : NeptunPla
 
         if (onlinePlayerRepository.update(key, onlinePlayer).await()) {
             sendUpdatePacket(updateType, key, newValue)
-        }
-    }
-
-    private fun constructLanguageProperties(resultRow: ResultRow?): LanguageProperties? {
-        return if (resultRow != null) {
-            LanguagePropertiesImpl(
-                resultRow[LanguagePropertiesTable.uuid],
-                LangKey.fromString(resultRow[LanguagePropertiesTable.languageKey]),
-                TextColor.fromHexString(resultRow[LanguagePropertiesTable.primaryColor])!!,
-                TextColor.fromHexString(resultRow[LanguagePropertiesTable.secondaryColor])!!,
-                TextColor.fromHexString(resultRow[LanguagePropertiesTable.separatorColor])!!
-            )
-        } else {
-            null
-        }
-    }
-
-    private fun constructOfflinePlayer(resultRow: ResultRow?, name: String?): NeptunOfflinePlayer? {
-        return if (resultRow != null) {
-            NeptunOfflinePlayerImpl(
-                resultRow[OfflinePlayerTable.uuid],
-                name ?: resultRow[OfflinePlayerTable.name],
-                resultRow[OfflinePlayerTable.firstLoginTimestamp],
-                resultRow[OfflinePlayerTable.lastLoginTimestamp],
-                resultRow[OfflinePlayerTable.lastLogoutTimestamp],
-                resultRow[OfflinePlayerTable.onlineTime],
-                SkinProfileImpl(resultRow[OfflinePlayerTable.skinValue], resultRow[OfflinePlayerTable.skinSignature]),
-                resultRow[OfflinePlayerTable.crystals],
-                resultRow[OfflinePlayerTable.shards],
-            )
-        } else {
-            null
         }
     }
 

@@ -15,7 +15,7 @@ class LanguagePropertiesImpl(
 ) : LanguageProperties {
 
     companion object {
-        fun createDefaultProperties(uuid: UUID): LanguageProperties {
+        fun create(uuid: UUID): LanguageProperties {
             return LanguagePropertiesImpl(uuid, LangKey.defaultKey(), NamedTextColor.DARK_AQUA, NamedTextColor.WHITE, NamedTextColor.GRAY)
         }
     }

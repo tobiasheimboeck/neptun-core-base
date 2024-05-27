@@ -1,15 +1,13 @@
 package world.neptuns.core.base.common.api.language.color
 
-import kotlinx.coroutines.Dispatchers
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import kotlinx.coroutines.Deferred
+import org.jetbrains.exposed.sql.ResultRow
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.color.LanguageColor
 import world.neptuns.core.base.api.language.color.LanguageColorController
 import world.neptuns.core.base.api.language.color.LanguageColorRegistry
 import world.neptuns.core.base.common.repository.color.LanguageColorCache
 import world.neptuns.core.base.common.repository.color.LanguageColorRepository
-import world.neptuns.core.base.common.repository.color.LanguageColorTable
 import world.neptuns.streamline.api.NeptunStreamlineProvider
 import java.util.*
 
@@ -28,32 +26,24 @@ class LanguageColorControllerImpl : LanguageColorController {
         else this.languageColorRepository.getValues(uuid).await()
     }
 
-    override suspend fun loadColors(uuid: UUID) {
-        newSuspendedTransaction(Dispatchers.IO) {
-            for (resultRow in LanguageColorTable.selectAll().where { LanguageColorTable.uuid eq uuid }.toList()) {
-                val languageColor = getLanguageColor(
-                    LineKey.Companion.key(resultRow[LanguageColorTable.name]),
-                    resultRow[LanguageColorTable.hexFormat]
-                )
-
-                languageColorRepository.insert(uuid, languageColor)
-                languageColorCache.insert(uuid, languageColor)
-            }
-        }
+    override suspend fun createOrLoadEntry(key: UUID, defaultValue: LanguageColor?, vararg data: Any): Deferred<Boolean> {
+        TODO("Not yet implemented")
     }
 
-    override suspend fun unloadColors(uuid: UUID) {
-
+    override suspend fun unloadEntry(key: UUID) {
+        TODO("Not yet implemented")
     }
 
-    override suspend fun addToLocalCache(key: UUID, value: List<LanguageColor>) {
-        for (color in value) {
-            this.languageColorCache.insert(key, color)
-        }
+    override fun constructEntry(resultRow: ResultRow): LanguageColor {
+        TODO("Not yet implemented")
     }
 
-    override suspend fun removeFromLocalCache(key: UUID) {
-        this.languageColorCache.deleteAll(key)
+    override fun cacheEntry(key: UUID, value: LanguageColor) {
+        TODO("Not yet implemented")
+    }
+
+    override fun removeEntryFromCache(key: UUID) {
+        TODO("Not yet implemented")
     }
 
     private fun getLanguageColor(lineKey: LineKey, hexFormat: String): LanguageColor {

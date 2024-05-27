@@ -3,6 +3,7 @@ package world.neptuns.core.base.bukkit.listener
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.plugin.java.JavaPlugin
+import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.common.packet.PlayerPerformCommandPacket
 import world.neptuns.core.base.common.packet.PlayerTeleportPacket
 import world.neptuns.core.base.common.packet.PlayerTeleportToPlayerPacket
@@ -14,6 +15,9 @@ class PacketListener(private val plugin: JavaPlugin) {
     private val packetController = NeptunStreamlineProvider.api.packetController
 
     suspend fun listen() {
+        NeptunCoreProvider.api.playerController.listenToUpdatePackets()
+        NeptunCoreProvider.api.languagePropertiesController.listenToUpdatePackets()
+
         this.packetController.listenForPacket(NetworkChannelRegistry.SERVICE, PlayerTeleportPacket::class.java) { packet ->
             val player = Bukkit.getPlayer(packet.uuid) ?: return@listenForPacket
             val worldName = packet.worldName ?: player.world.name

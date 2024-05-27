@@ -2,7 +2,6 @@ package world.neptuns.core.base.velocity.listener
 
 import com.velocitypowered.api.proxy.Player
 import com.velocitypowered.api.proxy.ProxyServer
-import kotlinx.coroutines.DelicateCoroutinesApi
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import world.neptuns.core.base.api.NeptunCoreProvider
@@ -16,8 +15,10 @@ internal class PacketListener(private val proxyServer: ProxyServer) {
 
     private val packetController = NeptunStreamlineProvider.api.packetController
 
-    @OptIn(DelicateCoroutinesApi::class)
     suspend fun listen() {
+        NeptunCoreProvider.api.playerController.listenToUpdatePackets()
+        NeptunCoreProvider.api.languagePropertiesController.listenToUpdatePackets()
+
         this.packetController.listenForPacket(NetworkChannelRegistry.PROXY, MessageToPlayerPacket::class.java) { packet ->
             val player = this.proxyServer.getPlayer(packet.uuid).orElse(null)
             val playerAdapter = NeptunCoreProvider.api.getPlayerAdapter(Player::class.java)
