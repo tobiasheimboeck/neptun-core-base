@@ -147,9 +147,9 @@ class LanguageImpl(override val key: LangKey, override val messages: Map<LineKey
 
     private fun replacePlayerColors(properties: LanguageProperties): List<TagResolver.Single> {
         return listOf(
-            Placeholder.parsed("pc", "<${properties.primaryColor.asHexString()}>"),
-            Placeholder.parsed("sc", "<${properties.secondaryColor.asHexString()}>"),
-            Placeholder.parsed("spc", "<${properties.separatorColor.asHexString()}>")
+            Placeholder.parsed("pc", "<${properties.primaryColor.hexFormat}>"),
+            Placeholder.parsed("sc", "<${properties.secondaryColor.hexFormat}>"),
+            Placeholder.parsed("spc", "<${properties.separatorColor.hexFormat}>")
         )
     }
 

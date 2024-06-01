@@ -13,4 +13,6 @@ object OfflinePlayerTable : Table("offline_players") {
     var shards = long("shards")
     val skinValue = text("skin_value")
     val skinSignature = text("skin_signature")
+
+    override val primaryKey: PrimaryKey = PrimaryKey(this.uuid)
 }

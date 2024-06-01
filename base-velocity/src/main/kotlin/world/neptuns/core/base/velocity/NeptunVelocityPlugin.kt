@@ -29,12 +29,12 @@ import java.nio.file.Path
     dependencies = [Dependency(id = "neptun_network_controller")]
 )
 class NeptunVelocityPlugin @Inject constructor(
-    private val suspendingPluginContainer: SuspendingPluginContainer,
+    suspendingPluginContainer: SuspendingPluginContainer,
     val proxyServer: ProxyServer,
-    @DataDirectory private val dataFolder: Path,
+    @DataDirectory val dataFolder: Path,
 ) : NeptunPluginAdapter {
 
-    override val namespace: LangNamespace = LangNamespace.create("core.proxy", null)
+    override lateinit var namespace: LangNamespace
 
     init {
         suspendingPluginContainer.initialize(this)
@@ -44,16 +44,21 @@ class NeptunVelocityPlugin @Inject constructor(
     suspend fun onProxyInitialization(event: ProxyInitializeEvent) {
         instance = this
 
-        val coreBaseApi = CoreBaseApiImpl(suspendingPluginContainer.pluginContainer.velocityDispatcher, this.dataFolder)
+        val pluginContainer = proxyServer.pluginManager.ensurePluginContainer(this)
+        val coreBaseApi = CoreBaseApiImpl(pluginContainer.velocityDispatcher, this.dataFolder)
+
+        NeptunCoreProvider.api = coreBaseApi
+
         coreBaseApi.languageController.generateLanguages(this::class.java)
         coreBaseApi.registerPlayerAdapter(VelocityPlayerAdapter(this.proxyServer, this))
         coreBaseApi.registerCommandExecutorClass(VelocityCommandExecutorAsync::class.java)
 
-        NeptunCoreProvider.api = coreBaseApi
+        this.namespace = LangNamespace.create("core.proxy", null)
+
         val packetListener = PacketListener(this.proxyServer)
         packetListener.listen()
 
-        this.proxyServer.eventManager.registerSuspend(this, VelocityPlayerListener(coreBaseApi.playerController, coreBaseApi.languagePropertiesController))
+        this.proxyServer.eventManager.registerSuspend(this, VelocityPlayerListener(pluginContainer, coreBaseApi.playerController, coreBaseApi.languagePropertiesController))
 
         coreBaseApi.registerCommand(LanguageCommand(coreBaseApi.languageColorController, coreBaseApi.languagePropertiesController, coreBaseApi.languageController))
     }

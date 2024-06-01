@@ -1,8 +1,9 @@
 package world.neptuns.core.base.api.language
 
 import world.neptuns.core.base.api.NeptunCoreProvider
+import java.io.Serializable
 
-interface LineKey {
+interface LineKey : Serializable {
 
     val namespace: LangNamespace
     val value: String

@@ -14,9 +14,9 @@ class VelocityCommandExecutorAsync(private val neptunCommand: NeptunCommand) : S
     private val neptunCommandExecutor = NeptunCoreProvider.api.commandController.getCommandExecutor(this.neptunCommand.name)!!
 
     init {
-        val proxyServer = NeptunVelocityPlugin.instance.proxyServer
-        val commandManager = proxyServer.commandManager
-        commandManager.registerSuspend(commandManager.metaBuilder(this.neptunCommand.name).aliases(*this.neptunCommand.aliases).build(), this, proxyServer)
+        val plugin = NeptunVelocityPlugin.instance
+        val commandManager = plugin.proxyServer.commandManager
+        commandManager.registerSuspend(commandManager.metaBuilder(this.neptunCommand.name).aliases(*this.neptunCommand.aliases).build(), this, plugin)
     }
 
     override suspend fun execute(invocation: SimpleCommand.Invocation) {

@@ -8,4 +8,6 @@ object LanguagePropertiesTable : Table("language_properties") {
     val primaryColor = varchar("primary_color", 7)
     val secondaryColor = varchar("secondary_color", 7)
     val separatorColor = varchar("separator_color", 7)
+
+    override val primaryKey: PrimaryKey = PrimaryKey(this.uuid)
 }

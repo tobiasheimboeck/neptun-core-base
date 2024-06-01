@@ -2,6 +2,8 @@ package world.neptuns.core.base.common.api.player
 
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
@@ -19,10 +21,20 @@ import world.neptuns.core.base.common.repository.player.OnlinePlayerRepository
 import world.neptuns.streamline.api.NeptunStreamlineProvider
 import java.util.*
 
+@Suppress("OPT_IN_USAGE")
 class NeptunPlayerControllerImpl(override val updateChannel: String) : NeptunPlayerController {
 
     private val onlinePlayerRepository = NeptunStreamlineProvider.api.repositoryLoader.get(OnlinePlayerRepository::class.java)!!
     private val onlinePlayerCache = NeptunStreamlineProvider.api.cacheLoader.get(OnlinePlayerCache::class.java)!!
+
+    init {
+        GlobalScope.launch(Dispatchers.IO) {
+            onlinePlayerRepository.onUpdate() { uuid, onlinePlayer ->
+                if (!onlinePlayerCache.contains(uuid)) return@onUpdate
+                onlinePlayerCache.update(uuid, onlinePlayer)
+            }
+        }
+    }
 
     override suspend fun isOnline(uuid: UUID): Boolean {
         return this.onlinePlayerCache.contains(uuid) || this.onlinePlayerRepository.contains(uuid).await()
@@ -59,14 +71,14 @@ class NeptunPlayerControllerImpl(override val updateChannel: String) : NeptunPla
         }
     }
 
-    override suspend fun createOrLoadEntry(key: UUID, defaultValue: NeptunOfflinePlayer?, vararg data: Any): Deferred<Boolean> {
-        return suspendedTransactionAsync {
+    override suspend fun createOrLoadEntry(key: UUID, defaultValue: NeptunOfflinePlayer?, vararg data: Any) {
+        newSuspendedTransaction {
             val resultRow = OfflinePlayerTable.selectAll().where { OfflinePlayerTable.uuid eq key }.limit(1).firstOrNull()
             val loadedOfflinePlayer: NeptunOfflinePlayer
 
             if (resultRow == null && defaultValue != null) {
                 OfflinePlayerTable.insert {
-                    it[this.uuid] = uuid
+                    it[this.uuid] = key
                     it[this.name] = defaultValue.name
                     it[this.firstLoginTimestamp] = defaultValue.firstLoginTimestamp
                     it[this.lastLoginTimestamp] = defaultValue.lastLoginTimestamp
@@ -84,13 +96,23 @@ class NeptunPlayerControllerImpl(override val updateChannel: String) : NeptunPla
             }
 
             val onlinePlayer = NeptunOnlinePlayerImpl.create(loadedOfflinePlayer, data[0] as String, "-")
+
+            if (defaultValue != null) {
+                onlinePlayer.name = defaultValue.name
+                onlinePlayer.lastLoginTimestamp = defaultValue.lastLoginTimestamp
+                onlinePlayer.skinProfile.value = defaultValue.skinProfile.value
+                onlinePlayer.skinProfile.signature = defaultValue.skinProfile.signature
+                bulkUpdateEntry(NeptunOfflinePlayer.Update.ALL, key, onlinePlayer, false)
+            }
+
             cacheEntry(onlinePlayer.uuid, onlinePlayer)
-            onlinePlayerRepository.insert(onlinePlayer.uuid, onlinePlayer).await()
+            onlinePlayerRepository.insert(onlinePlayer.uuid, onlinePlayer)
         }
     }
 
     override suspend fun unloadEntry(key: UUID) {
-        TODO("Not yet implemented")
+        this.onlinePlayerRepository.delete(key)
+        this.onlinePlayerCache.delete(key)
     }
 
     override fun constructEntry(resultRow: ResultRow): NeptunOfflinePlayer {
@@ -121,7 +143,7 @@ class NeptunPlayerControllerImpl(override val updateChannel: String) : NeptunPla
             OfflinePlayerTable.update({ OfflinePlayerTable.uuid eq key }) {
                 when (updateType) {
                     NeptunOfflinePlayer.Update.ALL -> {
-                        if (newValue !is NeptunOnlinePlayer)
+                        if (newValue !is NeptunOfflinePlayer)
                             throw UnsupportedOperationException("Object has to be an NeptunOfflinePlayer instance!")
 
                         it[name] = newValue.name
@@ -142,6 +164,7 @@ class NeptunPlayerControllerImpl(override val updateChannel: String) : NeptunPla
                     NeptunOfflinePlayer.Update.SKIN_SIGNATURE -> it[skinSignature] = newValue as String
                     NeptunOfflinePlayer.Update.CRYSTALS -> it[crystals] = newValue as Long
                     NeptunOfflinePlayer.Update.SHARDS -> it[shards] = newValue as Long
+                    NeptunOfflinePlayer.Update.CURRENT_SERVICE -> {}
                 }
             }
         }
@@ -165,6 +188,7 @@ class NeptunPlayerControllerImpl(override val updateChannel: String) : NeptunPla
                 onlinePlayer.skinProfile.signature = newValue.skinProfile.signature
                 onlinePlayer.crystals = newValue.crystals
                 onlinePlayer.shards = newValue.shards
+                onlinePlayer.currentServiceName = newValue.currentServiceName
             }
 
             NeptunOfflinePlayer.Update.NAME -> onlinePlayer.name = newValue as String
@@ -175,11 +199,10 @@ class NeptunPlayerControllerImpl(override val updateChannel: String) : NeptunPla
             NeptunOfflinePlayer.Update.SKIN_SIGNATURE -> onlinePlayer.skinProfile.signature = newValue as String
             NeptunOfflinePlayer.Update.CRYSTALS -> onlinePlayer.crystals = newValue as Long
             NeptunOfflinePlayer.Update.SHARDS -> onlinePlayer.shards = newValue as Long
+            NeptunOfflinePlayer.Update.CURRENT_SERVICE -> onlinePlayer.currentServiceName = newValue as String
         }
 
-        if (onlinePlayerRepository.update(key, onlinePlayer).await()) {
-            sendUpdatePacket(updateType, key, newValue)
-        }
+        onlinePlayerRepository.update(key, onlinePlayer)
     }
 
 }

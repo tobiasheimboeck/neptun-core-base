@@ -26,6 +26,10 @@ class LanguageColorRegistry {
     object Default : ClassRegistry<LanguageColor> {
         override val elements: MutableSet<LanguageColor> = mutableSetOf()
 
+        fun of(hexFormat: String): LanguageColor? {
+            return this.elements.find { it.hexFormat == hexFormat }
+        }
+
         val BLACK = Custom.create(LineKey.colorKey("black"), null, NamedTextColor.BLACK.asHexString(), 0)
         val DARK_BLUE = Custom.create(LineKey.colorKey("dark_blue"), null, NamedTextColor.DARK_BLUE.asHexString(), 0)
         val DARK_GREEN = Custom.create(LineKey.colorKey("dark_green"), null, NamedTextColor.DARK_GREEN.asHexString(), 0)

@@ -1,7 +1,7 @@
 package world.neptuns.core.base.api.language.properties
 
-import net.kyori.adventure.text.format.TextColor
 import world.neptuns.core.base.api.language.LangKey
+import world.neptuns.core.base.api.language.color.LanguageColor
 import java.io.Serializable
 import java.util.*
 
@@ -10,9 +10,9 @@ interface LanguageProperties : Serializable {
     val uuid: UUID
     var langKey: LangKey
 
-    var primaryColor: TextColor
-    var secondaryColor: TextColor
-    var separatorColor: TextColor
+    var primaryColor: LanguageColor
+    var secondaryColor: LanguageColor
+    var separatorColor: LanguageColor
 
     enum class Update {
         ALL,

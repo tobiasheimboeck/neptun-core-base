@@ -1,15 +1,16 @@
 package world.neptuns.core.base.common.api.language.properties
 
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import net.kyori.adventure.text.format.TextColor
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import org.jetbrains.exposed.sql.update
 import world.neptuns.core.base.api.language.LangKey
+import world.neptuns.core.base.api.language.color.LanguageColor
+import world.neptuns.core.base.api.language.color.LanguageColorRegistry
 import world.neptuns.core.base.api.language.properties.LanguageProperties
 import world.neptuns.core.base.api.language.properties.LanguagePropertiesController
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesCache
@@ -18,27 +19,37 @@ import world.neptuns.core.base.common.repository.language.LanguagePropertiesTabl
 import world.neptuns.streamline.api.NeptunStreamlineProvider
 import java.util.*
 
+@Suppress("OPT_IN_USAGE")
 class LanguagePropertiesControllerImpl(override val updateChannel: String) : LanguagePropertiesController {
 
     private val languagePropertiesRepository = NeptunStreamlineProvider.api.repositoryLoader.get(LanguagePropertiesRepository::class.java)!!
     private val languagePropertiesCache = NeptunStreamlineProvider.api.cacheLoader.get(LanguagePropertiesCache::class.java)!!
 
+    init {
+        GlobalScope.launch(Dispatchers.IO) {
+            languagePropertiesRepository.onUpdate { uuid, languageProperties ->
+                if (!languagePropertiesCache.contains(uuid)) return@onUpdate
+                languagePropertiesCache.update(uuid, languageProperties)
+            }
+        }
+    }
+
     override suspend fun getProperties(uuid: UUID): LanguageProperties? {
         return this.languagePropertiesCache.get(uuid) ?: this.languagePropertiesRepository.get(uuid).await()
     }
 
-    override suspend fun createOrLoadEntry(key: UUID, defaultValue: LanguageProperties?, vararg data: Any): Deferred<Boolean> {
-        return suspendedTransactionAsync {
+    override suspend fun createOrLoadEntry(key: UUID, defaultValue: LanguageProperties?, vararg data: Any) {
+        newSuspendedTransaction {
             val resultRow = LanguagePropertiesTable.selectAll().where { LanguagePropertiesTable.uuid eq key }.limit(1).firstOrNull()
             val loadedProperties: LanguageProperties
 
-            if (resultRow == null && defaultValue != null ){
+            if (resultRow == null && defaultValue != null) {
                 LanguagePropertiesTable.insert {
-                    it[this.uuid] = uuid
+                    it[this.uuid] = key
                     it[this.languageKey] = defaultValue.langKey.asString()
-                    it[this.primaryColor] = defaultValue.primaryColor.asHexString()
-                    it[this.secondaryColor] = defaultValue.secondaryColor.asHexString()
-                    it[this.separatorColor] = defaultValue.separatorColor.asHexString()
+                    it[this.primaryColor] = defaultValue.primaryColor.hexFormat
+                    it[this.secondaryColor] = defaultValue.secondaryColor.hexFormat
+                    it[this.separatorColor] = defaultValue.separatorColor.hexFormat
                 }
 
                 loadedProperties = defaultValue
@@ -47,7 +58,7 @@ class LanguagePropertiesControllerImpl(override val updateChannel: String) : Lan
             }
 
             cacheEntry(key, loadedProperties)
-            languagePropertiesRepository.insert(key, loadedProperties).await()
+            languagePropertiesRepository.insert(key, loadedProperties)
         }
     }
 
@@ -60,9 +71,9 @@ class LanguagePropertiesControllerImpl(override val updateChannel: String) : Lan
         return LanguagePropertiesImpl(
             resultRow[LanguagePropertiesTable.uuid],
             LangKey.fromString(resultRow[LanguagePropertiesTable.languageKey]),
-            TextColor.fromHexString(resultRow[LanguagePropertiesTable.primaryColor])!!,
-            TextColor.fromHexString(resultRow[LanguagePropertiesTable.secondaryColor])!!,
-            TextColor.fromHexString(resultRow[LanguagePropertiesTable.separatorColor])!!
+            LanguageColorRegistry.Default.of(resultRow[LanguagePropertiesTable.primaryColor])!!,
+            LanguageColorRegistry.Default.of(resultRow[LanguagePropertiesTable.secondaryColor])!!,
+            LanguageColorRegistry.Default.of(resultRow[LanguagePropertiesTable.separatorColor])!!
         )
     }
 
@@ -83,9 +94,9 @@ class LanguagePropertiesControllerImpl(override val updateChannel: String) : Lan
                             throw UnsupportedOperationException("Object has to be an LanguageProperties instance!")
 
                         it[languageKey] = newValue.langKey.asString()
-                        it[primaryColor] = newValue.primaryColor.asHexString()
-                        it[secondaryColor] = newValue.secondaryColor.asHexString()
-                        it[separatorColor] = newValue.separatorColor.asHexString()
+                        it[primaryColor] = newValue.primaryColor.hexFormat
+                        it[secondaryColor] = newValue.secondaryColor.hexFormat
+                        it[separatorColor] = newValue.separatorColor.hexFormat
                     }
 
                     LanguageProperties.Update.LANGUAGE_KEY -> it[languageKey] = newValue as String
@@ -114,14 +125,12 @@ class LanguagePropertiesControllerImpl(override val updateChannel: String) : Lan
             }
 
             LanguageProperties.Update.LANGUAGE_KEY -> languageProperties.langKey = newValue as LangKey
-            LanguageProperties.Update.PRIMARY_COLOR -> languageProperties.primaryColor = newValue as TextColor
-            LanguageProperties.Update.SECONDARY_COLOR -> languageProperties.secondaryColor = newValue as TextColor
-            LanguageProperties.Update.SEPARATOR_COLOR -> languageProperties.separatorColor = newValue as TextColor
+            LanguageProperties.Update.PRIMARY_COLOR -> languageProperties.primaryColor = newValue as LanguageColor
+            LanguageProperties.Update.SECONDARY_COLOR -> languageProperties.secondaryColor = newValue as LanguageColor
+            LanguageProperties.Update.SEPARATOR_COLOR -> languageProperties.separatorColor = newValue as LanguageColor
         }
 
-        if (languagePropertiesRepository.update(key, languageProperties).await()) {
-            sendUpdatePacket(updateType, key, newValue)
-        }
+        languagePropertiesRepository.update(key, languageProperties)
     }
 
 }

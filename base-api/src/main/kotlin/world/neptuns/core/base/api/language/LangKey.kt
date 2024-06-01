@@ -1,8 +1,9 @@
 package world.neptuns.core.base.api.language
 
 import world.neptuns.core.base.api.NeptunCoreProvider
+import java.io.Serializable
 
-interface LangKey {
+interface LangKey : Serializable {
 
     val countryCode: String
     val languageCode: String
@@ -19,7 +20,7 @@ interface LangKey {
         }
 
         fun fromString(string: String): LangKey {
-            val strings = string.split("-")
+            val strings = string.split("_")
             return key(strings[0], strings[1])
         }
     }

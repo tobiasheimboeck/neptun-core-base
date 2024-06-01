@@ -1,11 +1,8 @@
 package world.neptuns.core.base.common
 
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.redisson.Redisson
-import org.redisson.api.RedissonClient
-import org.redisson.codec.SerializationCodec
-import org.redisson.config.Config
+import world.neptuns.controller.api.NeptunControllerProvider
 import world.neptuns.core.base.api.CoreBaseApi
 import world.neptuns.core.base.api.command.NeptunCommand
 import world.neptuns.core.base.api.command.NeptunCommandController
@@ -33,8 +30,6 @@ import world.neptuns.core.base.common.api.language.color.LanguageColorImpl
 import world.neptuns.core.base.common.api.language.properties.LanguagePropertiesControllerImpl
 import world.neptuns.core.base.common.api.player.NeptunPlayerControllerImpl
 import world.neptuns.core.base.common.api.utils.PageConverterImpl
-import world.neptuns.core.base.common.file.MariaDbCredentials
-import world.neptuns.core.base.common.file.RedisCredentials
 import world.neptuns.core.base.common.repository.color.LanguageColorCache
 import world.neptuns.core.base.common.repository.color.LanguageColorRepository
 import world.neptuns.core.base.common.repository.color.LanguageColorTable
@@ -45,14 +40,10 @@ import world.neptuns.core.base.common.repository.player.OfflinePlayerTable
 import world.neptuns.core.base.common.repository.player.OnlinePlayerCache
 import world.neptuns.core.base.common.repository.player.OnlinePlayerRepository
 import world.neptuns.streamline.api.NeptunStreamlineProvider
-import world.neptuns.streamline.api.packet.NetworkChannelRegistry
-import world.neptuns.streamline.common.NeptunStreamlineConnector
 import java.nio.file.Path
 import kotlin.coroutines.CoroutineContext
 
 class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, override val dataFolder: Path) : CoreBaseApi {
-
-    override val redissonClient: RedissonClient
 
     override val fileController: FileController = FileControllerImpl()
     override val languageController: LanguageController = LanguageControllerImpl()
@@ -67,10 +58,11 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
     private lateinit var commandExecutorClass: Class<*>
 
     init {
-        establishMariaDbConnection(OfflinePlayerTable, LanguagePropertiesTable, LanguageColorTable)
-        this.redissonClient = establishRedisConnection()
+        val redissonClient = NeptunControllerProvider.api.redissonClient
 
-        NeptunStreamlineConnector.init(redissonClient)
+        transaction {
+            SchemaUtils.create(LanguageColorTable, LanguagePropertiesTable, OfflinePlayerTable)
+        }
 
         val repositoryLoader = NeptunStreamlineProvider.api.repositoryLoader
         repositoryLoader.register(OnlinePlayerRepository(redissonClient))
@@ -83,8 +75,8 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
         cacheLoader.register(LanguagePropertiesCache())
 
         this.languageColorController = LanguageColorControllerImpl()
-        this.languagePropertiesController = LanguagePropertiesControllerImpl(NetworkChannelRegistry.PROXY_AND_SERVICE)
-        this.playerController = NeptunPlayerControllerImpl(NetworkChannelRegistry.PROXY_AND_SERVICE)
+        this.languagePropertiesController = LanguagePropertiesControllerImpl("network:message-service:language_updates")
+        this.playerController = NeptunPlayerControllerImpl("network:message-service:player_updates")
     }
 
     override fun newLanguageKey(countryCode: String, languageCode: String): LangKey {
@@ -123,45 +115,6 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
 
     override fun <T> newPageConverter(data: List<T>): PageConverter<T> {
         return PageConverterImpl(data)
-    }
-
-    private fun establishMariaDbConnection(vararg tables: Table) {
-        val credentials = this.fileController.createOrLoadFile(this.dataFolder, "database", "mariadb", MariaDbCredentials::class, MariaDbCredentials(
-            "127.0.0.1",
-            3306,
-            "neptunsworld_core",
-            "root",
-            "-"
-        ))
-
-        Database.connect(
-            url = "jdbc:mariadb://${credentials.hostname}:${credentials.port}/${credentials.database}",
-            driver = "org.mariadb.jdbc.Driver",
-            user = credentials.user,
-            password = credentials.password
-        )
-
-        transaction {
-            addLogger(StdOutSqlLogger)
-            SchemaUtils.create(*tables)
-        }
-    }
-
-    private fun establishRedisConnection(): RedissonClient {
-        val credentials = this.fileController.createOrLoadFile(this.dataFolder, "database", "redis", RedisCredentials::class, RedisCredentials(
-            "127.0.0.1",
-            6379,
-            "-"
-        ))
-
-        val config = Config()
-        config.codec = SerializationCodec()
-        config.nettyThreads = 4
-        config.useSingleServer()
-            .setAddress("redis://${credentials.hostname}:${credentials.port}")
-            .setPassword(credentials.password)
-
-        return Redisson.create(config)
     }
 
 }

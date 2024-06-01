@@ -2,7 +2,6 @@ package world.neptuns.core.base.api
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import org.redisson.api.RedissonClient
 import world.neptuns.core.base.api.command.NeptunCommandController
 import world.neptuns.core.base.api.command.NeptunCommandExecutor
 import world.neptuns.core.base.api.file.FileController
@@ -23,7 +22,6 @@ interface CoreBaseApi {
 
     val minecraftDispatcher: CoroutineContext
     val dataFolder: Path
-    val redissonClient: RedissonClient
 
     val fileController: FileController
 

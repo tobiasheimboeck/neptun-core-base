@@ -2,9 +2,10 @@ package world.neptuns.core.base.api.player
 
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.skin.SkinProfile
+import java.io.Serializable
 import java.util.*
 
-interface NeptunOfflinePlayer {
+interface NeptunOfflinePlayer : Serializable {
 
     val uuid: UUID
     var name: String
@@ -37,12 +38,8 @@ interface NeptunOfflinePlayer {
         SKIN_VALUE,
         SKIN_SIGNATURE,
         CRYSTALS,
-        SHARDS
-    }
-
-    enum class Reward {
-        CRYSTALS,
-        SHARDS
+        SHARDS,
+        CURRENT_SERVICE
     }
 
 }

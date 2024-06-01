@@ -14,20 +14,22 @@ import world.neptuns.core.base.common.CoreBaseApiImpl
 
 class NeptunBukkitPlugin : SuspendingJavaPlugin(), NeptunPluginAdapter {
 
-    override val namespace: LangNamespace = LangNamespace.create("core.lobby", null)
+    override lateinit var namespace: LangNamespace
 
     override suspend fun onEnableAsync() {
         val coreBaseApi = CoreBaseApiImpl(minecraftDispatcher, this.dataFolder.toPath())
+        NeptunCoreProvider.api = coreBaseApi
+
         coreBaseApi.languageController.generateLanguages(this::class.java)
         coreBaseApi.registerPlayerAdapter(BukkitPlayerAdapter(this))
         coreBaseApi.registerCommandExecutorClass(BukkitCommandExecutorAsync::class.java)
 
-        NeptunCoreProvider.api = coreBaseApi
+        this.namespace = LangNamespace.create("core.lobby", null)
 
         val packetListener = PacketListener(this)
         packetListener.listen()
 
-        this.server.pluginManager.registerSuspendingEvents(BukkitPlayerListener(coreBaseApi.playerController, coreBaseApi.languagePropertiesController), this)
+        this.server.pluginManager.registerSuspendingEvents(BukkitPlayerListener(this, coreBaseApi.playerController, coreBaseApi.languagePropertiesController), this)
     }
 
 }

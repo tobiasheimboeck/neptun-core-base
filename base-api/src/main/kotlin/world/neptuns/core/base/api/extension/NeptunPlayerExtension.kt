@@ -1,8 +1,8 @@
 package world.neptuns.core.base.api.extension
 
-import net.kyori.adventure.text.format.TextColor
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.language.Language
+import world.neptuns.core.base.api.language.color.LanguageColor
 import world.neptuns.core.base.api.language.properties.LanguageProperties
 import world.neptuns.core.base.api.player.NeptunOfflinePlayer
 
@@ -11,17 +11,17 @@ suspend fun NeptunOfflinePlayer.getLanguage(): Language? {
     return NeptunCoreProvider.api.languageController.getLanguage(languageProperties.langKey)
 }
 
-suspend fun NeptunOfflinePlayer.getPrimaryColor(): TextColor? {
+suspend fun NeptunOfflinePlayer.getPrimaryColor(): LanguageColor? {
     val languageProperties = getLanguageProperties() ?: return null
     return languageProperties.primaryColor
 }
 
-suspend fun NeptunOfflinePlayer.getSecondaryColor(): TextColor? {
+suspend fun NeptunOfflinePlayer.getSecondaryColor(): LanguageColor? {
     val languageProperties = getLanguageProperties() ?: return null
     return languageProperties.secondaryColor
 }
 
-suspend fun NeptunOfflinePlayer.getSeparatorColor(): TextColor? {
+suspend fun NeptunOfflinePlayer.getSeparatorColor(): LanguageColor? {
     val languageProperties = getLanguageProperties() ?: return null
     return languageProperties.separatorColor
 }

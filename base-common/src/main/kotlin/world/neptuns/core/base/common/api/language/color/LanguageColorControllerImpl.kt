@@ -1,6 +1,5 @@
 package world.neptuns.core.base.common.api.language.color
 
-import kotlinx.coroutines.Deferred
 import org.jetbrains.exposed.sql.ResultRow
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.color.LanguageColor
@@ -26,7 +25,7 @@ class LanguageColorControllerImpl : LanguageColorController {
         else this.languageColorRepository.getValues(uuid).await()
     }
 
-    override suspend fun createOrLoadEntry(key: UUID, defaultValue: LanguageColor?, vararg data: Any): Deferred<Boolean> {
+    override suspend fun createOrLoadEntry(key: UUID, defaultValue: LanguageColor?, vararg data: Any) {
         TODO("Not yet implemented")
     }
 
