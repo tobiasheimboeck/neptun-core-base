@@ -29,7 +29,7 @@ class NeptunPlayerControllerImpl(override val updateChannel: String) : NeptunPla
 
     init {
         GlobalScope.launch(Dispatchers.IO) {
-            onlinePlayerRepository.onUpdate() { uuid, onlinePlayer ->
+            onlinePlayerRepository.onUpdate { uuid, onlinePlayer ->
                 if (!onlinePlayerCache.contains(uuid)) return@onUpdate
                 onlinePlayerCache.update(uuid, onlinePlayer)
             }

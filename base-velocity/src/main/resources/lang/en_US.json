@@ -1,3 +1,6 @@
 {
-  "core.base.language.key_change": "<prefix_language> <gray>You set your language to <white><name><gray>."
+  "core.base.language.key_change": "<prefix_language> <gray>You set your language to <white><name><gray>.",
+
+  "core.base.hub.already_connected": "<prefix> <gray>You are already on a hub instance!",
+  "core.base.hub.send_player": "<prefix> <gray>Relocating to hub..."
 }

@@ -8,13 +8,16 @@ import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerLoginEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import world.neptuns.controller.api.NeptunControllerProvider
 import world.neptuns.core.base.api.language.properties.LanguagePropertiesController
+import world.neptuns.core.base.api.packet.NeptunPlayerDataLoadedPacket
 import world.neptuns.core.base.api.player.NeptunOfflinePlayer
 import world.neptuns.core.base.api.player.NeptunPlayerController
 import world.neptuns.core.base.bukkit.NeptunBukkitPlugin
+import world.neptuns.core.base.common.repository.language.LanguagePropertiesRepository
 import world.neptuns.core.base.common.repository.player.OnlinePlayerCache
 import world.neptuns.core.base.common.repository.player.OnlinePlayerRepository
 import world.neptuns.streamline.api.NeptunStreamlineProvider
@@ -25,8 +28,8 @@ class BukkitPlayerListener(
     private val languagePropertiesController: LanguagePropertiesController,
 ) : Listener {
 
-    private val pRep = NeptunStreamlineProvider.api.repositoryLoader.get(OnlinePlayerRepository::class.java)!!
-    private val pCache = NeptunStreamlineProvider.api.cacheLoader.get(OnlinePlayerCache::class.java)!!
+    private val playerRepository = NeptunStreamlineProvider.api.repositoryLoader.get(OnlinePlayerRepository::class.java)!!
+    private val languagePropertiesRepository = NeptunStreamlineProvider.api.repositoryLoader.get(LanguagePropertiesRepository::class.java)!!
 
     @EventHandler(priority = EventPriority.LOWEST)
     suspend fun onPlayerLogin(event: PlayerLoginEvent) {
@@ -53,13 +56,23 @@ class BukkitPlayerListener(
             }
 
             languagePropertiesController.cacheEntry(player.uniqueId, languageProperties)
-
-            Bukkit.getScheduler().runTaskLater(plugin, Runnable {
-                runBlocking {
-                    player.sendMessage(Component.text("Redis: ${pRep.getAll().await().size} | Locally: ${pCache.getAll().size}"))
-                }
-            },10)
         }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    suspend fun onPlayerJoin(event: PlayerJoinEvent) {
+        val player = event.player
+
+        event.joinMessage(null)
+
+        withContext(this.plugin.asyncDispatcher) {
+            val onlinePlayer = playerRepository.get(player.uniqueId).await() ?: return@withContext
+            val languageProperties = languagePropertiesRepository.get(player.uniqueId).await() ?: return@withContext
+
+            val packet = NeptunPlayerDataLoadedPacket(player.uniqueId, onlinePlayer, languageProperties)
+            NeptunStreamlineProvider.api.packetController.sendPacket(packet)
+        }
+
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

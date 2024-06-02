@@ -1,6 +1,7 @@
 package world.neptuns.core.base.api.player
 
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
+import world.neptuns.controller.api.service.NeptunService
 import world.neptuns.core.base.api.command.NeptunCommandPlatform
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.utils.NeptunPluginAdapter
