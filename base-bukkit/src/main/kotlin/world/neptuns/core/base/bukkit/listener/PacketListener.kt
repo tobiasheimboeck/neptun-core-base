@@ -15,9 +15,6 @@ class PacketListener(private val plugin: JavaPlugin) {
     private val packetController = NeptunStreamlineProvider.api.packetController
 
     suspend fun listen() {
-        NeptunCoreProvider.api.playerController.listenToUpdatePackets()
-        NeptunCoreProvider.api.languagePropertiesController.listenToUpdatePackets()
-
         this.packetController.listenForPacket(NetworkChannelRegistry.SERVICE, PlayerTeleportPacket::class.java) { packet ->
             val player = Bukkit.getPlayer(packet.uuid) ?: return@listenForPacket
             val worldName = packet.worldName ?: player.world.name

@@ -16,9 +16,6 @@ internal class PacketListener(private val proxyServer: ProxyServer) {
     private val packetController = NeptunStreamlineProvider.api.packetController
 
     suspend fun listen() {
-        NeptunCoreProvider.api.playerController.listenToUpdatePackets()
-        NeptunCoreProvider.api.languagePropertiesController.listenToUpdatePackets()
-
         this.packetController.listenForPacket(NetworkChannelRegistry.PROXY, MessageToPlayerPacket::class.java) { packet ->
             val player = this.proxyServer.getPlayer(packet.uuid).orElse(null)
             val playerAdapter = NeptunCoreProvider.api.getPlayerAdapter(Player::class.java)

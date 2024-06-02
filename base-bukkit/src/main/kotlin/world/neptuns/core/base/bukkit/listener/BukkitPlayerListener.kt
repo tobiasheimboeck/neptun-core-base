@@ -41,8 +41,8 @@ class BukkitPlayerListener(
             }
 
             onlinePlayer.currentServiceName = NeptunControllerProvider.api.podName()
-            playerController.updateCachedEntry(NeptunOfflinePlayer.Update.CURRENT_SERVICE, player.uniqueId, onlinePlayer.currentServiceName)
 
+            playerController.updateCachedEntry(NeptunOfflinePlayer.Update.CURRENT_SERVICE, player.uniqueId, onlinePlayer.currentServiceName)
             playerController.cacheEntry(player.uniqueId, onlinePlayer)
 
             val languageProperties = languagePropertiesController.getProperties(player.uniqueId)
