@@ -5,14 +5,14 @@ import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.language.LangNamespace
-import world.neptuns.core.base.api.utils.NeptunPluginAdapter
+import world.neptuns.core.base.api.utils.NeptunPlugin
 import world.neptuns.core.base.bukkit.command.BukkitCommandExecutorAsync
 import world.neptuns.core.base.bukkit.listener.BukkitPlayerListener
 import world.neptuns.core.base.bukkit.listener.PacketListener
 import world.neptuns.core.base.bukkit.player.BukkitPlayerAdapter
 import world.neptuns.core.base.common.CoreBaseApiImpl
 
-class NeptunBukkitPlugin : SuspendingJavaPlugin(), NeptunPluginAdapter {
+class NeptunBukkitPlugin : SuspendingJavaPlugin(), NeptunPlugin {
 
     override lateinit var namespace: LangNamespace
 

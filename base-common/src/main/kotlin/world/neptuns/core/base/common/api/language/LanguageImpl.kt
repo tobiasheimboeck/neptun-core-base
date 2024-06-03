@@ -13,7 +13,7 @@ import world.neptuns.core.base.api.language.properties.LanguageProperties
 import java.text.MessageFormat
 import java.util.*
 
-class LanguageImpl(override val key: LangKey, override val messages: Map<LineKey, String>) : Language {
+class LanguageImpl(override val key: LangKey, override val messages: MutableMap<LineKey, String>) : Language {
 
     private val defaultResolvers: MutableSet<TagResolver> = mutableSetOf(
         StandardTags.gradient(),
@@ -138,11 +138,11 @@ class LanguageImpl(override val key: LangKey, override val messages: Map<LineKey
             prefixText.replace("<prefix_text>", validPrefixName!!)
         } else if (lineKey.namespace.subPrefix != null) {
             val subPrefix = lineKey.namespace.subPrefix!!
-            val correctedSubPrefixName = subPrefix.substring(0, 1).uppercase(Locale.getDefault()) + subPrefix.substring(1)
+            val correctedSubPrefixName = subPrefix.substring(0, 1).uppercase() + subPrefix.substring(1)
             prefixText.replace("<prefix_text>", correctedSubPrefixName)
         }
 
-        return Placeholder.component(if (prefixName == null) "prefix " else "prefix_$prefixName", MiniMessage.builder()
+        return Placeholder.component(if (prefixName == null) "prefix" else "prefix_${prefixName.lowercase()}", MiniMessage.builder()
             .tags(TagResolver.builder()
                 .resolvers(replacePlayerColors(properties))
                 .resolvers(this.defaultResolvers)

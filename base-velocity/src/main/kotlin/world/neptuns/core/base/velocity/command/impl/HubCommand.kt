@@ -1,7 +1,6 @@
 package world.neptuns.core.base.velocity.command.impl
 
 import com.velocitypowered.api.proxy.Player
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import world.neptuns.controller.api.NeptunControllerProvider
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.command.NeptunCommand
@@ -27,11 +26,11 @@ class HubCommand(
         val neptunService = NeptunControllerProvider.api.serviceController.getService(currentServiceName) ?: return
 
         if (neptunService.type.isHubService()) {
-            playerAdapter.sendMessage(player, "core.base.hub.already_connected")
+            playerAdapter.sendMessage(player, "hub.already_connected")
             return
         }
 
-        playerAdapter.sendMessage(player, "core.base.hub.send_player")
+        playerAdapter.sendMessage(player, "hub.send_player")
         playerAdapter.transferPlayerToLobby(player.uniqueId)
     }
 

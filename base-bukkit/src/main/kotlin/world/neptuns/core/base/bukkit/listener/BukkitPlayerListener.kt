@@ -1,6 +1,7 @@
 package world.neptuns.core.base.bukkit.listener
 
 import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
+import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.Component
 import org.bukkit.event.EventHandler
@@ -28,7 +29,9 @@ class BukkitPlayerListener(
             val onlinePlayer = playerController.getOnlinePlayer(player.uniqueId)
 
             if (onlinePlayer == null) {
-                player.kick(Component.text("No online player with uuid ${player.uniqueId} found!"))
+                withContext(plugin.minecraftDispatcher) {
+                    player.kick(Component.text("No online player with uuid ${player.uniqueId} found!"))
+                }
                 return@withContext
             }
 

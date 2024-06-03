@@ -3,6 +3,7 @@ package world.neptuns.core.base.common.api.language
 import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.Language
 import world.neptuns.core.base.api.language.LanguageController
+import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.common.api.language.utils.LanguageFileUtils
 
 class LanguageControllerImpl : LanguageController {
@@ -24,8 +25,15 @@ class LanguageControllerImpl : LanguageController {
 
     private fun createLanguage(rawPath: String, loaderClass: Class<*>) {
         for (langKey in LanguageFileUtils.getLanguageKeysFromJarFile(rawPath, loaderClass)) {
-            val fileContent = LanguageFileUtils.getLanguageFileContent(rawPath, langKey, loaderClass)
-            this.languages.add(LanguageImpl(langKey, fileContent))
+            val fileContent: MutableMap<LineKey, String> = LanguageFileUtils.getLanguageFileContent(rawPath, langKey, loaderClass)
+
+            val language = this.languages.find { it.key.asString() == langKey.asString() }
+
+            if (language == null) {
+                this.languages.add(LanguageImpl(langKey, fileContent))
+            } else {
+                language.messages.putAll(fileContent)
+            }
         }
     }
 

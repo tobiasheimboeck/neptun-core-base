@@ -37,7 +37,7 @@ object LanguageFileUtils {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun getLanguageFileContent(rawPath: String, langKey: LangKey, clazz: Class<*>): Map<LineKey, String> {
+    fun getLanguageFileContent(rawPath: String, langKey: LangKey, clazz: Class<*>): MutableMap<LineKey, String> {
         val content: MutableMap<LineKey, String> = mutableMapOf()
 
         val path = "$rawPath/${langKey.asString()}.json"

@@ -7,7 +7,7 @@ import world.neptuns.core.base.api.language.properties.LanguageProperties
 interface Language {
 
     val key: LangKey
-    val messages: Map<LineKey, String>
+    val messages: MutableMap<LineKey, String>
 
     fun lineAsString(properties: LanguageProperties, lineKey: LineKey, vararg toReplace: Any): String
 

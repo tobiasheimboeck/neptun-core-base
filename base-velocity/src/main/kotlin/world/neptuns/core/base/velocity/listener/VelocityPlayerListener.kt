@@ -5,6 +5,7 @@ import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.connection.DisconnectEvent
 import com.velocitypowered.api.event.connection.LoginEvent
 import com.velocitypowered.api.event.proxy.ProxyPingEvent
+import com.velocitypowered.api.network.ProtocolVersion
 import com.velocitypowered.api.proxy.server.ServerPing
 import world.neptuns.controller.api.NeptunControllerProvider
 import world.neptuns.core.base.api.CoreBaseApi
@@ -30,7 +31,7 @@ class VelocityPlayerListener(
         event.ping = event.ping.asBuilder()
             .onlinePlayers(NeptunControllerProvider.api.serviceController.getGlobalPlayerAmount())
             .maximumPlayers(serviceGroup.maxOnlineServiceCount)
-            .description(language.line(CoreBaseApi.defaultLangProperties, LineKey.key("core.base.motd.normal")))
+            .description(language.line(CoreBaseApi.defaultLangProperties, LineKey.key("core.base.proxy.motd.normal")))
             .version(ServerPing.Version(0, "⚒"))
             .build()
     }
@@ -41,11 +42,17 @@ class VelocityPlayerListener(
         val property = player.gameProfile.properties.first()
         val podName = NeptunControllerProvider.api.podName()
 
+        val defaultLanguage = NeptunCoreProvider.api.languageController.getLanguage(LangKey.key("en", "US")) ?: return
+
+        if (player.protocolVersion != ProtocolVersion.MINECRAFT_1_20_3) {
+            player.disconnect(defaultLanguage.line(CoreBaseApi.defaultLangProperties, LineKey.key("core.base.proxy.protocol.wrong_version")))
+            return
+        }
+
         val serverGroup = NeptunControllerProvider.api.serviceGroupController.getServiceGroup("proxy") ?: return
 
         if (serverGroup.inMaintenance && !player.hasPermission("core.maintenance.bypass")) {
-            val language = NeptunCoreProvider.api.languageController.getLanguage(LangKey.key("en", "US")) ?: return
-            player.disconnect(language.line(CoreBaseApi.defaultLangProperties, LineKey.key("core.base.maintenance.forbidden")))
+            player.disconnect(defaultLanguage.line(CoreBaseApi.defaultLangProperties, LineKey.key("core.base.proxy.maintenance.forbidden")))
             return
         }
 
