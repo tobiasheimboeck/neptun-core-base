@@ -12,6 +12,7 @@ import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.color.LanguageColor
 import world.neptuns.core.base.api.language.color.LanguageColorController
 import world.neptuns.core.base.api.language.properties.LanguagePropertiesController
+import world.neptuns.core.base.api.language.properties.default.DefaultLanguageProperties
 import world.neptuns.core.base.api.player.NeptunPlayerController
 import world.neptuns.core.base.api.player.PlayerAdapter
 import world.neptuns.core.base.api.utils.PageConverter
@@ -51,6 +52,8 @@ interface CoreBaseApi {
             .setPrettyPrinting()
             .disableHtmlEscaping()
             .create()
+
+        val defaultLangProperties = DefaultLanguageProperties()
     }
 
 }

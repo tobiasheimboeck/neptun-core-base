@@ -58,7 +58,7 @@ class NeptunVelocityPlugin @Inject constructor(
         val packetListener = PacketListener(this.proxyServer)
         packetListener.listen()
 
-        this.proxyServer.eventManager.registerSuspend(this, VelocityPlayerListener(pluginContainer, coreBaseApi.playerController, coreBaseApi.languagePropertiesController))
+        this.proxyServer.eventManager.registerSuspend(this, VelocityPlayerListener(coreBaseApi.playerController, coreBaseApi.languagePropertiesController))
 
         coreBaseApi.registerCommand(LanguageCommand(coreBaseApi.languageColorController, coreBaseApi.languagePropertiesController, coreBaseApi.languageController))
     }

@@ -16,9 +16,14 @@ interface LineKey : Serializable {
         }
 
         fun key(string: String): LineKey {
+
+            // core.base.motd.normal
+            // [core, base, motd, normal]
+            //
+
             val keySplitted = string.split(".")
             val keyValue = keySplitted.subList(2, keySplitted.size).joinToString(".")
-            return key(LangNamespace.create(keySplitted[0], keySplitted[1]), keyValue)
+            return key(LangNamespace.create(keySplitted[0] + "." + keySplitted[1], null), keyValue)
         }
 
         fun coreKey(value: String): LineKey {

@@ -23,14 +23,15 @@ class LanguageImpl(override val key: LangKey, override val messages: Map<LineKey
         StandardTags.hoverEvent()
     )
 
-    override fun lineAsString(properties: LanguageProperties, key: LineKey, vararg toReplace: Any): String {
-        val content: String = this.messages[key] ?: return "$key not found..."
+    override fun lineAsString(properties: LanguageProperties, lineKey: LineKey, vararg toReplace: Any): String {
+        val content: String = this.messages[lineKey] ?: return "${lineKey.asString()} not found..."
         return MessageFormat.format(content, *toReplace)
     }
 
-    override fun line(properties: LanguageProperties, key: LineKey, vararg toReplace: TagResolver): Component {
+    override fun line(properties: LanguageProperties, lineKey: LineKey, vararg toReplace: TagResolver): Component {
         val builder = MiniMessage.builder()
-        val message = this.messages[key] ?: return errorResult(builder)
+        val message = this.messages.entries.find { it.key.asString() == lineKey.asString() }?.value
+            ?: return errorResult(builder, lineKey)
 
         val tagResolver = TagResolver.builder()
             .resolvers(this.defaultResolvers)
@@ -42,10 +43,12 @@ class LanguageImpl(override val key: LangKey, override val messages: Map<LineKey
         return builder.tags(tagResolver.build()).build().deserialize(message)
     }
 
-    override fun lines(properties: LanguageProperties, key: LineKey, vararg toReplace: TagResolver): List<Component> {
+    override fun lines(properties: LanguageProperties, lineKey: LineKey, vararg toReplace: TagResolver): List<Component> {
         val builder = MiniMessage.builder()
-        val message = this.messages[key] ?: return listOf(errorResult(builder))
-        if (!message.contains("\n")) return listOf(Component.text("$key is not a multiline message!", NamedTextColor.RED))
+        val message = this.messages.entries.find { it.key.asString() == lineKey.asString() }?.value
+            ?: return listOf(errorResult(builder, lineKey))
+
+        if (!message.contains("\n")) return listOf(Component.text("$lineKey is not a multiline message!", NamedTextColor.RED))
 
         val lines = message.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
         val components: MutableList<Component> = ArrayList()
@@ -63,9 +66,10 @@ class LanguageImpl(override val key: LangKey, override val messages: Map<LineKey
         return components
     }
 
-    override fun displayName(properties: LanguageProperties, key: LineKey, vararg toReplace: TagResolver): Component {
+    override fun displayName(properties: LanguageProperties, lineKey: LineKey, vararg toReplace: TagResolver): Component {
         val builder = MiniMessage.builder()
-        val message = this.messages[key] ?: return errorResult(builder)
+        val message = this.messages.entries.find { it.key.asString() == lineKey.asString() }?.value
+            ?: return errorResult(builder, lineKey)
 
         val tagResolver = TagResolver.builder()
             .resolvers(this.defaultResolvers)
@@ -76,9 +80,10 @@ class LanguageImpl(override val key: LangKey, override val messages: Map<LineKey
         return builder.tags(tagResolver.build()).build().deserialize("<!li>$message")
     }
 
-    override fun lore(properties: LanguageProperties, key: LineKey, vararg toReplace: TagResolver): List<Component> {
+    override fun lore(properties: LanguageProperties, lineKey: LineKey, vararg toReplace: TagResolver): List<Component> {
         val builder = MiniMessage.builder()
-        val message = this.messages[key] ?: return listOf(errorResult(builder))
+        val message = this.messages.entries.find { it.key.asString() == lineKey.asString() }?.value
+            ?: return listOf(errorResult(builder, lineKey))
 
         val components: MutableList<Component> = ArrayList()
         val tagResolver = TagResolver.builder()
@@ -100,12 +105,13 @@ class LanguageImpl(override val key: LangKey, override val messages: Map<LineKey
     }
 
     override fun hasMultipleLines(lineKey: LineKey): Boolean {
-        return this.messages[lineKey]?.contains("\n") ?: false
+        return this.messages.entries.find { it.key.asString() == lineKey.asString() }?.value?.contains("\n")
+            ?: return false
     }
 
-    private fun errorResult(builder: MiniMessage.Builder): Component {
+    private fun errorResult(builder: MiniMessage.Builder, lineKey: LineKey): Component {
         return builder.tags(TagResolver.builder().resolver(StandardTags.color()).build()).build()
-            .deserialize("<red>$key not found...")
+            .deserialize("<red>${lineKey.asString()} not found...")
     }
 
     private fun replacePrefix(properties: LanguageProperties, content: String): TagResolver.Single {
@@ -125,7 +131,7 @@ class LanguageImpl(override val key: LangKey, override val messages: Map<LineKey
     private fun createPlaceholder(properties: LanguageProperties, prefixName: String?, validPrefixName: String?): TagResolver.Single {
         val lineKey = LineKey.coreKey(if (prefixName == null) "prefix.global" else "prefix")
 
-        val prefixText = this.messages[lineKey]
+        val prefixText = this.messages.entries.find { it.key.asString() == lineKey.asString() }?.value
             ?: throw NullPointerException("Prefix with key ${lineKey.asString()} not found!")
 
         if (prefixName != null) {

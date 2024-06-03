@@ -7,10 +7,10 @@ import world.neptuns.core.base.common.api.language.utils.LanguageFileUtils
 
 class LanguageControllerImpl : LanguageController {
 
-    override val messages: MutableList<Language> = mutableListOf()
+    override val languages: MutableList<Language> = mutableListOf()
 
     override fun getLanguage(key: LangKey): Language? {
-        return this.messages.find { it.key.asString() == key.asString() }
+        return this.languages.find { it.key.asString() == key.asString() }
     }
 
     override fun generateLanguages(loaderClass: Class<*>) {
@@ -25,7 +25,7 @@ class LanguageControllerImpl : LanguageController {
     private fun createLanguage(rawPath: String, loaderClass: Class<*>) {
         for (langKey in LanguageFileUtils.getLanguageKeysFromJarFile(rawPath, loaderClass)) {
             val fileContent = LanguageFileUtils.getLanguageFileContent(rawPath, langKey, loaderClass)
-            this.messages.add(LanguageImpl(langKey, fileContent))
+            this.languages.add(LanguageImpl(langKey, fileContent))
         }
     }
 

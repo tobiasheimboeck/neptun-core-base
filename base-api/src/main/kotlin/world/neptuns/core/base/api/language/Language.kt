@@ -9,15 +9,15 @@ interface Language {
     val key: LangKey
     val messages: Map<LineKey, String>
 
-    fun lineAsString(properties: LanguageProperties, key: LineKey, vararg toReplace: Any): String
+    fun lineAsString(properties: LanguageProperties, lineKey: LineKey, vararg toReplace: Any): String
 
-    fun line(properties: LanguageProperties, key: LineKey, vararg toReplace: TagResolver): Component
+    fun line(properties: LanguageProperties, lineKey: LineKey, vararg toReplace: TagResolver): Component
 
-    fun lines(properties: LanguageProperties, key: LineKey, vararg toReplace: TagResolver): List<Component>
+    fun lines(properties: LanguageProperties, lineKey: LineKey, vararg toReplace: TagResolver): List<Component>
 
-    fun displayName(properties: LanguageProperties, key: LineKey, vararg toReplace: TagResolver): Component
+    fun displayName(properties: LanguageProperties, lineKey: LineKey, vararg toReplace: TagResolver): Component
 
-    fun lore(properties: LanguageProperties, key: LineKey, vararg toReplace: TagResolver): List<Component>
+    fun lore(properties: LanguageProperties, lineKey: LineKey, vararg toReplace: TagResolver): List<Component>
 
     fun hasMultipleLines(lineKey: LineKey): Boolean
 

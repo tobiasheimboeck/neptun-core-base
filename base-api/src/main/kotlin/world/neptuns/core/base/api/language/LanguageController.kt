@@ -2,7 +2,7 @@ package world.neptuns.core.base.api.language
 
 interface LanguageController {
 
-    val messages: MutableList<Language>
+    val languages: MutableList<Language>
 
     fun getLanguage(key: LangKey): Language?
 

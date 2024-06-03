@@ -1,10 +1,8 @@
 package world.neptuns.core.base.bukkit.listener
 
 import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -15,18 +13,12 @@ import world.neptuns.core.base.api.language.properties.LanguagePropertiesControl
 import world.neptuns.core.base.api.player.NeptunOfflinePlayer
 import world.neptuns.core.base.api.player.NeptunPlayerController
 import world.neptuns.core.base.bukkit.NeptunBukkitPlugin
-import world.neptuns.core.base.common.repository.player.OnlinePlayerCache
-import world.neptuns.core.base.common.repository.player.OnlinePlayerRepository
-import world.neptuns.streamline.api.NeptunStreamlineProvider
 
 class BukkitPlayerListener(
     private val plugin: NeptunBukkitPlugin,
     private val playerController: NeptunPlayerController,
     private val languagePropertiesController: LanguagePropertiesController,
 ) : Listener {
-
-    private val pRep = NeptunStreamlineProvider.api.repositoryLoader.get(OnlinePlayerRepository::class.java)!!
-    private val pCache = NeptunStreamlineProvider.api.cacheLoader.get(OnlinePlayerCache::class.java)!!
 
     @EventHandler(priority = EventPriority.LOWEST)
     suspend fun onPlayerLogin(event: PlayerLoginEvent) {
@@ -53,12 +45,6 @@ class BukkitPlayerListener(
             }
 
             languagePropertiesController.cacheEntry(player.uniqueId, languageProperties)
-
-            Bukkit.getScheduler().runTaskLater(plugin, Runnable {
-                runBlocking {
-                    player.sendMessage(Component.text("Redis: ${pRep.getAll().await().size} | Locally: ${pCache.getAll().size}"))
-                }
-            },10)
         }
     }
 

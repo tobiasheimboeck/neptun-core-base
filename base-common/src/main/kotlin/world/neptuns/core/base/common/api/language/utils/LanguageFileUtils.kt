@@ -52,7 +52,7 @@ object LanguageFileUtils {
                         val keySplitted = key.split(".")
                         val keyValue = keySplitted.subList(2, keySplitted.size).joinToString(".")
 
-                        content[LineKey.key(LangNamespace.create(keySplitted[0], keySplitted[1]), keyValue)] = value
+                        content[LineKey.key(LangNamespace.create(keySplitted[0] + "." + keySplitted[1], null), keyValue)] = value
                     }
                 }
             }
