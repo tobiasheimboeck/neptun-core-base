@@ -9,7 +9,6 @@ import world.neptuns.base.bukkit.api.hotbar.HotbarController
 import world.neptuns.base.bukkit.api.item.ItemBuilder
 import world.neptuns.base.bukkit.api.item.ItemDataController
 import world.neptuns.base.bukkit.api.metadata.MetadataController
-import world.neptuns.base.bukkit.api.plugin.NeptunBukkitPlugin
 import world.neptuns.base.bukkit.api.scoreboard.SidebarBuilder
 import world.neptuns.base.bukkit.api.scoreboard.SidebarController
 import world.neptuns.core.base.bukkit.api.bossbar.BossbarControllerImpl

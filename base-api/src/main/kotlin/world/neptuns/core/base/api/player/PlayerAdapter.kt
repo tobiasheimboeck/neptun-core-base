@@ -6,7 +6,6 @@ import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.utils.NeptunPlugin
 import java.util.*
 
-
 interface PlayerAdapter<T> {
 
     val pluginAdapter: NeptunPlugin

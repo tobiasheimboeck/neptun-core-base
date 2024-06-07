@@ -1,10 +1,10 @@
 package world.neptuns.base.bukkit.api.hotbar
 
 import org.bukkit.entity.Player
+import world.neptuns.base.bukkit.api.NeptunBukkitPlugin
 import world.neptuns.base.bukkit.api.hotbar.builder.HotbarBuilder
 import world.neptuns.base.bukkit.api.hotbar.builder.HotbarItemBuilder
 import world.neptuns.base.bukkit.api.hotbar.builder.HotbarPageBuilder
-import world.neptuns.base.bukkit.api.plugin.NeptunBukkitPlugin
 
 interface HotbarController {
 
