@@ -63,7 +63,6 @@ class VelocityPlayerListener(
     @Subscribe(order = PostOrder.LATE)
     suspend fun onPlayerDisconnect(event: DisconnectEvent) {
         val player = event.player
-
         val onlinePlayer = NeptunCoreProvider.api.playerController.getOnlinePlayer(player.uniqueId)
 
         if (onlinePlayer != null) {

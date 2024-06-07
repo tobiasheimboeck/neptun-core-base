@@ -3,9 +3,11 @@ package world.neptuns.core.base.bukkit
 import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
+import world.neptuns.base.bukkit.api.NeptunCoreBukkitProvider
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.language.LangNamespace
 import world.neptuns.core.base.api.utils.NeptunPlugin
+import world.neptuns.core.base.bukkit.api.CoreBaseBukkitApiImpl
 import world.neptuns.core.base.bukkit.command.BukkitCommandExecutorAsync
 import world.neptuns.core.base.bukkit.listener.BukkitPlayerListener
 import world.neptuns.core.base.bukkit.listener.PacketListener
@@ -28,6 +30,9 @@ class NeptunBukkitPlugin : SuspendingJavaPlugin(), NeptunPlugin {
 
         val packetListener = PacketListener(this)
         packetListener.listen()
+
+        val coreBaseBukkitApi = CoreBaseBukkitApiImpl(this)
+        NeptunCoreBukkitProvider.api = coreBaseBukkitApi
 
         this.server.pluginManager.registerSuspendingEvents(BukkitPlayerListener(this, coreBaseApi.playerController, coreBaseApi.languagePropertiesController), this)
     }

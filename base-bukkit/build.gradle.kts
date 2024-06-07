@@ -11,6 +11,7 @@ dependencies {
     compileOnly(libs.bundles.paper)
     compileOnly(project(":base-api"))
     implementation(project(":base-common"))
+    implementation(project(":base-bukkit-api"))
 }
 
 tasks.test {
