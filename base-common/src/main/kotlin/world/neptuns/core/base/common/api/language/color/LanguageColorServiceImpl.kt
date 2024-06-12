@@ -3,14 +3,14 @@ package world.neptuns.core.base.common.api.language.color
 import org.jetbrains.exposed.sql.ResultRow
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.color.LanguageColor
-import world.neptuns.core.base.api.language.color.LanguageColorController
+import world.neptuns.core.base.api.language.color.LanguageColorService
 import world.neptuns.core.base.api.language.color.LanguageColorRegistry
 import world.neptuns.core.base.common.repository.color.LanguageColorCache
 import world.neptuns.core.base.common.repository.color.LanguageColorRepository
 import world.neptuns.streamline.api.NeptunStreamlineProvider
 import java.util.*
 
-class LanguageColorControllerImpl : LanguageColorController {
+class LanguageColorServiceImpl : LanguageColorService {
 
     private val languageColorRepository = NeptunStreamlineProvider.api.repositoryLoader.get(LanguageColorRepository::class.java)!!
     private val languageColorCache = NeptunStreamlineProvider.api.cacheLoader.get(LanguageColorCache::class.java)!!

@@ -6,7 +6,7 @@ import world.neptuns.streamline.api.utils.Controller
 import world.neptuns.streamline.api.utils.Updatable
 import java.util.*
 
-interface NeptunPlayerController : Controller<UUID, NeptunOfflinePlayer>, Updatable<UUID, NeptunOfflinePlayer.Update, Any> {
+interface NeptunPlayerService : Controller<UUID, NeptunOfflinePlayer>, Updatable<UUID, NeptunOfflinePlayer.Update, Any> {
 
     suspend fun isOnline(uuid: UUID): Boolean
 

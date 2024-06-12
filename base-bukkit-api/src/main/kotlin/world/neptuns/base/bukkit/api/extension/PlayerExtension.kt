@@ -8,7 +8,7 @@ import world.neptuns.core.base.api.player.NeptunOnlinePlayer
 import java.util.*
 
 suspend fun Player.toOnlinePlayer(): NeptunOnlinePlayer {
-    return NeptunCoreProvider.api.playerController.getOnlinePlayer(uniqueId)!!
+    return NeptunCoreProvider.api.playerService.getOnlinePlayer(uniqueId)!!
 }
 
 suspend fun Player.sendMessage(key: LineKey, vararg toReplace: TagResolver) {

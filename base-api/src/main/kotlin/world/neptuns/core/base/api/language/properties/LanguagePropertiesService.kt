@@ -4,7 +4,7 @@ import world.neptuns.streamline.api.utils.Controller
 import world.neptuns.streamline.api.utils.Updatable
 import java.util.*
 
-interface LanguagePropertiesController : Controller<UUID, LanguageProperties>, Updatable<UUID, LanguageProperties.Update, Any> {
+interface LanguagePropertiesService : Controller<UUID, LanguageProperties>, Updatable<UUID, LanguageProperties.Update, Any> {
 
     suspend fun getProperties(uuid: UUID): LanguageProperties?
 

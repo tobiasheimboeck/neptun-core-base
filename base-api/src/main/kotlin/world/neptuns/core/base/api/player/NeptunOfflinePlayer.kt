@@ -26,7 +26,7 @@ interface NeptunOfflinePlayer : Serializable {
     }
 
     suspend fun isOnline(): Boolean {
-        return NeptunCoreProvider.api.playerController.isOnline(uuid)
+        return NeptunCoreProvider.api.playerService.isOnline(uuid)
     }
 
     enum class Update {

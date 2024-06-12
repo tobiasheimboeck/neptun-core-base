@@ -23,7 +23,7 @@ class BukkitPlayerAdapter(override val pluginAdapter: NeptunPlugin) : PlayerAdap
     }
 
     override suspend fun transferPlayerToPlayersService(uuid: UUID, targetUuid: UUID) {
-        val targetPlayer = NeptunCoreProvider.api.playerController.getOnlinePlayer(targetUuid) ?: return
+        val targetPlayer = NeptunCoreProvider.api.playerService.getOnlinePlayer(targetUuid) ?: return
         NeptunStreamlineProvider.api.packetController.sendPacket(PlayerConnectToServicePacket(uuid, false, targetPlayer.currentServiceName))
     }
 
@@ -90,7 +90,7 @@ class BukkitPlayerAdapter(override val pluginAdapter: NeptunPlugin) : PlayerAdap
     }
 
     private suspend fun validateLanguageProperties(uuid: UUID, result: (LanguageProperties, Language) -> Unit) {
-        val properties = NeptunCoreProvider.api.languagePropertiesController.getProperties(uuid) ?: return
+        val properties = NeptunCoreProvider.api.languagePropertiesService.getProperties(uuid) ?: return
         val language = NeptunCoreProvider.api.languageController.getLanguage(properties.langKey) ?: return
         result.invoke(properties, language)
     }

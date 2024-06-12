@@ -1,7 +1,7 @@
 package world.neptuns.core.base.common.api.file
 
 import world.neptuns.core.base.api.CoreBaseApi
-import world.neptuns.core.base.api.file.FileController
+import world.neptuns.core.base.api.file.FileService
 import world.neptuns.core.base.api.file.NeptunFile
 import java.io.*
 import java.nio.file.Files
@@ -9,7 +9,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.reflect.KClass
 
-class FileControllerImpl : FileController {
+class FileControllerImpl : FileService {
 
     override fun <T> read(file: File, clazz: Class<T>): T? {
         return try {

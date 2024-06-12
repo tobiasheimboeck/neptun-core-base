@@ -7,11 +7,11 @@ import world.neptuns.core.base.api.command.NeptunCommand
 import world.neptuns.core.base.api.command.NeptunCommandExecutor
 import world.neptuns.core.base.api.command.NeptunCommandPlatform
 import world.neptuns.core.base.api.command.NeptunCommandSender
-import world.neptuns.core.base.api.player.NeptunPlayerController
+import world.neptuns.core.base.api.player.NeptunPlayerService
 
 @NeptunCommand(NeptunCommandPlatform.VELOCITY, name = "hub", aliases = ["lobby", "l"])
 class HubCommand(
-    private val playerController: NeptunPlayerController
+    private val playerController: NeptunPlayerService
 ) : NeptunCommandExecutor {
 
     override suspend fun execute(sender: NeptunCommandSender, args: List<String>) {

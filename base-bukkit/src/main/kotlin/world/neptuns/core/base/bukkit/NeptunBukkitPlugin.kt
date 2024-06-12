@@ -34,7 +34,7 @@ class NeptunBukkitPlugin : SuspendingJavaPlugin(), NeptunPlugin {
         val coreBaseBukkitApi = CoreBaseBukkitApiImpl(this)
         NeptunCoreBukkitProvider.api = coreBaseBukkitApi
 
-        this.server.pluginManager.registerSuspendingEvents(BukkitPlayerListener(this, coreBaseApi.playerController, coreBaseApi.languagePropertiesController), this)
+        this.server.pluginManager.registerSuspendingEvents(BukkitPlayerListener(this, coreBaseApi.playerService, coreBaseApi.languagePropertiesService), this)
     }
 
 }

@@ -4,7 +4,7 @@ import java.io.File
 import java.nio.file.Path
 import kotlin.reflect.KClass
 
-interface FileController {
+interface FileService {
 
     fun <T> read(file: File, clazz: Class<T>): T?
 

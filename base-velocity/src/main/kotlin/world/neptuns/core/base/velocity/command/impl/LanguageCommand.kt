@@ -10,16 +10,16 @@ import world.neptuns.core.base.api.command.NeptunCommandPlatform
 import world.neptuns.core.base.api.command.NeptunCommandSender
 import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.LanguageController
-import world.neptuns.core.base.api.language.color.LanguageColorController
+import world.neptuns.core.base.api.language.color.LanguageColorService
 import world.neptuns.core.base.api.language.properties.LanguageProperties
-import world.neptuns.core.base.api.language.properties.LanguagePropertiesController
+import world.neptuns.core.base.api.language.properties.LanguagePropertiesService
 import world.neptuns.core.base.common.packet.LanguagePropertiesChangePacket
 import world.neptuns.streamline.api.NeptunStreamlineProvider
 
 @NeptunCommand(type = NeptunCommandPlatform.VELOCITY, "language", "core.language", arrayOf("lang"))
 class LanguageCommand(
-    private val languageColorController: LanguageColorController,
-    private val languagePropertiesController: LanguagePropertiesController,
+    private val languageColorService: LanguageColorService,
+    private val languagePropertiesService: LanguagePropertiesService,
     private val languageController: LanguageController,
 ) : NeptunCommandExecutor {
 
@@ -29,7 +29,7 @@ class LanguageCommand(
         val player = sender.castTo(Player::class.java)
         val playerAdapter = NeptunCoreProvider.api.getPlayerAdapter(Player::class.java)
 
-        val properties = this.languagePropertiesController.getProperties(player.uniqueId) ?: return
+        val properties = this.languagePropertiesService.getProperties(player.uniqueId) ?: return
 
         val requestedLanguage = this.languageController.getLanguage(LangKey.fromString(args[0]))
 
@@ -39,7 +39,7 @@ class LanguageCommand(
         }
 
         properties.langKey = requestedLanguage.key
-        this.languagePropertiesController.bulkUpdateEntry(LanguageProperties.Update.LANGUAGE_KEY, player.uniqueId, properties.langKey.asString(), true)
+        this.languagePropertiesService.bulkUpdateEntry(LanguageProperties.Update.LANGUAGE_KEY, player.uniqueId, properties.langKey.asString(), true)
         NeptunStreamlineProvider.api.packetController.sendPacket(LanguagePropertiesChangePacket(player.uniqueId, properties))
 
         playerAdapter.sendMessage(player, "core.base.language.key_change", Placeholder.parsed("name", properties.langKey.asString()))

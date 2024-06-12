@@ -4,16 +4,16 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import world.neptuns.core.base.api.command.NeptunCommandController
 import world.neptuns.core.base.api.command.NeptunCommandExecutor
-import world.neptuns.core.base.api.file.FileController
+import world.neptuns.core.base.api.file.FileService
 import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.LangNamespace
 import world.neptuns.core.base.api.language.LanguageController
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.color.LanguageColor
-import world.neptuns.core.base.api.language.color.LanguageColorController
-import world.neptuns.core.base.api.language.properties.LanguagePropertiesController
+import world.neptuns.core.base.api.language.color.LanguageColorService
+import world.neptuns.core.base.api.language.properties.LanguagePropertiesService
 import world.neptuns.core.base.api.language.properties.default.DefaultLanguageProperties
-import world.neptuns.core.base.api.player.NeptunPlayerController
+import world.neptuns.core.base.api.player.NeptunPlayerService
 import world.neptuns.core.base.api.player.PlayerAdapter
 import world.neptuns.core.base.api.utils.PageConverter
 import java.nio.file.Path
@@ -24,12 +24,12 @@ interface CoreBaseApi {
     val minecraftDispatcher: CoroutineContext
     val dataFolder: Path
 
-    val fileController: FileController
+    val fileService: FileService
 
     val languageController: LanguageController
-    val languagePropertiesController: LanguagePropertiesController
-    val languageColorController: LanguageColorController
-    val playerController: NeptunPlayerController
+    val languagePropertiesService: LanguagePropertiesService
+    val languageColorService: LanguageColorService
+    val playerService: NeptunPlayerService
 
     val commandController: NeptunCommandController
 

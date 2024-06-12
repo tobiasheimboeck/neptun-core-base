@@ -13,7 +13,7 @@ import org.jetbrains.exposed.sql.update
 import world.neptuns.controller.api.service.NeptunService
 import world.neptuns.core.base.api.player.NeptunOfflinePlayer
 import world.neptuns.core.base.api.player.NeptunOnlinePlayer
-import world.neptuns.core.base.api.player.NeptunPlayerController
+import world.neptuns.core.base.api.player.NeptunPlayerService
 import world.neptuns.core.base.common.api.skin.SkinProfileImpl
 import world.neptuns.core.base.common.repository.player.OfflinePlayerTable
 import world.neptuns.core.base.common.repository.player.OnlinePlayerCache
@@ -22,7 +22,7 @@ import world.neptuns.streamline.api.NeptunStreamlineProvider
 import java.util.*
 
 @Suppress("OPT_IN_USAGE")
-class NeptunPlayerControllerImpl(override val updateChannel: String) : NeptunPlayerController {
+class NeptunPlayerServiceImpl : NeptunPlayerService {
 
     private val onlinePlayerRepository = NeptunStreamlineProvider.api.repositoryLoader.get(OnlinePlayerRepository::class.java)!!
     private val onlinePlayerCache = NeptunStreamlineProvider.api.cacheLoader.get(OnlinePlayerCache::class.java)!!

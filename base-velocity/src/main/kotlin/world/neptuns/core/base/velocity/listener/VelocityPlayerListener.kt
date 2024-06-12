@@ -12,15 +12,15 @@ import world.neptuns.core.base.api.CoreBaseApi
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.LineKey
-import world.neptuns.core.base.api.language.properties.LanguagePropertiesController
-import world.neptuns.core.base.api.player.NeptunPlayerController
+import world.neptuns.core.base.api.language.properties.LanguagePropertiesService
+import world.neptuns.core.base.api.player.NeptunPlayerService
 import world.neptuns.core.base.common.api.language.properties.LanguagePropertiesImpl
 import world.neptuns.core.base.common.api.player.NeptunOfflinePlayerImpl
 
 
 class VelocityPlayerListener(
-    private val playerController: NeptunPlayerController,
-    private val languagePropertiesController: LanguagePropertiesController,
+    private val playerController: NeptunPlayerService,
+    private val languagePropertiesService: LanguagePropertiesService,
 ) {
 
     @Subscribe
@@ -57,13 +57,13 @@ class VelocityPlayerListener(
         }
 
         this.playerController.createOrLoadEntry(player.uniqueId, NeptunOfflinePlayerImpl.create(player.uniqueId, player.username, property.value, property.signature), podName)
-        this.languagePropertiesController.createOrLoadEntry(player.uniqueId, LanguagePropertiesImpl.create(player.uniqueId))
+        this.languagePropertiesService.createOrLoadEntry(player.uniqueId, LanguagePropertiesImpl.create(player.uniqueId))
     }
 
     @Subscribe(order = PostOrder.LATE)
     suspend fun onPlayerDisconnect(event: DisconnectEvent) {
         val player = event.player
-        val onlinePlayer = NeptunCoreProvider.api.playerController.getOnlinePlayer(player.uniqueId)
+        val onlinePlayer = NeptunCoreProvider.api.playerService.getOnlinePlayer(player.uniqueId)
 
         if (onlinePlayer != null) {
             onlinePlayer.lastLogoutTimestamp = System.currentTimeMillis()
@@ -71,6 +71,6 @@ class VelocityPlayerListener(
         }
 
         this.playerController.unloadEntry(player.uniqueId)
-        this.languagePropertiesController.unloadEntry(player.uniqueId)
+        this.languagePropertiesService.unloadEntry(player.uniqueId)
     }
 }

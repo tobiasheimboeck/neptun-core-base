@@ -12,7 +12,7 @@ import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.color.LanguageColor
 import world.neptuns.core.base.api.language.color.LanguageColorRegistry
 import world.neptuns.core.base.api.language.properties.LanguageProperties
-import world.neptuns.core.base.api.language.properties.LanguagePropertiesController
+import world.neptuns.core.base.api.language.properties.LanguagePropertiesService
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesCache
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesRepository
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesTable
@@ -20,7 +20,7 @@ import world.neptuns.streamline.api.NeptunStreamlineProvider
 import java.util.*
 
 @Suppress("OPT_IN_USAGE")
-class LanguagePropertiesControllerImpl(override val updateChannel: String) : LanguagePropertiesController {
+class LanguagePropertiesServiceImpl : LanguagePropertiesService {
 
     private val languagePropertiesRepository = NeptunStreamlineProvider.api.repositoryLoader.get(LanguagePropertiesRepository::class.java)!!
     private val languagePropertiesCache = NeptunStreamlineProvider.api.cacheLoader.get(LanguagePropertiesCache::class.java)!!

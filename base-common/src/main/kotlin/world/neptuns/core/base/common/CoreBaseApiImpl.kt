@@ -8,15 +8,15 @@ import world.neptuns.core.base.api.command.NeptunCommand
 import world.neptuns.core.base.api.command.NeptunCommandController
 import world.neptuns.core.base.api.command.NeptunCommandExecutor
 import world.neptuns.core.base.api.currency.CurrencyRegistry
-import world.neptuns.core.base.api.file.FileController
+import world.neptuns.core.base.api.file.FileService
 import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.LangNamespace
 import world.neptuns.core.base.api.language.LanguageController
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.color.LanguageColor
-import world.neptuns.core.base.api.language.color.LanguageColorController
-import world.neptuns.core.base.api.language.properties.LanguagePropertiesController
-import world.neptuns.core.base.api.player.NeptunPlayerController
+import world.neptuns.core.base.api.language.color.LanguageColorService
+import world.neptuns.core.base.api.language.properties.LanguagePropertiesService
+import world.neptuns.core.base.api.player.NeptunPlayerService
 import world.neptuns.core.base.api.player.PlayerAdapter
 import world.neptuns.core.base.api.utils.PageConverter
 import world.neptuns.core.base.common.api.command.NeptunCommandControllerImpl
@@ -25,10 +25,10 @@ import world.neptuns.core.base.common.api.language.LangKeyImpl
 import world.neptuns.core.base.common.api.language.LangNamespaceImpl
 import world.neptuns.core.base.common.api.language.LanguageControllerImpl
 import world.neptuns.core.base.common.api.language.LineKeyImpl
-import world.neptuns.core.base.common.api.language.color.LanguageColorControllerImpl
 import world.neptuns.core.base.common.api.language.color.LanguageColorImpl
-import world.neptuns.core.base.common.api.language.properties.LanguagePropertiesControllerImpl
-import world.neptuns.core.base.common.api.player.NeptunPlayerControllerImpl
+import world.neptuns.core.base.common.api.language.color.LanguageColorServiceImpl
+import world.neptuns.core.base.common.api.language.properties.LanguagePropertiesServiceImpl
+import world.neptuns.core.base.common.api.player.NeptunPlayerServiceImpl
 import world.neptuns.core.base.common.api.utils.PageConverterImpl
 import world.neptuns.core.base.common.repository.color.LanguageColorCache
 import world.neptuns.core.base.common.repository.color.LanguageColorRepository
@@ -45,12 +45,12 @@ import kotlin.coroutines.CoroutineContext
 
 class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, override val dataFolder: Path) : CoreBaseApi {
 
-    override val fileController: FileController = FileControllerImpl()
+    override val fileService: FileService = FileControllerImpl()
     override val languageController: LanguageController = LanguageControllerImpl()
 
-    override val languageColorController: LanguageColorController
-    override val languagePropertiesController: LanguagePropertiesController
-    override val playerController: NeptunPlayerController
+    override val languageColorService: LanguageColorService
+    override val languagePropertiesService: LanguagePropertiesService
+    override val playerService: NeptunPlayerService
 
     private lateinit var playerAdapter: PlayerAdapter<*>
 
@@ -74,9 +74,9 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
         cacheLoader.register(LanguageColorCache())
         cacheLoader.register(LanguagePropertiesCache())
 
-        this.languageColorController = LanguageColorControllerImpl()
-        this.languagePropertiesController = LanguagePropertiesControllerImpl("network:message-service:language_updates")
-        this.playerController = NeptunPlayerControllerImpl("network:message-service:player_updates")
+        this.languageColorService = LanguageColorServiceImpl()
+        this.languagePropertiesService = LanguagePropertiesServiceImpl()
+        this.playerService = NeptunPlayerServiceImpl()
     }
 
     override fun newLanguageKey(countryCode: String, languageCode: String): LangKey {
