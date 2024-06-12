@@ -1,9 +1,9 @@
 package world.neptuns.core.base.common.api.language.utils
 
-import world.neptuns.core.base.api.CoreBaseApi
 import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.LangNamespace
 import world.neptuns.core.base.api.language.LineKey
+import world.neptuns.streamline.api.StreamlineApi
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -46,7 +46,7 @@ object LanguageFileUtils {
         try {
             InputStreamReader(resource.openStream(), StandardCharsets.UTF_8).use { inputStreamReader ->
                 BufferedReader(inputStreamReader).use { bufferedReader ->
-                    val map = CoreBaseApi.GSON.fromJson(bufferedReader, Map::class.java) as Map<String, String>
+                    val map = StreamlineApi.GSON.fromJson(bufferedReader, Map::class.java) as Map<String, String>
 
                     for ((key, value) in map) {
                         val keySplitted = key.split(".")

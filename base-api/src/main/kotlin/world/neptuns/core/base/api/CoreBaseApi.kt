@@ -1,7 +1,5 @@
 package world.neptuns.core.base.api
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import world.neptuns.core.base.api.command.NeptunCommandController
 import world.neptuns.core.base.api.command.NeptunCommandExecutor
 import world.neptuns.core.base.api.file.FileService
@@ -48,11 +46,6 @@ interface CoreBaseApi {
     fun <T> newPageConverter(data: List<T>): PageConverter<T>
 
     companion object {
-        val GSON: Gson = GsonBuilder()
-            .setPrettyPrinting()
-            .disableHtmlEscaping()
-            .create()
-
         val defaultLangProperties = DefaultLanguageProperties()
     }
 

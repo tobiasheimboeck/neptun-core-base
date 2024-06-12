@@ -7,7 +7,7 @@ import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.java.JavaPlugin
 import world.neptuns.base.bukkit.api.item.ItemDataController
-import world.neptuns.core.base.api.CoreBaseApi
+import world.neptuns.streamline.api.StreamlineApi
 
 class ItemDataControllerImpl(private val plugin: JavaPlugin) : ItemDataController {
 
@@ -19,14 +19,14 @@ class ItemDataControllerImpl(private val plugin: JavaPlugin) : ItemDataControlle
     override fun <T> getData(itemMeta: ItemMeta, key: String, clazz: Class<T>): T {
         val namespacedKey = NamespacedKey(this.plugin, key)
         val jsonString: String = itemMeta.persistentDataContainer.getOrDefault(namespacedKey, PersistentDataType.STRING, "")
-        return CoreBaseApi.GSON.fromJson(jsonString, clazz)
+        return StreamlineApi.GSON.fromJson(jsonString, clazz)
     }
 
     override fun setData(itemStack: ItemStack, itemMeta: ItemMeta, key: String, data: Any) {
         val namespacedKey = NamespacedKey(this.plugin, key)
         val dataContainer: PersistentDataContainer = itemMeta.persistentDataContainer
         if (dataContainer.has(namespacedKey, PersistentDataType.STRING)) return
-        dataContainer.set(namespacedKey, PersistentDataType.STRING, CoreBaseApi.GSON.toJson(data))
+        dataContainer.set(namespacedKey, PersistentDataType.STRING, StreamlineApi.GSON.toJson(data))
         itemStack.setItemMeta(itemMeta)
     }
 

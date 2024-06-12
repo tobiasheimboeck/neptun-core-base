@@ -1,8 +1,8 @@
 package world.neptuns.core.base.common.api.file
 
-import world.neptuns.core.base.api.CoreBaseApi
 import world.neptuns.core.base.api.file.FileService
 import world.neptuns.core.base.api.file.NeptunFile
+import world.neptuns.streamline.api.StreamlineApi
 import java.io.*
 import java.nio.file.Files
 import java.nio.file.Path
@@ -13,7 +13,7 @@ class FileControllerImpl : FileService {
 
     override fun <T> read(file: File, clazz: Class<T>): T? {
         return try {
-            CoreBaseApi.GSON.fromJson(FileReader(file), clazz)
+            StreamlineApi.GSON.fromJson(FileReader(file), clazz)
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
             null
@@ -23,7 +23,7 @@ class FileControllerImpl : FileService {
     override fun save(file: File, result: Any) {
         try {
             val fileWriter = FileWriter(file)
-            CoreBaseApi.GSON.toJson(result, fileWriter)
+            StreamlineApi.GSON.toJson(result, fileWriter)
             fileWriter.close()
         } catch (e: IOException) {
             e.printStackTrace()
