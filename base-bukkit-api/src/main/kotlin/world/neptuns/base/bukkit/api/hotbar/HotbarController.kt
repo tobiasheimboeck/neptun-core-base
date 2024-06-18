@@ -1,7 +1,7 @@
 package world.neptuns.base.bukkit.api.hotbar
 
 import org.bukkit.entity.Player
-import world.neptuns.base.bukkit.api.NeptunBukkitPlugin
+import world.neptuns.base.bukkit.api.NeptunBukkitPluginAdapter
 import world.neptuns.base.bukkit.api.hotbar.builder.HotbarBuilder
 import world.neptuns.base.bukkit.api.hotbar.builder.HotbarItemBuilder
 import world.neptuns.base.bukkit.api.hotbar.builder.HotbarPageBuilder
@@ -14,7 +14,7 @@ interface HotbarController {
 
     fun setHotbarToPlayer(player: Player, key: String)
 
-    fun setFallbackHotbarToPlayer(player: Player, plugin: NeptunBukkitPlugin) {
+    fun setFallbackHotbarToPlayer(player: Player, plugin: NeptunBukkitPluginAdapter) {
         val fallbackHotbarKey = plugin.fallbackHotbarKey ?: throw NullPointerException("No default hotbar found...")
         setHotbarToPlayer(player, fallbackHotbarKey)
     }

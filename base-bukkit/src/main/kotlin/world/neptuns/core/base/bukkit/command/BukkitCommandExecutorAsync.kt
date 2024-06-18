@@ -38,10 +38,13 @@ class BukkitCommandExecutorAsync(private val neptunCommand: NeptunCommand) : Sus
         return true
     }
 
-    override suspend fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String>? {
+    val users = listOf("User", "User")
+
+    override suspend fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String> {
         val neptunCommandSender = BukkitCommandSender(sender)
 
         if (checkPermission(neptunCommandSender, sender)) return emptyList()
+
         return this.neptunCommandExecutor.onTabComplete(neptunCommandSender, args.toList())
     }
 

@@ -5,11 +5,17 @@ import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.language.LangNamespace
 import world.neptuns.core.base.api.utils.NeptunPlugin
 
-abstract class NeptunBukkitPlugin(override val namespace: LangNamespace, val fallbackHotbarKey: String?, private val loadLanguageFile: Boolean) : SuspendingJavaPlugin(), NeptunPlugin {
+abstract class NeptunBukkitPluginAdapter(val fallbackHotbarKey: String?, private val loadLanguageFile: Boolean) : SuspendingJavaPlugin(), NeptunPlugin {
+
+    override lateinit var namespace: LangNamespace
 
     override fun onLoad() {
         if (!this.loadLanguageFile) return
         NeptunCoreProvider.api.languageController.addContentToLanguage(this::class.java)
+
+        this.namespace = initNamespace()
     }
+
+    abstract fun initNamespace(): LangNamespace
 
 }
