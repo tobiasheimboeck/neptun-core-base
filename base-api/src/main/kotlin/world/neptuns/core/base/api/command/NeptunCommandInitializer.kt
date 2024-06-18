@@ -48,9 +48,6 @@ abstract class NeptunCommandInitializer {
             subCommandResult = subCommand.key
         }
 
-        if (subCommandResult != null) println("args: $args | parts: ${subCommandResult.parts.split(" ")}")
-        if (subCommandResult != null && !args.containsAll(subCommandResult.parts.split(" "))) return null
-
         return if (resultSubCommandExecutor == null || subCommandResult == null) null else resultSubCommandExecutor to subCommandResult
     }
 
