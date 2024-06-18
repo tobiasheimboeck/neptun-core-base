@@ -14,7 +14,6 @@ inline fun generateSuggestions(args: List<String>, requiredLength: Int, comparis
         if (args[pos].equals(string, true)) continue
 
         isFailed = true
-        break
     }
 
     if (isFailed) return emptyList()

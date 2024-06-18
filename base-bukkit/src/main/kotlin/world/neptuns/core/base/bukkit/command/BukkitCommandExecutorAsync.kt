@@ -48,7 +48,12 @@ class BukkitCommandExecutorAsync(private val neptunCommand: NeptunCommand) : Sus
 
         // subCommandParts removes the first element from a command: /perms group Admin info => group Admin info, because 'perms' is the main command!
         val subCommandParts = args.drop(0)
-        val neptunSubCommandData = this.neptunCommandInitializer.findValidSubCommandData(subCommandParts) ?: return false
+        val neptunSubCommandData = this.neptunCommandInitializer.findValidSubCommandData(subCommandParts)
+
+        if (neptunSubCommandData == null) {
+            this.neptunCommandInitializer.defaultExecute(neptunCommandSender)
+            return true
+        }
 
         val neptunSubCommandExecutor = neptunSubCommandData.first
         val neptunSubCommand = neptunSubCommandData.second

@@ -32,16 +32,24 @@ abstract class NeptunCommandInitializer {
         var resultSubCommandExecutor: NeptunSubCommandExecutor? = null
         var subCommandResult: NeptunSubCommand? = null
 
-        for (subCommand: MutableMap.MutableEntry<NeptunSubCommand, NeptunSubCommandExecutor> in this.subCommands) {
+        for (subCommand in this.subCommands) {
             val neptunSubCommand = subCommand.key
             val subCommandParts = neptunSubCommand.parts.split(" ")
 
-            if (!args.containsAll(subCommandParts) && (neptunSubCommand.length == args.size) || (neptunSubCommand.length == -1 && args.size > neptunSubCommand.minLength)) continue
+            val isMatching = args.containsAll(subCommandParts)
+
+            if (!isMatching || (neptunSubCommand.length != args.size && args.size <= neptunSubCommand.minLength))
+                continue
+
+            if (neptunSubCommand.minLength == -1 && (args.size > neptunSubCommand.length || args.size < neptunSubCommand.length))
+                continue
 
             resultSubCommandExecutor = subCommand.value
             subCommandResult = subCommand.key
-            break
         }
+
+        if (subCommandResult != null) println("args: $args | parts: ${subCommandResult.parts.split(" ")}")
+        if (subCommandResult != null && !args.containsAll(subCommandResult.parts.split(" "))) return null
 
         return if (resultSubCommandExecutor == null || subCommandResult == null) null else resultSubCommandExecutor to subCommandResult
     }
