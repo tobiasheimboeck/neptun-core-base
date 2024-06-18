@@ -15,8 +15,7 @@ import world.neptuns.core.base.api.language.LangNamespace
 import world.neptuns.core.base.api.utils.NeptunPlugin
 import world.neptuns.core.base.common.CoreBaseApiImpl
 import world.neptuns.core.base.velocity.command.VelocityCommandExecutorAsync
-import world.neptuns.core.base.velocity.command.impl.HubCommand
-import world.neptuns.core.base.velocity.command.impl.LanguageCommand
+import world.neptuns.core.base.velocity.command.impl.test.HelloCommand
 import world.neptuns.core.base.velocity.listener.PacketListener
 import world.neptuns.core.base.velocity.listener.VelocityPlayerListener
 import world.neptuns.core.base.velocity.player.VelocityPlayerAdapter
@@ -62,10 +61,12 @@ class NeptunVelocityPlugin @Inject constructor(
 
         this.proxyServer.eventManager.registerSuspend(this, VelocityPlayerListener(coreBaseApi.playerService, coreBaseApi.languagePropertiesService))
 
-        registerCommands(
-            HubCommand(coreBaseApi.playerService),
-            LanguageCommand(coreBaseApi.languageColorService, coreBaseApi.languagePropertiesService, coreBaseApi.languageController)
-        )
+        registerCommand(HelloCommand())
+
+//        registerCommands(
+//            HubCommand(coreBaseApi.playerService),
+//            LanguageCommand(coreBaseApi.languageColorService, coreBaseApi.languagePropertiesService, coreBaseApi.languageController)
+//        )
     }
 
     companion object {

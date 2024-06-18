@@ -6,7 +6,7 @@ import world.neptuns.controller.api.NeptunControllerProvider
 import world.neptuns.core.base.api.CoreBaseApi
 import world.neptuns.core.base.api.command.NeptunCommand
 import world.neptuns.core.base.api.command.NeptunCommandController
-import world.neptuns.core.base.api.command.NeptunCommandExecutor
+import world.neptuns.core.base.api.command.NeptunCommandInitializer
 import world.neptuns.core.base.api.currency.CurrencyRegistry
 import world.neptuns.core.base.api.file.FileService
 import world.neptuns.core.base.api.language.LangKey
@@ -108,8 +108,8 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
         this.commandExecutorClass = clazz
     }
 
-    override fun registerCommand(commandExecutor: NeptunCommandExecutor) {
-        val neptunCommand = this.commandController.registerCommand(commandExecutor)
+    override fun registerInitializer(initializer: NeptunCommandInitializer) {
+        val neptunCommand = this.commandController.registerCommand(initializer)
         this.commandExecutorClass.getDeclaredConstructor(NeptunCommand::class.java).newInstance(neptunCommand)
     }
 

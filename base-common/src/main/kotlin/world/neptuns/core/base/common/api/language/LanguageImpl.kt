@@ -104,6 +104,17 @@ class LanguageImpl(override val key: LangKey, override val messages: MutableMap<
         return components
     }
 
+    override fun usage(properties: LanguageProperties, subCommands: List<String>, vararg toReplace: Any): Pair<Component, Set<Component>> {
+        val title = line(properties, LineKey.key("core.base.usage.title"))
+        val subCommandLines = mutableSetOf<Component>()
+
+        for (subCommandLine in subCommands) {
+            subCommandLines.add(line(properties, LineKey.key("core.base.usage"), Placeholder.parsed("command", subCommandLine)))
+        }
+
+        return title to subCommandLines
+    }
+
     override fun hasMultipleLines(lineKey: LineKey): Boolean {
         return this.messages.entries.find { it.key.asString() == lineKey.asString() }?.value?.contains("\n")
             ?: return false

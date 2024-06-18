@@ -1,7 +1,7 @@
 package world.neptuns.core.base.api.utils
 
 import world.neptuns.core.base.api.NeptunCoreProvider
-import world.neptuns.core.base.api.command.NeptunCommandExecutor
+import world.neptuns.core.base.api.command.NeptunCommandInitializer
 import world.neptuns.core.base.api.language.LangNamespace
 import world.neptuns.core.base.api.language.LineKey
 
@@ -9,12 +9,12 @@ interface NeptunPlugin {
 
     val namespace: LangNamespace
 
-    fun registerCommands(vararg commandExecutors: NeptunCommandExecutor) {
-        commandExecutors.forEach { registerCommand(it) }
+    fun registerCommands(vararg initializers: NeptunCommandInitializer) {
+        initializers.forEach { registerCommand(it) }
     }
 
-    fun registerCommand(commandExecutor: NeptunCommandExecutor) {
-        NeptunCoreProvider.api.registerCommand(commandExecutor)
+    fun registerCommand(initializer: NeptunCommandInitializer) {
+        NeptunCoreProvider.api.registerInitializer(initializer)
     }
 
     fun key(key: String): LineKey = LineKey.key(this.namespace, key)

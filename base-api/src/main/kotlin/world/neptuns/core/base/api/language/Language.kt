@@ -19,6 +19,8 @@ interface Language {
 
     fun lore(properties: LanguageProperties, lineKey: LineKey, vararg toReplace: TagResolver): List<Component>
 
+    fun usage(properties: LanguageProperties, subCommands: List<String>, vararg toReplace: Any): Pair<Component, Set<Component>>
+
     fun hasMultipleLines(lineKey: LineKey): Boolean
 
 }

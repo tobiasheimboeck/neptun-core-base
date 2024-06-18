@@ -1,7 +1,7 @@
 package world.neptuns.core.base.api
 
 import world.neptuns.core.base.api.command.NeptunCommandController
-import world.neptuns.core.base.api.command.NeptunCommandExecutor
+import world.neptuns.core.base.api.command.NeptunCommandInitializer
 import world.neptuns.core.base.api.file.FileService
 import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.LangNamespace
@@ -41,7 +41,7 @@ interface CoreBaseApi {
     fun <T> getPlayerAdapter(clazz: Class<T>): PlayerAdapter<T>
 
     fun <T> registerCommandExecutorClass(clazz: Class<T>)
-    fun registerCommand(commandExecutor: NeptunCommandExecutor)
+    fun registerInitializer(initializer: NeptunCommandInitializer)
 
     fun <T> newPageConverter(data: List<T>): PageConverter<T>
 

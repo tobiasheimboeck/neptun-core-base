@@ -4,17 +4,18 @@ import com.velocitypowered.api.proxy.Player
 import world.neptuns.controller.api.NeptunControllerProvider
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.command.NeptunCommand
-import world.neptuns.core.base.api.command.NeptunCommandExecutor
+import world.neptuns.core.base.api.command.NeptunCommandInitializer
 import world.neptuns.core.base.api.command.NeptunCommandPlatform
 import world.neptuns.core.base.api.command.NeptunCommandSender
+import world.neptuns.core.base.api.command.subcommand.NeptunSubCommandExecutor
 import world.neptuns.core.base.api.player.NeptunPlayerService
 
 @NeptunCommand(NeptunCommandPlatform.VELOCITY, name = "hub", aliases = ["lobby", "l"])
 class HubCommand(
-    private val playerController: NeptunPlayerService
-) : NeptunCommandExecutor {
+    private val playerController: NeptunPlayerService,
+) : NeptunCommandInitializer() {
 
-    override suspend fun execute(sender: NeptunCommandSender, args: List<String>) {
+    override suspend fun defaultExecute(sender: NeptunCommandSender) {
         if (!sender.isPlayer()) return
 
         val player = sender.castTo(Player::class.java)
@@ -34,12 +35,10 @@ class HubCommand(
         playerAdapter.transferPlayerToLobby(player.uniqueId)
     }
 
-    override fun sendUsage(sender: NeptunCommandSender) {
+    override suspend fun onDefaultTabComplete(sender: NeptunCommandSender): List<String> = emptyList()
 
-    }
+    override fun initSubCommands(subCommandExecutors: MutableList<NeptunSubCommandExecutor>) {
 
-    override suspend fun onTabComplete(sender: NeptunCommandSender, args: List<String>): List<String> {
-        return emptyList()
     }
 
 }
