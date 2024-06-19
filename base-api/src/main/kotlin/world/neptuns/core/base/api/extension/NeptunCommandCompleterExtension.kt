@@ -1,10 +1,12 @@
 package world.neptuns.core.base.api.extension
 
-inline fun generateSuggestions(args: List<String>, requiredLength: Int, valuesToCheck: List<Pair<Int, String>>, crossinline block: (MutableList<String>) -> Unit): List<String> {
+import world.neptuns.core.base.api.command.subcommand.NeptunSubCommandExecutor
+
+fun NeptunSubCommandExecutor.generateSuggestions(args: List<String>, requiredLength: Int, valuesToCheck: List<Pair<Int, String>>, block: (MutableList<String>) -> Unit): List<String> {
     return generateSuggestions(args, requiredLength, { a, b -> a == b }, valuesToCheck, block)
 }
 
-inline fun generateSuggestions(args: List<String>, requiredLength: Int, comparison: (Int, Int) -> Boolean, valuesToCheck: List<Pair<Int, String>>, crossinline block: (MutableList<String>) -> Unit): List<String> {
+fun NeptunSubCommandExecutor.generateSuggestions(args: List<String>, requiredLength: Int, comparison: (Int, Int) -> Boolean, valuesToCheck: List<Pair<Int, String>>, block: (MutableList<String>) -> Unit): List<String> {
     var isFailed = false
 
     for (pair in valuesToCheck) {
@@ -21,11 +23,11 @@ inline fun generateSuggestions(args: List<String>, requiredLength: Int, comparis
     return generateSuggestions(args, requiredLength, comparison, block)
 }
 
-inline fun generateSuggestions(args: List<String>, requiredLength: Int, crossinline block: (MutableList<String>) -> Unit): List<String> {
+fun NeptunSubCommandExecutor.generateSuggestions(args: List<String>, requiredLength: Int, block: (MutableList<String>) -> Unit): List<String> {
     return generateSuggestions(args, requiredLength, { a, b -> a == b }, block)
 }
 
-inline fun generateSuggestions(args: List<String>, requiredLength: Int, comparison: (Int, Int) -> Boolean, crossinline block: (MutableList<String>) -> Unit): List<String> {
+fun NeptunSubCommandExecutor.generateSuggestions(args: List<String>, requiredLength: Int, comparison: (Int, Int) -> Boolean, block: (MutableList<String>) -> Unit): List<String> {
     if (!comparison(args.size, requiredLength)) return emptyList()
 
     val suggestions = mutableListOf<String>()

@@ -14,6 +14,7 @@ import world.neptuns.core.base.bukkit.listener.PacketListener
 import world.neptuns.core.base.bukkit.player.BukkitPlayerAdapter
 import world.neptuns.core.base.common.CoreBaseApiImpl
 
+
 class NeptunBukkitPlugin : SuspendingJavaPlugin(), NeptunPlugin {
 
     override lateinit var namespace: LangNamespace

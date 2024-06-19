@@ -57,8 +57,6 @@ class VelocityCommandExecutorAsync(private val neptunCommand: NeptunCommand) : S
         if (checkPermission(neptunCommandSender, sender, neptunSubCommand.permission))
             return
 
-        println("Executing $subCommandParts : Length ${neptunSubCommand.length}:${subCommandParts.size}")
-
         neptunSubCommandExecutor.execute(neptunCommandSender, subCommandParts)
         return
     }

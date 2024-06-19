@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component
 import world.neptuns.core.base.api.command.NeptunCommandSender
 import world.neptuns.core.base.api.command.subcommand.NeptunSubCommand
 import world.neptuns.core.base.api.command.subcommand.NeptunSubCommandExecutor
+import world.neptuns.core.base.api.extension.getArgument
 
 @NeptunSubCommand(length = 3, parts = "world info")
 class HelloWorldInfoSubCommand : NeptunSubCommandExecutor {
@@ -13,7 +14,9 @@ class HelloWorldInfoSubCommand : NeptunSubCommandExecutor {
         if (!sender.isPlayer()) return
         val player = sender.castTo(Player::class.java)
 
-        val name = args[2]
+        val name = getArgument(sender, Int::class.java, args[1]) { integer ->
+
+        }
 
         player.sendMessage(Component.text("World info $name"))
     }

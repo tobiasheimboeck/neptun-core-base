@@ -3,6 +3,7 @@
   "core.base.prefix": "<aqua><prefix_text> <gray>|",
 
   "core.base.no_permission": "<prefix> <gray>You don't have the required permissions!",
+  "core.base.invalid_data_type": "<prefix> <white><type> <gray>required!",
 
   "core.base.usage.title": "<gold>Command Overview <gray>(<title>)",
   "core.base.usage": "<aqua><dark_gray>► <white>/<command>"

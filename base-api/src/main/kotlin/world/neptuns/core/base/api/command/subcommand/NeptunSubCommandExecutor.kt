@@ -8,4 +8,5 @@ interface NeptunSubCommandExecutor {
 
     suspend fun onTabComplete(sender: NeptunCommandSender, args: List<String>): List<String>
 
+
 }
