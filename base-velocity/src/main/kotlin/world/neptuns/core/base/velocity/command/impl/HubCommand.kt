@@ -16,9 +16,8 @@ class HubCommand(
 ) : NeptunCommandInitializer() {
 
     override suspend fun defaultExecute(sender: NeptunCommandSender) {
-        if (!sender.isPlayer()) return
+        val player = sender.castTo(Player::class.java) ?: return
 
-        val player = sender.castTo(Player::class.java)
         val playerAdapter = NeptunCoreProvider.api.getPlayerAdapter(Player::class.java)
 
         val onlinePlayer = this.playerController.getOnlinePlayer(player.uniqueId) ?: return

@@ -1,4 +1,4 @@
-package world.neptuns.core.base.api.utils
+package world.neptuns.core.base.api.util
 
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.command.NeptunCommandInitializer

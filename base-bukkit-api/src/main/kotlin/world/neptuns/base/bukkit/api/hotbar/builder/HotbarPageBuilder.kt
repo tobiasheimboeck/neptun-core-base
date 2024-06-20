@@ -2,7 +2,7 @@ package world.neptuns.base.bukkit.api.hotbar.builder
 
 import world.neptuns.base.bukkit.api.NeptunCoreBukkitProvider
 import world.neptuns.base.bukkit.api.hotbar.HotbarPage
-import world.neptuns.core.base.api.utils.Builder
+import world.neptuns.core.base.api.util.Builder
 
 interface HotbarPageBuilder : Builder<HotbarPage> {
 

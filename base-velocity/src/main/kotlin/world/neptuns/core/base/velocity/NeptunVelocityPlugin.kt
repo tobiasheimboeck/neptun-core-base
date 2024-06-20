@@ -12,7 +12,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory
 import com.velocitypowered.api.proxy.ProxyServer
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.language.LangNamespace
-import world.neptuns.core.base.api.utils.NeptunPlugin
+import world.neptuns.core.base.api.util.NeptunPlugin
 import world.neptuns.core.base.common.CoreBaseApiImpl
 import world.neptuns.core.base.velocity.command.VelocityCommandExecutorAsync
 import world.neptuns.core.base.velocity.command.impl.test.HelloCommand

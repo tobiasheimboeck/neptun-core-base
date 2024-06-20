@@ -10,7 +10,7 @@ import world.neptuns.core.base.api.language.Language
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.properties.LanguageProperties
 import world.neptuns.core.base.api.player.PlayerAdapter
-import world.neptuns.core.base.api.utils.NeptunPlugin
+import world.neptuns.core.base.api.util.NeptunPlugin
 import world.neptuns.core.base.common.packet.*
 import world.neptuns.streamline.api.NeptunStreamlineProvider
 import world.neptuns.streamline.api.packet.NetworkChannelRegistry

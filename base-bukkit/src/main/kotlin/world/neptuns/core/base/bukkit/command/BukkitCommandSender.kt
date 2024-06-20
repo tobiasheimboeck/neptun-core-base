@@ -12,7 +12,7 @@ class BukkitCommandSender(private val commandSender: CommandSender) : NeptunComm
     override fun hasPermission(permission: String): Boolean = this.commandSender.hasPermission(permission)
 
     override fun <T> castTo(clazz: Class<T>): T? {
-        return if (clazz is CommandSender) clazz.cast(commandSender) else null
+        return if (isPlayer()) clazz.cast(commandSender) else null
     }
 
     override fun sendMessage(component: Component) {

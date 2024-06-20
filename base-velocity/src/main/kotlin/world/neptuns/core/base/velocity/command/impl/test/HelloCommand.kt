@@ -15,7 +15,8 @@ class HelloCommand : NeptunCommandInitializer() {
         val player = sender.castTo(Player::class.java) ?: return
 
         player.sendMessage(Component.text("Use: /hello world"))
-        player.sendMessage(Component.text("Use: /hello world info <name>"))
+        player.sendMessage(Component.text("Use: /hello world info <name> <age>"))
+        player.sendMessage(Component.text("Use: /hello world create <name> [permission]"))
     }
 
     override suspend fun onDefaultTabComplete(sender: NeptunCommandSender): List<String> = emptyList()
@@ -23,6 +24,7 @@ class HelloCommand : NeptunCommandInitializer() {
     override fun initSubCommands(subCommandExecutors: MutableList<NeptunSubCommandExecutor>) {
         subCommandExecutors.add(HelloWorldSubCommand())
         subCommandExecutors.add(HelloWorldInfoSubCommand())
+        subCommandExecutors.add(HelloWorldCreateSubCommand())
     }
 
 }

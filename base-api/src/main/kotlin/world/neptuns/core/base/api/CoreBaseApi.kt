@@ -13,7 +13,7 @@ import world.neptuns.core.base.api.language.properties.LanguagePropertiesService
 import world.neptuns.core.base.api.language.properties.default.DefaultLanguageProperties
 import world.neptuns.core.base.api.player.NeptunPlayerService
 import world.neptuns.core.base.api.player.PlayerAdapter
-import world.neptuns.core.base.api.utils.PageConverter
+import world.neptuns.core.base.api.util.PageConverter
 import java.nio.file.Path
 import kotlin.coroutines.CoroutineContext
 

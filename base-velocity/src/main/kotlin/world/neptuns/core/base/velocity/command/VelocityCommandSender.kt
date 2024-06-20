@@ -12,7 +12,7 @@ class VelocityCommandSender(private val commandSource: CommandSource) : NeptunCo
     override fun hasPermission(permission: String): Boolean = this.commandSource.hasPermission(permission)
 
     override fun <T> castTo(clazz: Class<T>): T? {
-        return if (clazz is CommandSource) clazz.cast(commandSource) else null
+        return if (isPlayer()) clazz.cast(commandSource) else null
     }
     override fun sendMessage(component: Component) {
         this.commandSource.sendMessage(component)

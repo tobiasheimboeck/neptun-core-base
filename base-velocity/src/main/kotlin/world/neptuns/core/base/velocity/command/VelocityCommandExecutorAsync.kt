@@ -43,8 +43,9 @@ class VelocityCommandExecutorAsync(private val neptunCommand: NeptunCommand) : S
         }
 
         // subCommandParts removes the first element from a command: /perms group Admin info => group Admin info, because 'perms' is the main command!
-        val subCommandParts = args.drop(0)
-        val neptunSubCommandData = this.neptunCommandInitializer.findValidSubCommandData(subCommandParts)
+        val subCommandArgs = args.drop(0)
+
+        val neptunSubCommandData = this.neptunCommandInitializer.findValidSubCommandData(subCommandArgs)
 
         if (neptunSubCommandData == null) {
             this.neptunCommandInitializer.defaultExecute(neptunCommandSender)
@@ -57,7 +58,7 @@ class VelocityCommandExecutorAsync(private val neptunCommand: NeptunCommand) : S
         if (checkPermission(neptunCommandSender, sender, neptunSubCommand.permission))
             return
 
-        neptunSubCommandExecutor.execute(neptunCommandSender, subCommandParts)
+        neptunSubCommandExecutor.execute(neptunCommandSender, subCommandArgs)
         return
     }
 

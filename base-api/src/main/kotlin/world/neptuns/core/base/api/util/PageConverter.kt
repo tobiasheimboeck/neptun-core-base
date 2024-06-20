@@ -1,4 +1,4 @@
-package world.neptuns.core.base.api.utils
+package world.neptuns.core.base.api.util
 
 interface PageConverter<T> {
 

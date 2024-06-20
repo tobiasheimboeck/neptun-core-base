@@ -4,7 +4,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.player.PlayerAdapter
-import world.neptuns.core.base.api.utils.PageConverter
+import world.neptuns.core.base.api.util.PageConverter
 
 class PageConverterImpl<T>(override val data: List<T>) : PageConverter<T> {
 

@@ -18,7 +18,7 @@ import world.neptuns.core.base.api.language.color.LanguageColorService
 import world.neptuns.core.base.api.language.properties.LanguagePropertiesService
 import world.neptuns.core.base.api.player.NeptunPlayerService
 import world.neptuns.core.base.api.player.PlayerAdapter
-import world.neptuns.core.base.api.utils.PageConverter
+import world.neptuns.core.base.api.util.PageConverter
 import world.neptuns.core.base.common.api.command.NeptunCommandControllerImpl
 import world.neptuns.core.base.common.api.file.FileControllerImpl
 import world.neptuns.core.base.common.api.language.LangKeyImpl
