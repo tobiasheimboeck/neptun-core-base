@@ -24,8 +24,8 @@ class HotbarItemBuilderImpl : HotbarItemBuilder {
         return this
     }
 
-    override fun item(itemBuilder: ItemBuilder): HotbarItemBuilder {
-        this.itemStack = itemBuilder.build()
+    override fun item(itemStack: ItemStack): HotbarItemBuilder {
+        this.itemStack = itemStack
         return this
     }
 

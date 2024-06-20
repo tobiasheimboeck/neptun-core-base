@@ -18,7 +18,6 @@ interface CoreBaseBukkitApi {
     val persistentDataController: PersistentDataController
 
     val hotbarController: HotbarController
-
     val sidebarController: SidebarController
 
     fun newSidebar(viewer: Player): SidebarBuilder
