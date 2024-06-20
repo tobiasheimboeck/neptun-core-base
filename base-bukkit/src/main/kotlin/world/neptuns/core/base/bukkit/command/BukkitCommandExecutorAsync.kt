@@ -12,6 +12,7 @@ import world.neptuns.core.base.api.CoreBaseApi
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.command.NeptunCommand
 import world.neptuns.core.base.api.command.NeptunCommandSender
+import world.neptuns.core.base.api.command.subcommand.NeptunSubCommand
 import world.neptuns.core.base.api.language.LineKey
 
 class BukkitCommandExecutorAsync(private val neptunCommand: NeptunCommand) : SuspendingCommandExecutor, SuspendingTabCompleter {
@@ -74,16 +75,18 @@ class BukkitCommandExecutorAsync(private val neptunCommand: NeptunCommand) : Sus
             return this.neptunCommandInitializer.onDefaultTabComplete(neptunCommandSender, args.toList())
 
         // subCommandParts removes the first element from a command: /perms group Admin info => group Admin info, because 'perms' is the main command!
-        val subCommandParts = args.drop(0)
-        val neptunSubCommandData = this.neptunCommandInitializer.findValidSubCommandData(subCommandParts)
-            ?: return emptyList()
+        val subCommandArgs = args.drop(0)
 
-        val neptunSubCommandExecutor = neptunSubCommandData.first
-        val neptunSubCommand = neptunSubCommandData.second
+        val suggestions = mutableListOf<String>()
 
-        if (checkPermission(neptunCommandSender, sender, neptunSubCommand.permission)) return emptyList()
+        for (subCommandExecutor in this.neptunCommandInitializer.subCommandExecutors) {
+            val subCommandAnnotation = subCommandExecutor::class.java.getAnnotation(NeptunSubCommand::class.java)!!
+            if (checkPermission(neptunCommandSender, sender, subCommandAnnotation.permission)) return emptyList()
 
-        return neptunSubCommandExecutor.onTabComplete(neptunCommandSender, args.toList())
+            suggestions.addAll(subCommandExecutor.onTabComplete(neptunCommandSender, subCommandArgs))
+        }
+
+        return suggestions
     }
 
     private fun checkPermission(neptunCommandSender: NeptunCommandSender, sender: CommandSender, permission: String): Boolean {

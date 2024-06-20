@@ -36,3 +36,17 @@ fun NeptunCommandCompletable.generateSuggestions(args: List<String>, requiredLen
 
     return suggestions.filter { it.regionMatches(0, args.last(), 0, args.last().length, ignoreCase = true) }
 }
+
+fun NeptunCommandCompletable.generateSimpleSuggestions(args: List<String>, requiredLength: Int, block: MutableList<String>.() -> Unit): List<String> {
+    return generateSimpleSuggestions(args, requiredLength, { a, b -> a == b }, block)
+}
+
+fun NeptunCommandCompletable.generateSimpleSuggestions(args: List<String>, requiredLength: Int, comparison: (Int, Int) -> Boolean, block: MutableList<String>.() -> Unit): List<String> {
+    if (!comparison(args.size, requiredLength)) return emptyList()
+
+    val suggestions = mutableListOf<String>()
+
+    block(suggestions)
+
+    return suggestions
+}

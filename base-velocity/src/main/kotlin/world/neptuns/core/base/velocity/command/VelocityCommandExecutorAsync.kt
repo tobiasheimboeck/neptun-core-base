@@ -71,35 +71,22 @@ class VelocityCommandExecutorAsync(private val neptunCommand: NeptunCommand) : S
 
         val args = invocation.arguments().toList()
 
-        if (args.isEmpty())
+        if (args.isEmpty() || args.size == 1)
             return this.neptunCommandInitializer.onDefaultTabComplete(neptunCommandSender, args)
 
         // subCommandParts removes the first element from a command: /perms group Admin info => group Admin info, because 'perms' is the main command!
         val subCommandArgs = args.drop(0)
 
-//        val neptunSubCommandData = this.neptunCommandInitializer.findValidSubCommandData(subCommandArgs)
-//            ?: return emptyList()
-
-        val result = mutableListOf<String>()
+        val suggestions = mutableListOf<String>()
 
         for (subCommandExecutor in this.neptunCommandInitializer.subCommandExecutors) {
             val subCommandAnnotation = subCommandExecutor::class.java.getAnnotation(NeptunSubCommand::class.java)!!
-
             if (checkPermission(neptunCommandSender, sender, subCommandAnnotation.permission)) return emptyList()
 
-            println(subCommandAnnotation::class.java.name)
-
-             result.addAll(subCommandExecutor.onTabComplete(neptunCommandSender, subCommandArgs))
+            suggestions.addAll(subCommandExecutor.onTabComplete(neptunCommandSender, subCommandArgs))
         }
 
-//        val neptunSubCommandExecutor = neptunSubCommandData.first
-//        val neptunSubCommand = neptunSubCommandData.second
-//
-//        if (checkPermission(neptunCommandSender, sender, neptunSubCommand.permission)) return emptyList()
-//
-//        return neptunSubCommandExecutor.onTabComplete(neptunCommandSender, subCommandArgs)
-
-        return result
+        return suggestions
     }
 
     private fun checkPermission(neptunCommandSender: NeptunCommandSender, sender: CommandSource, permission: String): Boolean {
