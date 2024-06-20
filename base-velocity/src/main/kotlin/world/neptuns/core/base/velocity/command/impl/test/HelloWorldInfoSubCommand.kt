@@ -5,9 +5,10 @@ import net.kyori.adventure.text.Component
 import world.neptuns.core.base.api.command.NeptunCommandSender
 import world.neptuns.core.base.api.command.subcommand.NeptunSubCommand
 import world.neptuns.core.base.api.command.subcommand.NeptunSubCommandExecutor
+import world.neptuns.core.base.api.extension.findArgument
 import world.neptuns.core.base.api.extension.getArgument
 
-@NeptunSubCommand(length = 3, parts = "world info")
+@NeptunSubCommand(length = 3, parts = "world info {woldName}")
 class HelloWorldInfoSubCommand : NeptunSubCommandExecutor {
 
     override suspend fun execute(sender: NeptunCommandSender, args: List<String>) {
@@ -15,6 +16,10 @@ class HelloWorldInfoSubCommand : NeptunSubCommandExecutor {
         val player = sender.castTo(Player::class.java)
 
         val name = getArgument(sender, Int::class.java, args[1]) { integer ->
+
+        }
+
+        findArgument(sender, "worldName", Int::class.java) {
 
         }
 

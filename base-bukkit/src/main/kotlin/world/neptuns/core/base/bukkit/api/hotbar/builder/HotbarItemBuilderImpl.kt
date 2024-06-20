@@ -5,7 +5,6 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 import world.neptuns.base.bukkit.api.hotbar.HotbarItem
 import world.neptuns.base.bukkit.api.hotbar.builder.HotbarItemBuilder
-import world.neptuns.base.bukkit.api.item.ItemBuilder
 import world.neptuns.core.base.bukkit.api.hotbar.HotbarItemImpl
 
 class HotbarItemBuilderImpl : HotbarItemBuilder {

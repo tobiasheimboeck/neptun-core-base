@@ -1,4 +1,4 @@
-package world.neptuns.base.bukkit.api.utils
+package world.neptuns.base.bukkit.api.util
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -7,7 +7,7 @@ import org.bukkit.scoreboard.Scoreboard
 import org.bukkit.scoreboard.Team
 import java.util.*
 
-object ScoreboardUtils {
+object ScoreboardUtil {
 
     fun registerScoreboardTeam(teamName: String, color: NamedTextColor): Team {
         val scoreboard: Scoreboard = Bukkit.getScoreboardManager().mainScoreboard
