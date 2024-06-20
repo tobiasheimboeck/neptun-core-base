@@ -1,4 +1,4 @@
-package world.neptuns.core.base.api.extension
+package world.neptuns.core.base.api.command.extension
 
 import world.neptuns.core.base.api.command.subcommand.NeptunSubCommandExecutor
 

@@ -11,8 +11,7 @@ import world.neptuns.core.base.api.command.subcommand.NeptunSubCommandExecutor
 class HelloWorldSubCommand : NeptunSubCommandExecutor {
 
     override suspend fun execute(sender: NeptunCommandSender, args: List<String>) {
-        if (!sender.isPlayer()) return
-        val player = sender.castTo(Player::class.java)
+        val player = sender.castTo(Player::class.java) ?: return
 
         player.sendMessage(Component.text("Hello world!", NamedTextColor.GREEN))
     }

@@ -8,7 +8,7 @@ interface NeptunCommandSender {
 
     fun hasPermission(permission: String): Boolean
 
-    fun <T> castTo(clazz: Class<T>): T
+    fun <T> castTo(clazz: Class<T>): T?
 
     fun sendMessage(component: Component)
 
