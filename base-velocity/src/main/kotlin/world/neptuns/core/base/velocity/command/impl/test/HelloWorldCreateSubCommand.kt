@@ -20,9 +20,19 @@ class HelloWorldCreateSubCommand : NeptunSubCommandExecutor {
         player.sendMessage(Component.text("Create world $name with permission $permission"))
     }
 
+//    override suspend fun onTabComplete(sender: NeptunCommandSender, args: List<String>): List<String> {
+//        val res = mutableListOf<String>()
+//
+//        res.addAll(generateSuggestions(args, 2, listOf(Pair(0, "world"))) { add("create") })
+//        res.addAll(generateSuggestions(args, 3, listOf(Pair(0, "world"), Pair(1, "create"))) { add("cool_name_by_tgamings_brain") })
+//
+//        return res
+//    }
+
     override suspend fun onTabComplete(sender: NeptunCommandSender, args: List<String>): List<String> {
-        return generateSuggestions(args, 2, listOf(Pair(0, "world"))) {
-            add("create")
+        return buildList {
+            addAll(generateSuggestions(args, 2, listOf(Pair(0, "world"))) { add("create") })
+            addAll(generateSuggestions(args, 3, listOf(Pair(0, "world"), Pair(1, "create"))) { add("cool_name_by_tgamings_brain") })
         }
     }
 
