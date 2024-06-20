@@ -8,6 +8,7 @@ import world.neptuns.core.base.api.CoreBaseApi
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.command.NeptunCommand
 import world.neptuns.core.base.api.command.NeptunCommandSender
+import world.neptuns.core.base.api.command.subcommand.NeptunSubCommand
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.velocity.NeptunVelocityPlugin
 
@@ -71,19 +72,34 @@ class VelocityCommandExecutorAsync(private val neptunCommand: NeptunCommand) : S
         val args = invocation.arguments().toList()
 
         if (args.isEmpty())
-            return this.neptunCommandInitializer.onDefaultTabComplete(neptunCommandSender)
+            return this.neptunCommandInitializer.onDefaultTabComplete(neptunCommandSender, args)
 
         // subCommandParts removes the first element from a command: /perms group Admin info => group Admin info, because 'perms' is the main command!
-        val subCommandParts = args.drop(0)
-        val neptunSubCommandData = this.neptunCommandInitializer.findValidSubCommandData(subCommandParts)
-            ?: return emptyList()
+        val subCommandArgs = args.drop(0)
 
-        val neptunSubCommandExecutor = neptunSubCommandData.first
-        val neptunSubCommand = neptunSubCommandData.second
+//        val neptunSubCommandData = this.neptunCommandInitializer.findValidSubCommandData(subCommandArgs)
+//            ?: return emptyList()
 
-        if (!checkPermission(neptunCommandSender, sender, neptunSubCommand.permission)) return emptyList()
+        val result = mutableListOf<String>()
 
-        return neptunSubCommandExecutor.onTabComplete(neptunCommandSender, args.toList())
+        for (subCommandExecutor in this.neptunCommandInitializer.subCommandExecutors) {
+            val subCommandAnnotation = subCommandExecutor::class.java.getAnnotation(NeptunSubCommand::class.java)!!
+
+            if (checkPermission(neptunCommandSender, sender, subCommandAnnotation.permission)) return emptyList()
+
+            println(subCommandAnnotation::class.java.name)
+
+             result.addAll(subCommandExecutor.onTabComplete(neptunCommandSender, subCommandArgs))
+        }
+
+//        val neptunSubCommandExecutor = neptunSubCommandData.first
+//        val neptunSubCommand = neptunSubCommandData.second
+//
+//        if (checkPermission(neptunCommandSender, sender, neptunSubCommand.permission)) return emptyList()
+//
+//        return neptunSubCommandExecutor.onTabComplete(neptunCommandSender, subCommandArgs)
+
+        return result
     }
 
     private fun checkPermission(neptunCommandSender: NeptunCommandSender, sender: CommandSource, permission: String): Boolean {

@@ -1,8 +1,9 @@
 package world.neptuns.core.base.api.command.subcommand
 
+import world.neptuns.core.base.api.command.NeptunCommandCompletable
 import world.neptuns.core.base.api.command.NeptunCommandSender
 
-interface NeptunSubCommandExecutor {
+interface NeptunSubCommandExecutor : NeptunCommandCompletable {
 
     suspend fun execute(sender: NeptunCommandSender, args: List<String>)
 

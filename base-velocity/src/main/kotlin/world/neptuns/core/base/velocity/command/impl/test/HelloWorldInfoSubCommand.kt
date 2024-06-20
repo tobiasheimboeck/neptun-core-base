@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import world.neptuns.core.base.api.command.NeptunCommandSender
 import world.neptuns.core.base.api.command.extension.findArgument
+import world.neptuns.core.base.api.command.extension.generateSuggestions
 import world.neptuns.core.base.api.command.subcommand.NeptunSubCommand
 import world.neptuns.core.base.api.command.subcommand.NeptunSubCommandExecutor
 
@@ -16,10 +17,14 @@ class HelloWorldInfoSubCommand : NeptunSubCommandExecutor {
 
         val name: String? = findArgument(player, "name", args, String::class.java)
         val age: Int? = findArgument(player, "age", args, Int::class.java)
- 1
+
         player.sendMessage(Component.text("$name is $age years old!", NamedTextColor.BLUE))
     }
 
-    override suspend fun onTabComplete(sender: NeptunCommandSender, args: List<String>): List<String> = emptyList()
+    override suspend fun onTabComplete(sender: NeptunCommandSender, args: List<String>): List<String> {
+        return generateSuggestions(args, 2, listOf(Pair(0, "world"))) {
+            add("info")
+        }
+    }
 
 }
