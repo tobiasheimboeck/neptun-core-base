@@ -15,6 +15,7 @@ import world.neptuns.core.base.api.language.LangNamespace
 import world.neptuns.core.base.api.util.NeptunPlugin
 import world.neptuns.core.base.common.CoreBaseApiImpl
 import world.neptuns.core.base.velocity.command.VelocityCommandExecutorAsync
+import world.neptuns.core.base.velocity.command.impl.HubCommand
 import world.neptuns.core.base.velocity.command.impl.test.HelloMainCommand
 import world.neptuns.core.base.velocity.listener.PacketListener
 import world.neptuns.core.base.velocity.listener.VelocityPlayerListener
@@ -63,10 +64,10 @@ class NeptunVelocityPlugin @Inject constructor(
 
         registerCommand(HelloMainCommand())
 
-//        registerCommands(
-//            HubCommand(coreBaseApi.playerService),
-//            LanguageCommand(coreBaseApi.languageColorService, coreBaseApi.languagePropertiesService, coreBaseApi.languageController)
-//        )
+        registerCommands(
+            HubCommand(coreBaseApi.playerService),
+            // LanguageCommand(coreBaseApi.languageColorService, coreBaseApi.languagePropertiesService, coreBaseApi.languageController)
+        )
     }
 
     companion object {

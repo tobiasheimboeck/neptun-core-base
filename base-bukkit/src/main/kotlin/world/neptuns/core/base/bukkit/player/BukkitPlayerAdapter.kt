@@ -1,26 +1,22 @@
 package world.neptuns.core.base.bukkit.player
 
+import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.kyori.adventure.title.Title
-import org.bukkit.Bukkit
-import org.bukkit.entity.Player
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.command.NeptunCommandPlatform
 import world.neptuns.core.base.api.language.Language
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.properties.LanguageProperties
 import world.neptuns.core.base.api.player.PlayerAdapter
+import world.neptuns.core.base.api.player.extension.uuid
 import world.neptuns.core.base.api.util.NeptunPlugin
 import world.neptuns.core.base.common.packet.*
 import world.neptuns.streamline.api.NeptunStreamlineProvider
 import world.neptuns.streamline.api.packet.NetworkChannelRegistry
 import java.util.*
 
-class BukkitPlayerAdapter(override val pluginAdapter: NeptunPlugin) : PlayerAdapter<Player> {
-
-    override fun getMinecraftPlayer(uuid: UUID): Player? {
-        return Bukkit.getPlayer(uuid)
-    }
+class BukkitPlayerAdapter(override val pluginAdapter: NeptunPlugin) : PlayerAdapter {
 
     override suspend fun transferPlayerToPlayersService(uuid: UUID, targetUuid: UUID) {
         val targetPlayer = NeptunCoreProvider.api.playerService.getOnlinePlayer(targetUuid) ?: return
@@ -47,34 +43,34 @@ class BukkitPlayerAdapter(override val pluginAdapter: NeptunPlugin) : PlayerAdap
         NeptunStreamlineProvider.api.packetController.sendPacket(PlayerTeleportToPlayerPacket(uuid, targetUuid))
     }
 
-    override suspend fun executeCommand(platform: NeptunCommandPlatform, player: Player, command: String) {
+    override suspend fun executeCommand(platform: NeptunCommandPlatform, audience: Audience, command: String) {
         val channel = if (platform == NeptunCommandPlatform.VELOCITY) NetworkChannelRegistry.PROXY else NetworkChannelRegistry.SERVICE
-        NeptunStreamlineProvider.api.packetController.sendPacket(PlayerPerformCommandPacket(channel, player.uniqueId, command))
+        NeptunStreamlineProvider.api.packetController.sendPacket(PlayerPerformCommandPacket(channel, audience.uuid, command))
     }
 
-    override suspend fun sendPlayerListHeader(player: Player, key: LineKey, vararg toReplace: TagResolver) {
-        validateLanguageProperties(player.uniqueId) { properties, language ->
-            player.sendPlayerListHeader(language.line(properties, key, *toReplace))
+    override suspend fun sendPlayerListHeader(audience: Audience, key: LineKey, vararg toReplace: TagResolver) {
+        validateLanguageProperties(audience.uuid) { properties, language ->
+            audience.sendPlayerListHeader(language.line(properties, key, *toReplace))
         }
     }
 
-    override suspend fun sendPlayerListFooter(player: Player, key: LineKey, vararg toReplace: TagResolver) {
-        validateLanguageProperties(player.uniqueId) { properties, language ->
-            player.sendPlayerListFooter(language.line(properties, key, *toReplace))
+    override suspend fun sendPlayerListFooter(audience: Audience, key: LineKey, vararg toReplace: TagResolver) {
+        validateLanguageProperties(audience.uuid) { properties, language ->
+            audience.sendPlayerListFooter(language.line(properties, key, *toReplace))
         }
     }
 
-    override suspend fun sendTitle(player: Player, key: LineKey, vararg toReplace: TagResolver) {
-        validateLanguageProperties(player.uniqueId) { properties, language ->
+    override suspend fun sendTitle(audience: Audience, key: LineKey, vararg toReplace: TagResolver) {
+        validateLanguageProperties(audience.uuid) { properties, language ->
             val components = if (language.hasMultipleLines(key)) language.lines(properties, key, *toReplace) else listOf(language.line(properties, key, *toReplace))
-            repeat(components.size) { player.showTitle(Title.title(components[0], components[1])) }
+            repeat(components.size) { audience.showTitle(Title.title(components[0], components[1])) }
         }
     }
 
-    override suspend fun sendActionBar(player: Player, key: LineKey, vararg toReplace: TagResolver) {
-        validateLanguageProperties(player.uniqueId) { properties, language ->
+    override suspend fun sendActionBar(audience: Audience, key: LineKey, vararg toReplace: TagResolver) {
+        validateLanguageProperties(audience.uuid) { properties, language ->
             val components = if (language.hasMultipleLines(key)) language.lines(properties, key, *toReplace) else listOf(language.line(properties, key, *toReplace))
-            player.showTitle(Title.title(components[0], components[1]))
+            audience.showTitle(Title.title(components[0], components[1]))
         }
     }
 
@@ -82,10 +78,10 @@ class BukkitPlayerAdapter(override val pluginAdapter: NeptunPlugin) : PlayerAdap
         NeptunStreamlineProvider.api.packetController.sendPacket(MessageToPlayerPacket(uuid, key.asString(), toReplace))
     }
 
-    override suspend fun sendMessage(player: Player, key: LineKey, vararg toReplace: TagResolver) {
-        validateLanguageProperties(player.uniqueId) { properties, language ->
+    override suspend fun sendMessage(audience: Audience, key: LineKey, vararg toReplace: TagResolver) {
+        validateLanguageProperties(audience.uuid) { properties, language ->
             val components = if (language.hasMultipleLines(key)) language.lines(properties, key, *toReplace) else listOf(language.line(properties, key, *toReplace))
-            components.forEach(player::sendMessage)
+            components.forEach(audience::sendMessage)
         }
     }
 

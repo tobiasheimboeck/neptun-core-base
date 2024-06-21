@@ -8,14 +8,14 @@ import world.neptuns.streamline.api.NeptunStreamlineProvider
 
 class NeptunCommandControllerImpl : NeptunCommandController {
 
-    override val commandInitializer: MutableMap<String, NeptunMainCommandExecutor> = mutableMapOf()
+    override val commandExecutors: MutableMap<String, NeptunMainCommandExecutor> = mutableMapOf()
     override val commands: MutableList<NeptunCommand> = mutableListOf()
 
-    override fun registerCommand(initializer: NeptunMainCommandExecutor): NeptunCommand {
-        val neptunCommandAnnotation = initializer::class.java.getAnnotation(NeptunCommand::class.java)
+    override fun registerCommand(executor: NeptunMainCommandExecutor): NeptunCommand {
+        val neptunCommandAnnotation = executor::class.java.getAnnotation(NeptunCommand::class.java)
             ?: throw NullPointerException("Command class needs to have to @NeptunCommand annotation!")
 
-        this.commandInitializer[neptunCommandAnnotation.name] = initializer
+        this.commandExecutors[neptunCommandAnnotation.name] = executor
         this.commands.add(neptunCommandAnnotation)
 
         NeptunStreamlineProvider.api.eventController.fire(NeptunCommandRegisteredEvent(neptunCommandAnnotation))
@@ -23,7 +23,7 @@ class NeptunCommandControllerImpl : NeptunCommandController {
     }
 
     override fun getCommandInitializer(name: String): NeptunMainCommandExecutor? {
-        return this.commandInitializer.values.stream().filter { initializer: NeptunMainCommandExecutor? ->
+        return this.commandExecutors.values.stream().filter { initializer: NeptunMainCommandExecutor? ->
             val properties = initializer?.javaClass?.getAnnotation(NeptunCommand::class.java)
             initializer!!.javaClass.getAnnotation(NeptunCommand::class.java) != null && name.isNotEmpty() && (properties?.name == name || properties?.aliases?.contains(name) ?: false)
         }.findFirst().orElse(null)

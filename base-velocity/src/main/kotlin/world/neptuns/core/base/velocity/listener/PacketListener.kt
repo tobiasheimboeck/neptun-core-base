@@ -1,6 +1,5 @@
 package world.neptuns.core.base.velocity.listener
 
-import com.velocitypowered.api.proxy.Player
 import com.velocitypowered.api.proxy.ProxyServer
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
@@ -14,12 +13,11 @@ import world.neptuns.streamline.api.packet.NetworkChannelRegistry
 internal class PacketListener(private val proxyServer: ProxyServer) {
 
     private val packetController = NeptunStreamlineProvider.api.packetController
+    private val playerAdapter = NeptunCoreProvider.api.getPlayerAdapter()
 
     suspend fun listen() {
         this.packetController.listenForPacket(NetworkChannelRegistry.PROXY, MessageToPlayerPacket::class.java) { packet ->
             val player = this.proxyServer.getPlayer(packet.uuid).orElse(null)
-            val playerAdapter = NeptunCoreProvider.api.getPlayerAdapter(Player::class.java)
-
             val placeholders = mutableListOf<TagResolver>()
 
             for (placeholderAsString in packet.toReplace) {
@@ -32,7 +30,6 @@ internal class PacketListener(private val proxyServer: ProxyServer) {
 
         this.packetController.listenForPacket(NetworkChannelRegistry.PROXY, PlayerConnectToServicePacket::class.java) { packet ->
             val player = this.proxyServer.getPlayer(packet.uuid).orElse(null)
-            val playerAdapter = NeptunCoreProvider.api.getPlayerAdapter(Player::class.java)
 
             if (packet.isLobbyRequest) {
                 playerAdapter.transferPlayerToLobby(player.uniqueId)

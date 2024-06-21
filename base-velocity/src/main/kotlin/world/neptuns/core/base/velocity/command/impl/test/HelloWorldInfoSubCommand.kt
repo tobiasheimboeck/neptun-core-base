@@ -9,7 +9,7 @@ import world.neptuns.core.base.api.command.extension.generateSuggestions
 import world.neptuns.core.base.api.command.subcommand.NeptunSubCommand
 import world.neptuns.core.base.api.command.subcommand.NeptunSubCommandExecutor
 
-@NeptunSubCommand(length = 4, parts = "world info {name} {age}")
+@NeptunSubCommand(length = 4, parts = "world info [name] [age]")
 class HelloWorldInfoSubCommand : NeptunSubCommandExecutor {
 
     override suspend fun execute(sender: NeptunCommandSender, args: List<String>) {

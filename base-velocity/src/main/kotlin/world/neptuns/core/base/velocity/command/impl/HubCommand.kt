@@ -11,16 +11,14 @@ import world.neptuns.core.base.api.command.subcommand.NeptunSubCommandExecutor
 import world.neptuns.core.base.api.player.NeptunPlayerService
 
 @NeptunCommand(NeptunCommandPlatform.VELOCITY, name = "hub", aliases = ["lobby", "l"])
-class HubMainCommand(
-    private val playerController: NeptunPlayerService,
-) : NeptunMainCommandExecutor() {
+class HubCommand(private val playerService: NeptunPlayerService) : NeptunMainCommandExecutor() {
 
     override suspend fun defaultExecute(sender: NeptunCommandSender) {
         val player = sender.castTo(Player::class.java) ?: return
 
-        val playerAdapter = NeptunCoreProvider.api.getPlayerAdapter(Player::class.java)
+        val playerAdapter = NeptunCoreProvider.api.getPlayerAdapter()
 
-        val onlinePlayer = this.playerController.getOnlinePlayer(player.uniqueId) ?: return
+        val onlinePlayer = this.playerService.getOnlinePlayer(player.uniqueId) ?: return
 
         val currentServiceName = onlinePlayer.currentServiceName
         val neptunService = NeptunControllerProvider.api.serviceController.getService(currentServiceName) ?: return
@@ -34,7 +32,8 @@ class HubMainCommand(
         playerAdapter.transferPlayerToLobby(player.uniqueId)
     }
 
-    override suspend fun onDefaultTabComplete(sender: NeptunCommandSender, args: List<String>): List<String> = emptyList()
+    override suspend fun onDefaultTabComplete(sender: NeptunCommandSender, args: List<String>): List<String> =
+        emptyList()
 
     override fun initSubCommands(subCommandExecutors: MutableList<NeptunSubCommandExecutor>) {
 

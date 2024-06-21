@@ -16,7 +16,7 @@ import world.neptuns.core.base.common.packet.LanguagePropertiesChangePacket
 import world.neptuns.streamline.api.NeptunStreamlineProvider
 
 @NeptunCommand(platform = NeptunCommandPlatform.VELOCITY, "language", "core.language", ["lang"])
-class LanguageMainCommand(
+class LanguageCommand(
     private val languageColorService: LanguageColorService,
     private val languagePropertiesService: LanguagePropertiesService,
     private val languageController: LanguageController,
@@ -25,7 +25,7 @@ class LanguageMainCommand(
     override suspend fun defaultExecute(sender: NeptunCommandSender) {
         val player = sender.castTo(Player::class.java) ?: return
 
-        val playerAdapter = NeptunCoreProvider.api.getPlayerAdapter(Player::class.java)
+        val playerAdapter = NeptunCoreProvider.api.getPlayerAdapter()
 
         val properties = this.languagePropertiesService.getProperties(player.uniqueId) ?: return
 

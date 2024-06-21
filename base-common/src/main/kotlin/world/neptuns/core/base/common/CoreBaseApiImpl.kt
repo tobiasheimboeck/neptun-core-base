@@ -52,7 +52,7 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
     override val languagePropertiesService: LanguagePropertiesService
     override val playerService: NeptunPlayerService
 
-    private lateinit var playerAdapter: PlayerAdapter<*>
+    private lateinit var playerAdapter: PlayerAdapter
 
     override val commandController: NeptunCommandController = NeptunCommandControllerImpl()
     private lateinit var commandExecutorClass: Class<*>
@@ -95,13 +95,12 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
         return LanguageColorImpl(name, permission, hexFormat, CurrencyRegistry.Default.CRYSTALS, price)
     }
 
-    override fun <T> registerPlayerAdapter(playerAdapter: PlayerAdapter<T>) {
+    override fun registerPlayerAdapter(playerAdapter: PlayerAdapter) {
         this.playerAdapter = playerAdapter
     }
 
-    @Suppress("UNCHECKED_CAST")
-    override fun <T> getPlayerAdapter(clazz: Class<T>): PlayerAdapter<T> {
-        return this.playerAdapter as PlayerAdapter<T>
+    override fun getPlayerAdapter(): PlayerAdapter {
+        return this.playerAdapter
     }
 
     override fun <T> registerCommandExecutorClass(clazz: Class<T>) {

@@ -28,6 +28,16 @@ abstract class NeptunMainCommandExecutor : NeptunCommandCompletable {
 
     abstract fun initSubCommands(subCommandExecutors: MutableList<NeptunSubCommandExecutor>)
 
+    fun findSubCommandParts(): List<String> {
+        val subCommandParts = mutableListOf<String>()
+
+        for ((neptunSubCommand, _) in this.subCommands) {
+            subCommandParts.add(neptunSubCommand.parts)
+        }
+
+        return subCommandParts
+    }
+
     fun findValidSubCommandData(args: List<String>): Pair<NeptunSubCommandExecutor, NeptunSubCommand>? {
         var resultSubCommandExecutor: NeptunSubCommandExecutor? = null
         var subCommandResult: NeptunSubCommand? = null
@@ -35,7 +45,7 @@ abstract class NeptunMainCommandExecutor : NeptunCommandCompletable {
         for ((neptunSubCommand, subCommandExecutor) in this.subCommands) {
             val subCommandParts = neptunSubCommand.parts.split(" ")
 
-            val correctedSubCommandParts = subCommandParts.filter { !it.contains("{") && !it.contains("}") }
+            val correctedSubCommandParts = subCommandParts.filter { !it.contains("<") && !it.contains(">") && !it.contains("[") && !it.contains("]") }
 
             if (!args.containsAll(correctedSubCommandParts)) continue
             if (neptunSubCommand.length != -1 && args.size != neptunSubCommand.length) continue
