@@ -15,7 +15,7 @@ import world.neptuns.core.base.api.language.properties.LanguagePropertiesService
 import world.neptuns.core.base.common.packet.LanguagePropertiesChangePacket
 import world.neptuns.streamline.api.NeptunStreamlineProvider
 
-@NeptunCommand(platform = NeptunCommandPlatform.VELOCITY, "language", "core.language", ["lang"])
+@NeptunCommand(platform = NeptunCommandPlatform.VELOCITY, "language", title = "Language System", "core.language", ["lang"])
 class LanguageCommand(
     private val languageColorService: LanguageColorService,
     private val languagePropertiesService: LanguagePropertiesService,
@@ -43,7 +43,8 @@ class LanguageCommand(
         playerAdapter.sendMessage(player, "core.base.language.key_change", Placeholder.parsed("name", properties.langKey.asString()))
     }
 
-    override suspend fun onDefaultTabComplete(sender: NeptunCommandSender, args: List<String>): List<String> = emptyList()
+    override suspend fun onDefaultTabComplete(sender: NeptunCommandSender, args: List<String>): List<String> =
+        emptyList()
 
     override fun initSubCommands(subCommandExecutors: MutableList<NeptunSubCommandExecutor>) {
 

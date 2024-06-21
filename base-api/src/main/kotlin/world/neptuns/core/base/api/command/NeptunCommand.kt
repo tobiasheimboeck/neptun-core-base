@@ -5,6 +5,7 @@ package world.neptuns.core.base.api.command
 annotation class NeptunCommand (
     val platform: NeptunCommandPlatform,
     val name: String,
+    val title: String,
     val permission: String = "",
     val aliases: Array<String> = []
 )

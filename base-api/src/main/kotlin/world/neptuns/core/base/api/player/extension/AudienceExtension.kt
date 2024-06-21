@@ -3,6 +3,7 @@ package world.neptuns.core.base.api.player.extension
 import kotlinx.coroutines.Deferred
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.identity.Identity
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.language.LineKey
@@ -13,11 +14,19 @@ import java.util.*
 val Audience.uuid: UUID
     get() = this.pointers().get(Identity.UUID).get()
 
-suspend fun Audience.toOnlinePlayer(): NeptunOnlinePlayer =
-    NeptunCoreProvider.api.playerService.getOnlinePlayer(uuid)!!
+val Audience.name: String
+    get() = this.pointers().get(Identity.NAME).get()
 
-suspend fun Audience.toOfflinePlayer(): Deferred<NeptunOfflinePlayer?> =
-    NeptunCoreProvider.api.playerService.getOfflinePlayerAsync(uuid)
+val Audience.displayName: Component
+    get() = this.pointers().get(Identity.DISPLAY_NAME).get()
+
+suspend fun Audience.toOnlinePlayer(): NeptunOnlinePlayer {
+    return NeptunCoreProvider.api.playerService.getOnlinePlayer(uuid)!!
+}
+
+suspend fun Audience.toOfflinePlayer(): Deferred<NeptunOfflinePlayer?> {
+    return NeptunCoreProvider.api.playerService.getOfflinePlayerAsync(uuid)
+}
 
 suspend fun Audience.sendMessage(key: LineKey, vararg toReplace: TagResolver) {
     getPlayerAdapter().sendMessage(this, key, *toReplace)

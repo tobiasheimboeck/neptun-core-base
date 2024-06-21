@@ -11,7 +11,7 @@ import world.neptuns.core.base.api.command.extension.generateSuggestions
 import world.neptuns.core.base.api.command.extension.sendUsageFormatted
 import world.neptuns.core.base.api.command.subcommand.NeptunSubCommandExecutor
 
-@NeptunCommand(NeptunCommandPlatform.VELOCITY, name = "hello")
+@NeptunCommand(NeptunCommandPlatform.VELOCITY, name = "hello", title = "Test System")
 class HelloMainCommand : NeptunMainCommandExecutor() {
 
     private val playerAdapter = NeptunCoreProvider.api.getPlayerAdapter()

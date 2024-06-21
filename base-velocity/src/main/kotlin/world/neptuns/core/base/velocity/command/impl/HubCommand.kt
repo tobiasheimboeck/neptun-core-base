@@ -10,7 +10,7 @@ import world.neptuns.core.base.api.command.NeptunMainCommandExecutor
 import world.neptuns.core.base.api.command.subcommand.NeptunSubCommandExecutor
 import world.neptuns.core.base.api.player.NeptunPlayerService
 
-@NeptunCommand(NeptunCommandPlatform.VELOCITY, name = "hub", aliases = ["lobby", "l"])
+@NeptunCommand(NeptunCommandPlatform.VELOCITY, name = "hub", title = "Server System", aliases = ["lobby", "l"])
 class HubCommand(private val playerService: NeptunPlayerService) : NeptunMainCommandExecutor() {
 
     override suspend fun defaultExecute(sender: NeptunCommandSender) {
