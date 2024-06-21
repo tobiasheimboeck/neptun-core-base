@@ -1,48 +1,47 @@
 package world.neptuns.core.base.api.player
 
+import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import world.neptuns.core.base.api.command.NeptunCommandPlatform
 import world.neptuns.core.base.api.language.LineKey
-import world.neptuns.core.base.api.utils.NeptunPlugin
+import world.neptuns.core.base.api.util.NeptunPlugin
 import java.util.*
 
-interface PlayerAdapter<T> {
+interface PlayerAdapter {
 
     val pluginAdapter: NeptunPlugin
-
-    fun getMinecraftPlayer(uuid: UUID): T?
 
     suspend fun sendGlobalMessage(uuid: UUID, key: LineKey, toReplace: List<Pair<String, String>>)
     suspend fun sendGlobalMessage(uuid: UUID, key: String, toReplace: List<Pair<String, String>>) {
         sendGlobalMessage(uuid, LineKey.key(pluginAdapter.namespace, key), toReplace)
     }
 
-    suspend fun sendMessage(player: T, key: LineKey, vararg toReplace: TagResolver)
-    suspend fun sendMessage(player: T, key: String, vararg toReplace: TagResolver) {
-        sendMessage(player, LineKey.key(pluginAdapter.namespace, key), *toReplace)
+    suspend fun sendMessage(audience: Audience, key: LineKey, vararg toReplace: TagResolver)
+    suspend fun sendMessage(audience: Audience, key: String, vararg toReplace: TagResolver) {
+        sendMessage(audience, LineKey.key(pluginAdapter.namespace, key), *toReplace)
     }
 
-    suspend fun sendActionBar(player: T, key: LineKey, vararg toReplace: TagResolver)
-    suspend fun sendActionBar(player: T, key: String, vararg toReplace: TagResolver) {
-        sendActionBar(player, LineKey.key(pluginAdapter.namespace, key), *toReplace)
+    suspend fun sendActionBar(audience: Audience, key: LineKey, vararg toReplace: TagResolver)
+    suspend fun sendActionBar(audience: Audience, key: String, vararg toReplace: TagResolver) {
+        sendActionBar(audience, LineKey.key(pluginAdapter.namespace, key), *toReplace)
     }
 
-    suspend fun sendTitle(player: T, key: LineKey, vararg toReplace: TagResolver)
-    suspend fun sendTitle(player: T, key: String, vararg toReplace: TagResolver) {
-        sendTitle(player, LineKey.key(pluginAdapter.namespace, key), *toReplace)
+    suspend fun sendTitle(audience: Audience, key: LineKey, vararg toReplace: TagResolver)
+    suspend fun sendTitle(audience: Audience, key: String, vararg toReplace: TagResolver) {
+        sendTitle(audience, LineKey.key(pluginAdapter.namespace, key), *toReplace)
     }
 
-    suspend fun sendPlayerListHeader(player: T, key: LineKey, vararg toReplace: TagResolver)
-    suspend fun sendPlayerListHeader(player: T, key: String, vararg toReplace: TagResolver) {
-        sendPlayerListHeader(player, LineKey.key(pluginAdapter.namespace, key), *toReplace)
+    suspend fun sendPlayerListHeader(audience: Audience, key: LineKey, vararg toReplace: TagResolver)
+    suspend fun sendPlayerListHeader(audience: Audience, key: String, vararg toReplace: TagResolver) {
+        sendPlayerListHeader(audience, LineKey.key(pluginAdapter.namespace, key), *toReplace)
     }
 
-    suspend fun sendPlayerListFooter(player: T, key: LineKey, vararg toReplace: TagResolver)
-    suspend fun sendPlayerListFooter(player: T, key: String, vararg toReplace: TagResolver) {
-        sendPlayerListFooter(player, LineKey.key(pluginAdapter.namespace, key), *toReplace)
+    suspend fun sendPlayerListFooter(audience: Audience, key: LineKey, vararg toReplace: TagResolver)
+    suspend fun sendPlayerListFooter(audience: Audience, key: String, vararg toReplace: TagResolver) {
+        sendPlayerListFooter(audience, LineKey.key(pluginAdapter.namespace, key), *toReplace)
     }
 
-    suspend fun executeCommand(platform: NeptunCommandPlatform, player: T, command: String)
+    suspend fun executeCommand(platform: NeptunCommandPlatform, audience: Audience, command: String)
 
     suspend fun transferPlayerToPlayersService(uuid: UUID, targetUuid: UUID)
     suspend fun transferPlayerToService(uuid: UUID, serviceName: String)

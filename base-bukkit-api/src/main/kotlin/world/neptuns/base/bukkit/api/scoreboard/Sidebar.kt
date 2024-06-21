@@ -7,7 +7,7 @@ import org.bukkit.scoreboard.Criteria
 import org.bukkit.scoreboard.DisplaySlot
 import org.bukkit.scoreboard.Objective
 import org.bukkit.scoreboard.Scoreboard
-import world.neptuns.base.bukkit.api.utils.ScoreboardUtils
+import world.neptuns.base.bukkit.api.util.ScoreboardUtil
 
 class Sidebar(val viewer: Player, private val title: Component, private val lines: Map<Int, Component>) {
 
@@ -55,7 +55,7 @@ class Sidebar(val viewer: Player, private val title: Component, private val line
 
         for (line: Map.Entry<Int, Component> in this.lines.entries) {
             val lineId: Int = line.key
-            val team = ScoreboardUtils.registerScoreboardTeamWithContent(this.scoreboard, "x$lineId", Component.text(""), Component.text(""))
+            val team = ScoreboardUtil.registerScoreboardTeamWithContent(this.scoreboard, "x$lineId", Component.text(""), Component.text(""))
 
             val entryName: String = if (lineId < 10) "§$lineId§7" else "§${getColorCodeByName(lineId)}§7"
             if (team.hasEntry(entryName)) return

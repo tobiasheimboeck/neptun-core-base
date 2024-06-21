@@ -2,11 +2,11 @@ package world.neptuns.core.base.api.command
 
 interface NeptunCommandController {
 
-    val commandExecutors: MutableMap<String, NeptunCommandExecutor>
+    val commandExecutors: MutableMap<String, NeptunMainCommandExecutor>
     val commands: MutableList<NeptunCommand>
 
-    fun registerCommand(executor: NeptunCommandExecutor): NeptunCommand
+    fun registerCommand(executor: NeptunMainCommandExecutor): NeptunCommand
 
-    fun getCommandExecutor(name: String): NeptunCommandExecutor?
+    fun getCommandInitializer(name: String): NeptunMainCommandExecutor?
 
 }

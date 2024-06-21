@@ -1,7 +1,7 @@
 package world.neptuns.core.base.api
 
 import world.neptuns.core.base.api.command.NeptunCommandController
-import world.neptuns.core.base.api.command.NeptunCommandExecutor
+import world.neptuns.core.base.api.command.NeptunMainCommandExecutor
 import world.neptuns.core.base.api.file.FileService
 import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.LangNamespace
@@ -13,7 +13,7 @@ import world.neptuns.core.base.api.language.properties.LanguagePropertiesService
 import world.neptuns.core.base.api.language.properties.default.DefaultLanguageProperties
 import world.neptuns.core.base.api.player.NeptunPlayerService
 import world.neptuns.core.base.api.player.PlayerAdapter
-import world.neptuns.core.base.api.utils.PageConverter
+import world.neptuns.core.base.api.util.PageConverter
 import java.nio.file.Path
 import kotlin.coroutines.CoroutineContext
 
@@ -37,11 +37,11 @@ interface CoreBaseApi {
 
     fun newLanguageColor(name: LineKey, permission: String?, hexFormat: String, price: Long): LanguageColor
 
-    fun <T> registerPlayerAdapter(playerAdapter: PlayerAdapter<T>)
-    fun <T> getPlayerAdapter(clazz: Class<T>): PlayerAdapter<T>
+    fun registerPlayerAdapter(playerAdapter: PlayerAdapter)
+    fun getPlayerAdapter(): PlayerAdapter
 
     fun <T> registerCommandExecutorClass(clazz: Class<T>)
-    fun registerCommand(commandExecutor: NeptunCommandExecutor)
+    fun registerInitializer(initializer: NeptunMainCommandExecutor)
 
     fun <T> newPageConverter(data: List<T>): PageConverter<T>
 

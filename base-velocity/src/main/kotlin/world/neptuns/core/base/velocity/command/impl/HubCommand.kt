@@ -4,23 +4,21 @@ import com.velocitypowered.api.proxy.Player
 import world.neptuns.controller.api.NeptunControllerProvider
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.command.NeptunCommand
-import world.neptuns.core.base.api.command.NeptunCommandExecutor
 import world.neptuns.core.base.api.command.NeptunCommandPlatform
 import world.neptuns.core.base.api.command.NeptunCommandSender
+import world.neptuns.core.base.api.command.NeptunMainCommandExecutor
+import world.neptuns.core.base.api.command.subcommand.NeptunSubCommandExecutor
 import world.neptuns.core.base.api.player.NeptunPlayerService
 
-@NeptunCommand(NeptunCommandPlatform.VELOCITY, name = "hub", aliases = ["lobby", "l"])
-class HubCommand(
-    private val playerController: NeptunPlayerService
-) : NeptunCommandExecutor {
+@NeptunCommand(NeptunCommandPlatform.VELOCITY, name = "hub", title = "Server System", aliases = ["lobby", "l"])
+class HubCommand(private val playerService: NeptunPlayerService) : NeptunMainCommandExecutor() {
 
-    override suspend fun execute(sender: NeptunCommandSender, args: List<String>) {
-        if (!sender.isPlayer()) return
+    override suspend fun defaultExecute(sender: NeptunCommandSender) {
+        val player = sender.castTo(Player::class.java) ?: return
 
-        val player = sender.castTo(Player::class.java)
-        val playerAdapter = NeptunCoreProvider.api.getPlayerAdapter(Player::class.java)
+        val playerAdapter = NeptunCoreProvider.api.getPlayerAdapter()
 
-        val onlinePlayer = this.playerController.getOnlinePlayer(player.uniqueId) ?: return
+        val onlinePlayer = this.playerService.getOnlinePlayer(player.uniqueId) ?: return
 
         val currentServiceName = onlinePlayer.currentServiceName
         val neptunService = NeptunControllerProvider.api.serviceController.getService(currentServiceName) ?: return
@@ -34,12 +32,11 @@ class HubCommand(
         playerAdapter.transferPlayerToLobby(player.uniqueId)
     }
 
-    override fun sendUsage(sender: NeptunCommandSender) {
+    override suspend fun onDefaultTabComplete(sender: NeptunCommandSender, args: List<String>): List<String> =
+        emptyList()
 
-    }
+    override fun initSubCommands(subCommandExecutors: MutableList<NeptunSubCommandExecutor>) {
 
-    override suspend fun onTabComplete(sender: NeptunCommandSender, args: List<String>): List<String> {
-        return emptyList()
     }
 
 }

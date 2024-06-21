@@ -5,7 +5,6 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 import world.neptuns.base.bukkit.api.hotbar.HotbarItem
 import world.neptuns.base.bukkit.api.hotbar.builder.HotbarItemBuilder
-import world.neptuns.base.bukkit.api.item.ItemBuilder
 import world.neptuns.core.base.bukkit.api.hotbar.HotbarItemImpl
 
 class HotbarItemBuilderImpl : HotbarItemBuilder {
@@ -25,8 +24,8 @@ class HotbarItemBuilderImpl : HotbarItemBuilder {
         return this
     }
 
-    override fun item(itemBuilder: ItemBuilder): HotbarItemBuilder {
-        this.itemStack = itemBuilder.build()
+    override fun item(itemStack: ItemStack): HotbarItemBuilder {
+        this.itemStack = itemStack
         return this
     }
 

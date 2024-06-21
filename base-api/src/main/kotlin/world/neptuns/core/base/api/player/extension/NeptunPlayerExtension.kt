@@ -1,4 +1,4 @@
-package world.neptuns.core.base.api.extension
+package world.neptuns.core.base.api.player.extension
 
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.language.Language

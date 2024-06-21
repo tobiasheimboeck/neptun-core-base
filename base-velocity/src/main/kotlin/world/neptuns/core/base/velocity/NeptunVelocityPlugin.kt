@@ -12,11 +12,11 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory
 import com.velocitypowered.api.proxy.ProxyServer
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.language.LangNamespace
-import world.neptuns.core.base.api.utils.NeptunPlugin
+import world.neptuns.core.base.api.util.NeptunPlugin
 import world.neptuns.core.base.common.CoreBaseApiImpl
 import world.neptuns.core.base.velocity.command.VelocityCommandExecutorAsync
 import world.neptuns.core.base.velocity.command.impl.HubCommand
-import world.neptuns.core.base.velocity.command.impl.LanguageCommand
+import world.neptuns.core.base.velocity.command.impl.test.HelloMainCommand
 import world.neptuns.core.base.velocity.listener.PacketListener
 import world.neptuns.core.base.velocity.listener.VelocityPlayerListener
 import world.neptuns.core.base.velocity.player.VelocityPlayerAdapter
@@ -62,9 +62,11 @@ class NeptunVelocityPlugin @Inject constructor(
 
         this.proxyServer.eventManager.registerSuspend(this, VelocityPlayerListener(coreBaseApi.playerService, coreBaseApi.languagePropertiesService))
 
+        registerCommand(HelloMainCommand())
+
         registerCommands(
             HubCommand(coreBaseApi.playerService),
-            LanguageCommand(coreBaseApi.languageColorService, coreBaseApi.languagePropertiesService, coreBaseApi.languageController)
+            // LanguageCommand(coreBaseApi.languageColorService, coreBaseApi.languagePropertiesService, coreBaseApi.languageController)
         )
     }
 

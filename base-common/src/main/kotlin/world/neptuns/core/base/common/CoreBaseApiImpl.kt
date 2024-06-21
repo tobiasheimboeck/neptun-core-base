@@ -6,7 +6,7 @@ import world.neptuns.controller.api.NeptunControllerProvider
 import world.neptuns.core.base.api.CoreBaseApi
 import world.neptuns.core.base.api.command.NeptunCommand
 import world.neptuns.core.base.api.command.NeptunCommandController
-import world.neptuns.core.base.api.command.NeptunCommandExecutor
+import world.neptuns.core.base.api.command.NeptunMainCommandExecutor
 import world.neptuns.core.base.api.currency.CurrencyRegistry
 import world.neptuns.core.base.api.file.FileService
 import world.neptuns.core.base.api.language.LangKey
@@ -18,7 +18,7 @@ import world.neptuns.core.base.api.language.color.LanguageColorService
 import world.neptuns.core.base.api.language.properties.LanguagePropertiesService
 import world.neptuns.core.base.api.player.NeptunPlayerService
 import world.neptuns.core.base.api.player.PlayerAdapter
-import world.neptuns.core.base.api.utils.PageConverter
+import world.neptuns.core.base.api.util.PageConverter
 import world.neptuns.core.base.common.api.command.NeptunCommandControllerImpl
 import world.neptuns.core.base.common.api.file.FileControllerImpl
 import world.neptuns.core.base.common.api.language.LangKeyImpl
@@ -52,7 +52,7 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
     override val languagePropertiesService: LanguagePropertiesService
     override val playerService: NeptunPlayerService
 
-    private lateinit var playerAdapter: PlayerAdapter<*>
+    private lateinit var playerAdapter: PlayerAdapter
 
     override val commandController: NeptunCommandController = NeptunCommandControllerImpl()
     private lateinit var commandExecutorClass: Class<*>
@@ -95,21 +95,20 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
         return LanguageColorImpl(name, permission, hexFormat, CurrencyRegistry.Default.CRYSTALS, price)
     }
 
-    override fun <T> registerPlayerAdapter(playerAdapter: PlayerAdapter<T>) {
+    override fun registerPlayerAdapter(playerAdapter: PlayerAdapter) {
         this.playerAdapter = playerAdapter
     }
 
-    @Suppress("UNCHECKED_CAST")
-    override fun <T> getPlayerAdapter(clazz: Class<T>): PlayerAdapter<T> {
-        return this.playerAdapter as PlayerAdapter<T>
+    override fun getPlayerAdapter(): PlayerAdapter {
+        return this.playerAdapter
     }
 
     override fun <T> registerCommandExecutorClass(clazz: Class<T>) {
         this.commandExecutorClass = clazz
     }
 
-    override fun registerCommand(commandExecutor: NeptunCommandExecutor) {
-        val neptunCommand = this.commandController.registerCommand(commandExecutor)
+    override fun registerInitializer(initializer: NeptunMainCommandExecutor) {
+        val neptunCommand = this.commandController.registerCommand(initializer)
         this.commandExecutorClass.getDeclaredConstructor(NeptunCommand::class.java).newInstance(neptunCommand)
     }
 
