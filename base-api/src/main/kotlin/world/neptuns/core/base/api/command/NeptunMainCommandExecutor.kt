@@ -56,7 +56,7 @@ abstract class NeptunMainCommandExecutor : NeptunCommandCompletable {
             break
         }
 
-        return if (resultSubCommandExecutor == null || subCommandResult == null) null else Pair(resultSubCommandExecutor, subCommandResult)
+        return if (resultSubCommandExecutor == null || subCommandResult == null) null else resultSubCommandExecutor to subCommandResult
     }
 
 }

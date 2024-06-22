@@ -21,6 +21,8 @@ interface Language {
 
     fun usage(properties: LanguageProperties, subCommands: List<String>, vararg toReplace: TagResolver): Pair<Component, Set<Component>>
 
+    fun <T> elementList(properties: LanguageProperties, elements: Collection<T>, stringProvider: (T) -> String): Pair<Component, Set<Component>>
+
     fun hasMultipleLines(lineKey: LineKey): Boolean
 
 }

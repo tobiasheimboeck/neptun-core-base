@@ -4,6 +4,8 @@ import com.velocitypowered.api.command.CommandSource
 import com.velocitypowered.api.proxy.Player
 import net.kyori.adventure.text.Component
 import world.neptuns.core.base.api.command.NeptunCommandSender
+import world.neptuns.core.base.api.player.extension.getLanguage
+import world.neptuns.core.base.api.player.extension.getLanguageProperties
 import world.neptuns.core.base.api.player.extension.uuid
 import java.util.*
 

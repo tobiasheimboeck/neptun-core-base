@@ -5,8 +5,11 @@ import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.identity.Identity
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
+import world.neptuns.core.base.api.CoreBaseApi
 import world.neptuns.core.base.api.NeptunCoreProvider
+import world.neptuns.core.base.api.language.Language
 import world.neptuns.core.base.api.language.LineKey
+import world.neptuns.core.base.api.language.properties.LanguageProperties
 import world.neptuns.core.base.api.player.NeptunOfflinePlayer
 import world.neptuns.core.base.api.player.NeptunOnlinePlayer
 import java.util.*
@@ -26,6 +29,26 @@ suspend fun Audience.toOnlinePlayer(): NeptunOnlinePlayer {
 
 suspend fun Audience.toOfflinePlayer(): Deferred<NeptunOfflinePlayer?> {
     return NeptunCoreProvider.api.playerService.getOfflinePlayerAsync(uuid)
+}
+
+suspend fun Audience.getLanguage(): Language {
+    val defaultLanguage = CoreBaseApi.defaultLanguage
+    val languageProperties = toOnlinePlayer().getLanguageProperties() ?: return defaultLanguage
+    return NeptunCoreProvider.api.languageController.getLanguage(languageProperties.langKey) ?: defaultLanguage
+}
+
+suspend fun Audience.getLanguageProperties(): LanguageProperties {
+    val languageProperties = toOnlinePlayer().getLanguageProperties() ?: return CoreBaseApi.defaultLangProperties
+    return languageProperties
+}
+
+suspend fun <T> Audience.sendElementList(elements: Collection<T>, stringProvider: (T) -> String) {
+    val language = getLanguage()
+    val properties = getLanguageProperties()
+
+    val pair = language.elementList(properties, elements, stringProvider)
+    sendMessage(pair.first)
+    pair.second.forEach { sendMessage(it) }
 }
 
 suspend fun Audience.sendMessage(key: LineKey, vararg toReplace: TagResolver) {

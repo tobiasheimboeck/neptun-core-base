@@ -47,6 +47,7 @@ interface CoreBaseApi {
 
     companion object {
         val defaultLangProperties = DefaultLanguageProperties()
+        val defaultLanguage = NeptunCoreProvider.api.languageController.getLanguage(defaultLangProperties.langKey)!!
     }
 
 }

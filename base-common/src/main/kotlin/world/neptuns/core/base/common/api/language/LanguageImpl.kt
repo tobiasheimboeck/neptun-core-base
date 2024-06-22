@@ -115,6 +115,18 @@ class LanguageImpl(override val key: LangKey, override val messages: MutableMap<
         return title to subCommandLines
     }
 
+    override fun <T> elementList(properties: LanguageProperties, elements: Collection<T>, stringProvider: (T) -> String): Pair<Component, Set<Component>> {
+        val title = line(properties, LineKey.key("core.base.element_list.title"))
+        val lines = mutableSetOf<Component>()
+
+        for (element in elements) {
+            val elementString = stringProvider(element)
+            lines.add(line(properties, LineKey.key("core.base.element_list"), Placeholder.parsed("string", elementString)))
+        }
+
+        return title to lines
+    }
+
     override fun hasMultipleLines(lineKey: LineKey): Boolean {
         return this.messages.entries.find { it.key.asString() == lineKey.asString() }?.value?.contains("\n")
             ?: return false

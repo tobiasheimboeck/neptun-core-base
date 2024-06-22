@@ -8,7 +8,9 @@ import world.neptuns.core.base.api.command.NeptunCommandSender
 import world.neptuns.core.base.api.command.NeptunMainCommandExecutor
 import world.neptuns.core.base.api.command.subcommand.NeptunSubCommand
 import world.neptuns.core.base.api.command.subcommand.NeptunSubCommandExecutor
+import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.properties.LanguageProperties
+import world.neptuns.core.base.api.player.extension.sendMessage
 import world.neptuns.core.base.api.util.DataTypeUtil
 
 suspend fun NeptunMainCommandExecutor.sendUsageFormatted(sender: NeptunCommandSender) {
@@ -29,12 +31,24 @@ fun NeptunMainCommandExecutor.sendUsageFormatted(sender: NeptunCommandSender, pr
     usage.second.forEach(sender::sendMessage)
 }
 
-inline fun <reified T> NeptunSubCommandExecutor.findArgument(audience: Audience, key: String, args: List<String>, dataType: Class<T>): T? {
-    var resultData: T? = null
+suspend inline fun <reified T> NeptunSubCommandExecutor.findArgument(audience: Audience, key: String, args: List<String>, dataType: Class<T>): T? {
+    val subCommandAnnotation = this::class.java.getAnnotation(NeptunSubCommand::class.java) ?: return null
+    val parts = subCommandAnnotation.parts.split(" ")
 
-    findArgument(audience, key, args, dataType) { resultData = it }
+    val strippedList = parts.map { it.replace(Regex("[<>\\[\\]]"), "") }
 
-    return resultData
+    val placeholderIndex = strippedList.indexOf(key)
+    val element = args.getOrNull(placeholderIndex) ?: return null
+
+    var resultData: Pair<T?, String?> = Pair(null, null)
+    DataTypeUtil.parseDataTypeNullable(dataType, element) { resultData = it }
+
+    if (resultData.first == null) {
+        audience.sendMessage(LineKey.coreKey("argument_type.invalid"), Placeholder.parsed("name", key), Placeholder.parsed("type", resultData.second!!))
+        return null
+    }
+
+    return resultData.first
 }
 
 inline fun <reified T> NeptunSubCommandExecutor.findArgument(audience: Audience, key: String, args: List<String>, dataType: Class<T>, result: (T?) -> Unit) {

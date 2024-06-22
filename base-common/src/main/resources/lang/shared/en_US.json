@@ -1,10 +1,15 @@
 {
-  "core.base.prefix.global": "<aqua>Network <gray>|",
-  "core.base.prefix": "<aqua><prefix_text> <gray>|",
+  "core.base.prefix.global": "<dark_gray>[<gold>Network<dark_gray>]",
+  "core.base.prefix": "<gray>[<gold><prefix_text><gray>]",
 
   "core.base.no_permission": "<prefix> <gray>You don't have the required permissions!",
-  "core.base.invalid_data_type": "<prefix> <white><type> <gray>required!",
+  "core.base.data_type.invalid": "<prefix> <white><type> <gray>required!",
+
+  "core.base.argument_type.invalid": "<prefix> <red><name> has to be an <type>!",
 
   "core.base.usage.title": "<gold>Command Overview <gray>(<title>)",
-  "core.base.usage": "<aqua><dark_gray>► <white>/<command>"
+  "core.base.usage": "<blue> <white>/<command>",
+
+  "core.base.element_list.title": "<prefix> <gray>All loaded elements:",
+  "core.base.element_list": "<blue>► <white><string>"
 }
