@@ -11,6 +11,11 @@ import world.neptuns.core.base.api.command.subcommand.NeptunSubCommandExecutor
 import world.neptuns.core.base.api.language.properties.LanguageProperties
 import world.neptuns.core.base.api.util.DataTypeUtil
 
+suspend fun NeptunMainCommandExecutor.sendUsageFormatted(sender: NeptunCommandSender) {
+    val properties = NeptunCoreProvider.api.languagePropertiesService.getProperties(sender.uuid) ?: return
+    sendUsageFormatted(sender, properties)
+}
+
 fun NeptunMainCommandExecutor.sendUsageFormatted(sender: NeptunCommandSender, properties: LanguageProperties) {
     val language = NeptunCoreProvider.api.languageController.getLanguage(properties.langKey) ?: return
     val subCommandParts: List<String> = findSubCommandParts()

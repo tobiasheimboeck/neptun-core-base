@@ -4,9 +4,13 @@ import com.velocitypowered.api.command.CommandSource
 import com.velocitypowered.api.proxy.Player
 import net.kyori.adventure.text.Component
 import world.neptuns.core.base.api.command.NeptunCommandSender
+import world.neptuns.core.base.api.player.extension.uuid
+import java.util.*
 
-@Suppress("KotlinConstantConditions")
 class VelocityCommandSender(private val commandSource: CommandSource) : NeptunCommandSender {
+
+    override val uuid: UUID
+        get() = this.commandSource.uuid
 
     override fun isPlayer(): Boolean = this.commandSource is Player
     override fun hasPermission(permission: String): Boolean = this.commandSource.hasPermission(permission)

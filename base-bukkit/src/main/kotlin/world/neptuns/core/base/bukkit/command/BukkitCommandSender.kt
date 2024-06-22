@@ -4,9 +4,13 @@ import net.kyori.adventure.text.Component
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import world.neptuns.core.base.api.command.NeptunCommandSender
+import world.neptuns.core.base.api.player.extension.uuid
+import java.util.*
 
-@Suppress("KotlinConstantConditions")
 class BukkitCommandSender(private val commandSender: CommandSender) : NeptunCommandSender {
+
+    override val uuid: UUID
+        get() = this.commandSender.uuid
 
     override fun isPlayer(): Boolean = this.commandSender is Player
     override fun hasPermission(permission: String): Boolean = this.commandSender.hasPermission(permission)
