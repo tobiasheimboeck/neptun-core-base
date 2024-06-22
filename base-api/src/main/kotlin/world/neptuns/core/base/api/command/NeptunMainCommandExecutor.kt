@@ -32,7 +32,7 @@ abstract class NeptunMainCommandExecutor : NeptunCommandCompletable {
         val subCommandParts = mutableListOf<String>()
 
         for ((neptunSubCommand, _) in this.subCommands) {
-            subCommandParts.add(neptunSubCommand.parts)
+            subCommandParts.add("${this.commandAnnotation?.name} ${neptunSubCommand.parts}")
         }
 
         return subCommandParts
