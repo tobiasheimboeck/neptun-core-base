@@ -27,7 +27,9 @@ object DataTypeUtil {
 
             result(value to null)
         } catch (e: Exception) {
-            result(null to dataType.name)
+            val textColorClass = TextColor::class.java
+            val dataTypeName = if (dataType.simpleName == textColorClass.simpleName) "hexString #[0-9a-fA-F]" else dataType.simpleName
+            result(null to dataTypeName)
         }
     }
 
