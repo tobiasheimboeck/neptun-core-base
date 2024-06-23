@@ -13,6 +13,7 @@ suspend fun NeptunCommandCompletable.generateSuggestions(args: List<String>, req
         val pos = pair.first
         val string = pair.second
 
+        if (args.size <= pos) continue
         if (args[pos].equals(string, true)) continue
 
         isFailed = true
