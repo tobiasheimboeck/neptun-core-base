@@ -26,7 +26,7 @@ class VelocityCommandExecutorAsync(private val neptunCommand: NeptunCommand) : S
         val sender = invocation.source()
         val neptunCommandSender = VelocityCommandSender(sender)
 
-        if (checkPermission(neptunCommandSender, sender, this.neptunCommand.permission)) {
+        if (!checkPermission(neptunCommandSender, sender, this.neptunCommand.permission)) {
             val defaultLangProperties = CoreBaseApi.defaultLangProperties
 
             NeptunCoreProvider.api.languageController.getLanguage(defaultLangProperties.langKey)?.let {
@@ -56,7 +56,7 @@ class VelocityCommandExecutorAsync(private val neptunCommand: NeptunCommand) : S
         val neptunSubCommandExecutor = neptunSubCommandData.first
         val neptunSubCommand = neptunSubCommandData.second
 
-        if (checkPermission(neptunCommandSender, sender, neptunSubCommand.permission))
+        if (!checkPermission(neptunCommandSender, sender, neptunSubCommand.permission))
             return
 
         neptunSubCommandExecutor.execute(neptunCommandSender, subCommandArgs)
@@ -67,7 +67,7 @@ class VelocityCommandExecutorAsync(private val neptunCommand: NeptunCommand) : S
         val sender = invocation.source()
         val neptunCommandSender = VelocityCommandSender(sender)
 
-        if (checkPermission(neptunCommandSender, sender, this.neptunCommand.permission)) return emptyList()
+        if (!checkPermission(neptunCommandSender, sender, this.neptunCommand.permission)) return emptyList()
 
         val args = invocation.arguments().toList()
 
@@ -81,7 +81,7 @@ class VelocityCommandExecutorAsync(private val neptunCommand: NeptunCommand) : S
 
         for (subCommandExecutor in this.neptunCommandInitializer.subCommandExecutors) {
             val subCommandAnnotation = subCommandExecutor::class.java.getAnnotation(NeptunSubCommand::class.java)!!
-            if (checkPermission(neptunCommandSender, sender, subCommandAnnotation.permission)) return emptyList()
+            if (!checkPermission(neptunCommandSender, sender, subCommandAnnotation.permission)) return emptyList()
 
             suggestions.addAll(subCommandExecutor.onTabComplete(neptunCommandSender, subCommandArgs))
         }
@@ -89,8 +89,10 @@ class VelocityCommandExecutorAsync(private val neptunCommand: NeptunCommand) : S
         return suggestions
     }
 
+    // hasPermission => isPlayer && (permissionEmpty || hasPermission(perm))
+
     private fun checkPermission(neptunCommandSender: NeptunCommandSender, sender: CommandSource, permission: String): Boolean {
-        return neptunCommandSender.isPlayer() && (permission != "") && (sender.hasPermission(permission))
+        return neptunCommandSender.isPlayer() && (permission == "" || sender.hasPermission(permission))
     }
 
 }

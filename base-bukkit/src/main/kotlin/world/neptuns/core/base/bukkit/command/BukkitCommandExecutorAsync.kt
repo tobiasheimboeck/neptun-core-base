@@ -29,10 +29,10 @@ class BukkitCommandExecutorAsync(private val neptunCommand: NeptunCommand) : Sus
         server.commandMap.register("", pluginCommand!!)
     }
 
-    override suspend fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
+    override suspend fun onCommand(sender: CommandSender, command: Command, label: String, arguments: Array<out String>): Boolean {
         val neptunCommandSender = BukkitCommandSender(sender)
 
-        if (checkPermission(neptunCommandSender, sender, this.neptunCommand.permission)) {
+        if (!checkPermission(neptunCommandSender, sender, this.neptunCommand.permission)) {
             val defaultLangProperties = CoreBaseApi.defaultLangProperties
 
             NeptunCoreProvider.api.languageController.getLanguage(defaultLangProperties.langKey)?.let {
@@ -41,6 +41,8 @@ class BukkitCommandExecutorAsync(private val neptunCommand: NeptunCommand) : Sus
 
             return false
         }
+
+        val args = arguments.toList()
 
         if (args.isEmpty()){
             this.neptunCommandInitializer.defaultExecute(neptunCommandSender)
@@ -66,12 +68,14 @@ class BukkitCommandExecutorAsync(private val neptunCommand: NeptunCommand) : Sus
         return true
     }
 
-    override suspend fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String> {
+    override suspend fun onTabComplete(sender: CommandSender, command: Command, alias: String, arguments: Array<out String>): List<String> {
         val neptunCommandSender = BukkitCommandSender(sender)
 
         if (checkPermission(neptunCommandSender, sender, this.neptunCommand.permission)) return emptyList()
 
-        if (args.isEmpty())
+        val args = arguments.toList()
+
+        if (args.isEmpty() || args.size == 1)
             return this.neptunCommandInitializer.onDefaultTabComplete(neptunCommandSender, args.toList())
 
         // subCommandParts removes the first element from a command: /perms group Admin info => group Admin info, because 'perms' is the main command!
@@ -81,7 +85,7 @@ class BukkitCommandExecutorAsync(private val neptunCommand: NeptunCommand) : Sus
 
         for (subCommandExecutor in this.neptunCommandInitializer.subCommandExecutors) {
             val subCommandAnnotation = subCommandExecutor::class.java.getAnnotation(NeptunSubCommand::class.java)!!
-            if (checkPermission(neptunCommandSender, sender, subCommandAnnotation.permission)) return emptyList()
+            if (!checkPermission(neptunCommandSender, sender, subCommandAnnotation.permission)) return emptyList()
 
             suggestions.addAll(subCommandExecutor.onTabComplete(neptunCommandSender, subCommandArgs))
         }
@@ -90,7 +94,7 @@ class BukkitCommandExecutorAsync(private val neptunCommand: NeptunCommand) : Sus
     }
 
     private fun checkPermission(neptunCommandSender: NeptunCommandSender, sender: CommandSender, permission: String): Boolean {
-        return neptunCommandSender.isPlayer() && (permission != "") && (sender.hasPermission(permission))
+        return neptunCommandSender.isPlayer() && (permission == "" || sender.hasPermission(permission))
     }
 
 }
