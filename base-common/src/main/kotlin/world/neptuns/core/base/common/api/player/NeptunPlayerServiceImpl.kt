@@ -44,6 +44,11 @@ class NeptunPlayerServiceImpl : NeptunPlayerService {
         return this.onlinePlayerCache.get(uuid) ?: this.onlinePlayerRepository.get(uuid).await()
     }
 
+    override suspend fun getOnlinePlayer(name: String): NeptunOnlinePlayer? {
+        return this.onlinePlayerCache.getAll { it.name.equals(name, true) }.firstOrNull()
+            ?: this.onlinePlayerRepository.getAll { it.name.equals(name, true) }.await().firstOrNull()
+    }
+
     override suspend fun getOnlinePlayersFromService(neptunService: NeptunService): List<NeptunOfflinePlayer> {
         return this.onlinePlayerCache.getAll { it.currentServiceName == neptunService.id }
     }

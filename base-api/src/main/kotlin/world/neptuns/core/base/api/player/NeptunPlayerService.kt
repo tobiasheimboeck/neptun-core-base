@@ -11,6 +11,8 @@ interface NeptunPlayerService : Controller<UUID, NeptunOfflinePlayer>, Updatable
     suspend fun isOnline(uuid: UUID): Boolean
 
     suspend fun getOnlinePlayer(uuid: UUID): NeptunOnlinePlayer?
+    suspend fun getOnlinePlayer(name: String): NeptunOnlinePlayer?
+
     suspend fun getOnlinePlayersFromService(neptunService: NeptunService): List<NeptunOfflinePlayer>
     suspend fun getOnlinePlayers(): List<NeptunOnlinePlayer>
 
