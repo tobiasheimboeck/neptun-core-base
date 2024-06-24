@@ -14,12 +14,10 @@ import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.properties.LanguagePropertiesService
 import world.neptuns.core.base.api.player.NeptunPlayerService
-import world.neptuns.core.base.common.api.language.properties.LanguagePropertiesImpl
-import world.neptuns.core.base.common.api.player.NeptunOfflinePlayerImpl
 
 
 class VelocityPlayerListener(
-    private val playerController: NeptunPlayerService,
+    private val playerService: NeptunPlayerService,
     private val languagePropertiesService: LanguagePropertiesService,
 ) {
 
@@ -36,7 +34,7 @@ class VelocityPlayerListener(
             .build()
     }
 
-    @Subscribe(order = PostOrder.EARLY) // PermissionSystem: FIRST, CoreSystem: EARLY
+    @Subscribe(order = PostOrder.EARLY)
     suspend fun onPlayerLogin(event: LoginEvent) {
         val player = event.player
         val property = player.gameProfile.properties.first()
@@ -56,8 +54,15 @@ class VelocityPlayerListener(
             return
         }
 
-        this.playerController.createOrLoadEntry(player.uniqueId, NeptunOfflinePlayerImpl.create(player.uniqueId, player.username, property.value, property.signature), podName)
-        this.languagePropertiesService.createOrLoadEntry(player.uniqueId, LanguagePropertiesImpl.create(player.uniqueId))
+        val onlinePlayer = this.playerService.loadOnlinePlayer(player.uniqueId, player.username, property.value, property.signature, podName).await()
+
+        if (onlinePlayer == null)
+            this.playerService.createOfflinePlayer(player.uniqueId, player.username, property.value, property.signature, podName)
+
+        val languageProperties = this.languagePropertiesService.loadLanguageProperties(player.uniqueId).await()
+
+        if (languageProperties == null)
+            this.languagePropertiesService.createLanguageProperties(player.uniqueId)
     }
 
     @Subscribe(order = PostOrder.LATE)
@@ -70,7 +75,7 @@ class VelocityPlayerListener(
             onlinePlayer.updateOnlineTime()
         }
 
-        this.playerController.unloadEntry(player.uniqueId)
-        this.languagePropertiesService.unloadEntry(player.uniqueId)
+        this.playerService.unloadOnlinePlayer(player.uniqueId)
+        this.languagePropertiesService.unloadLanguageProperties(player.uniqueId)
     }
 }

@@ -1,11 +1,6 @@
 package world.neptuns.core.base.common.api.player
 
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.insert
+import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
@@ -15,7 +10,8 @@ import world.neptuns.core.base.api.player.NeptunOfflinePlayer
 import world.neptuns.core.base.api.player.NeptunOnlinePlayer
 import world.neptuns.core.base.api.player.NeptunPlayerService
 import world.neptuns.core.base.common.api.skin.SkinProfileImpl
-import world.neptuns.core.base.common.repository.player.OfflinePlayerTable
+import world.neptuns.core.base.common.database.player.OfflinePlayerTable
+import world.neptuns.core.base.common.database.player.dao.OfflinePlayerEntity
 import world.neptuns.core.base.common.repository.player.OnlinePlayerCache
 import world.neptuns.core.base.common.repository.player.OnlinePlayerRepository
 import world.neptuns.streamline.api.NeptunStreamlineProvider
@@ -59,14 +55,20 @@ class NeptunPlayerServiceImpl : NeptunPlayerService {
 
     override suspend fun getOfflinePlayerAsync(uuid: UUID): Deferred<NeptunOfflinePlayer?> {
         return suspendedTransactionAsync(Dispatchers.IO) {
-            val resultRow = OfflinePlayerTable.selectAll().where { OfflinePlayerTable.uuid eq uuid }.limit(1).firstOrNull()
-            resultRow?.let { constructEntry(it) }
-        }
-    }
+            val playerEntity = OfflinePlayerEntity.find { OfflinePlayerTable.uuid eq uuid }.firstOrNull()
+                ?: return@suspendedTransactionAsync null
 
-    override suspend fun getOfflinePlayersAsync(): Deferred<List<NeptunOfflinePlayer>> {
-        return suspendedTransactionAsync(Dispatchers.IO) {
-            OfflinePlayerTable.selectAll().toList().map { constructEntry(it) }
+            NeptunOfflinePlayerImpl(
+                playerEntity.uuid,
+                playerEntity.name,
+                playerEntity.firstLoginTimestamp,
+                playerEntity.lastLoginTimestamp,
+                playerEntity.lastLogoutTimestamp,
+                playerEntity.onlineTime,
+                SkinProfileImpl(playerEntity.skinValue, playerEntity.skinSignature),
+                playerEntity.crystals,
+                playerEntity.shards
+            )
         }
     }
 
@@ -76,71 +78,96 @@ class NeptunPlayerServiceImpl : NeptunPlayerService {
         }
     }
 
-    override suspend fun createOrLoadEntry(key: UUID, defaultValue: NeptunOfflinePlayer?, vararg data: Any) {
+    override suspend fun createOfflinePlayer(uuid: UUID, name: String, skinValue: String, skinSignature: String, currentProxyName: String) {
+        val currentTime = System.currentTimeMillis()
+
         newSuspendedTransaction {
-            val resultRow = OfflinePlayerTable.selectAll().where { OfflinePlayerTable.uuid eq key }.limit(1).firstOrNull()
-            val loadedOfflinePlayer: NeptunOfflinePlayer
+            OfflinePlayerEntity.new {
+                this.uuid = uuid
+                this.name = name
+                this.firstLoginTimestamp = currentTime
+                this.lastLoginTimestamp = currentTime
+                this.lastLogoutTimestamp = 0L
+                this.onlineTime = 0L
+                this.crystals = 0L
+                this.shards = 0L
+                this.skinValue = skinValue
+                this.skinSignature = skinSignature
+            }
+        }
 
-            if (resultRow == null && defaultValue != null) {
-                OfflinePlayerTable.insert {
-                    it[this.uuid] = key
-                    it[this.name] = defaultValue.name
-                    it[this.firstLoginTimestamp] = defaultValue.firstLoginTimestamp
-                    it[this.lastLoginTimestamp] = defaultValue.lastLoginTimestamp
-                    it[this.lastLogoutTimestamp] = defaultValue.lastLogoutTimestamp
-                    it[this.onlineTime] = defaultValue.onlineTime
-                    it[this.crystals] = defaultValue.crystals
-                    it[this.shards] = defaultValue.shards
-                    it[this.skinValue] = defaultValue.skinProfile.value
-                    it[this.skinSignature] = defaultValue.skinProfile.signature
-                }
+        val offlinePlayer = NeptunOfflinePlayerImpl(
+            uuid,
+            name,
+            currentTime,
+            currentTime,
+            0L,
+            0L,
+            SkinProfileImpl(skinValue, skinSignature),
+            0L,
+            0L
+        )
 
-                loadedOfflinePlayer = defaultValue
+        val onlinePlayer = NeptunOnlinePlayerImpl.create(offlinePlayer, currentProxyName, "-")
+
+        cacheOnlinePlayer(uuid, onlinePlayer)
+        this.onlinePlayerRepository.insert(uuid, onlinePlayer)
+    }
+
+    override suspend fun loadOnlinePlayer(
+        uuid: UUID,
+        name: String,
+        skinValue: String,
+        skinSignature: String,
+        currentProxyName: String
+    ): Deferred<NeptunOnlinePlayer?> = withContext(Dispatchers.IO) {
+        val currentTime = System.currentTimeMillis()
+
+        suspendedTransactionAsync {
+            val existingOfflinePlayer = OfflinePlayerEntity.find { OfflinePlayerTable.uuid eq uuid }.firstOrNull()
+
+            if (existingOfflinePlayer == null) {
+                null
             } else {
-                loadedOfflinePlayer = constructEntry(resultRow!!)
+                val offlinePlayer = NeptunOfflinePlayerImpl(
+                    uuid,
+                    existingOfflinePlayer.name,
+                    existingOfflinePlayer.firstLoginTimestamp,
+                    existingOfflinePlayer.lastLoginTimestamp,
+                    existingOfflinePlayer.lastLogoutTimestamp,
+                    existingOfflinePlayer.onlineTime,
+                    SkinProfileImpl(existingOfflinePlayer.skinValue, existingOfflinePlayer.skinSignature),
+                    existingOfflinePlayer.crystals,
+                    existingOfflinePlayer.shards,
+                )
+
+                val onlinePlayer = NeptunOnlinePlayerImpl.create(offlinePlayer, currentProxyName, "-")
+
+                onlinePlayer.name = name
+                onlinePlayer.lastLoginTimestamp = currentTime
+                onlinePlayer.skinProfile.value = skinValue
+                onlinePlayer.skinProfile.signature = skinSignature
+                bulkUpdateEntry(NeptunOfflinePlayer.Update.ALL, uuid, onlinePlayer, false)
+
+                cacheOnlinePlayer(uuid, onlinePlayer)
+                onlinePlayerRepository.insert(uuid, onlinePlayer)
+
+                onlinePlayer
             }
-
-            val onlinePlayer = NeptunOnlinePlayerImpl.create(loadedOfflinePlayer, data[0] as String, "-")
-
-            if (defaultValue != null) {
-                onlinePlayer.name = defaultValue.name
-                onlinePlayer.lastLoginTimestamp = defaultValue.lastLoginTimestamp
-                onlinePlayer.skinProfile.value = defaultValue.skinProfile.value
-                onlinePlayer.skinProfile.signature = defaultValue.skinProfile.signature
-                bulkUpdateEntry(NeptunOfflinePlayer.Update.ALL, key, onlinePlayer, false)
-            }
-
-            cacheEntry(onlinePlayer.uuid, onlinePlayer)
-            onlinePlayerRepository.insert(onlinePlayer.uuid, onlinePlayer)
         }
     }
 
-    override suspend fun unloadEntry(key: UUID) {
-        this.onlinePlayerRepository.delete(key)
-        this.onlinePlayerCache.delete(key)
+    override suspend fun unloadOnlinePlayer(uuid: UUID) {
+        this.onlinePlayerRepository.delete(uuid)
+        this.onlinePlayerCache.delete(uuid)
     }
 
-    override fun constructEntry(resultRow: ResultRow): NeptunOfflinePlayer {
-        return NeptunOfflinePlayerImpl(
-            resultRow[OfflinePlayerTable.uuid],
-            resultRow[OfflinePlayerTable.name],
-            resultRow[OfflinePlayerTable.firstLoginTimestamp],
-            resultRow[OfflinePlayerTable.lastLoginTimestamp],
-            resultRow[OfflinePlayerTable.lastLogoutTimestamp],
-            resultRow[OfflinePlayerTable.onlineTime],
-            SkinProfileImpl(resultRow[OfflinePlayerTable.skinValue], resultRow[OfflinePlayerTable.skinSignature]),
-            resultRow[OfflinePlayerTable.crystals],
-            resultRow[OfflinePlayerTable.shards],
-        )
+    override suspend fun cacheOnlinePlayer(uuid: UUID, onlinePlayer: NeptunOnlinePlayer) {
+        this.onlinePlayerCache.insert(uuid, onlinePlayer)
     }
 
-    override fun cacheEntry(key: UUID, value: NeptunOfflinePlayer) {
-        this.onlinePlayerCache.insert(key, value as NeptunOnlinePlayer)
-
-    }
-
-    override fun removeEntryFromCache(key: UUID) {
-        this.onlinePlayerCache.delete(key)
+    override suspend fun removeCachedOnlinePlayer(uuid: UUID) {
+        this.onlinePlayerCache.delete(uuid)
     }
 
     override suspend fun bulkUpdateEntry(updateType: NeptunOfflinePlayer.Update, key: UUID, newValue: Any, updateCache: Boolean, result: (Unit) -> Unit) {

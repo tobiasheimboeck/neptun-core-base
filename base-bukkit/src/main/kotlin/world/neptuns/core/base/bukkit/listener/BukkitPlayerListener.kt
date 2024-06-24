@@ -38,7 +38,7 @@ class BukkitPlayerListener(
             onlinePlayer.currentServiceName = NeptunControllerProvider.api.podName()
 
             playerController.updateCachedEntry(NeptunOfflinePlayer.Update.CURRENT_SERVICE, player.uniqueId, onlinePlayer.currentServiceName)
-            playerController.cacheEntry(player.uniqueId, onlinePlayer)
+            playerController.cacheOnlinePlayer(player.uniqueId, onlinePlayer)
 
             val languageProperties = languagePropertiesService.getProperties(player.uniqueId)
 
@@ -47,7 +47,7 @@ class BukkitPlayerListener(
                 return@withContext
             }
 
-            languagePropertiesService.cacheEntry(player.uniqueId, languageProperties)
+            languagePropertiesService.cacheLanguageProperties(player.uniqueId, languageProperties)
         }
     }
 
@@ -55,8 +55,8 @@ class BukkitPlayerListener(
     suspend fun onPlayerQuit(event: PlayerQuitEvent) {
         val player = event.player
 
-        this.playerController.removeEntryFromCache(player.uniqueId)
-        this.languagePropertiesService.removeEntryFromCache(player.uniqueId)
+        this.playerController.removeCachedOnlinePlayer(player.uniqueId)
+        this.languagePropertiesService.removeLanguageProperties(player.uniqueId)
     }
 
 }

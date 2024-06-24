@@ -30,13 +30,13 @@ import world.neptuns.core.base.common.api.language.color.LanguageColorServiceImp
 import world.neptuns.core.base.common.api.language.properties.LanguagePropertiesServiceImpl
 import world.neptuns.core.base.common.api.player.NeptunPlayerServiceImpl
 import world.neptuns.core.base.common.api.utils.PageConverterImpl
+import world.neptuns.core.base.common.database.color.LanguageColorTable
+import world.neptuns.core.base.common.database.player.OfflinePlayerTable
+import world.neptuns.core.base.common.database.properties.LanguagePropertiesTable
 import world.neptuns.core.base.common.repository.color.LanguageColorCache
 import world.neptuns.core.base.common.repository.color.LanguageColorRepository
-import world.neptuns.core.base.common.repository.color.LanguageColorTable
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesCache
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesRepository
-import world.neptuns.core.base.common.repository.language.LanguagePropertiesTable
-import world.neptuns.core.base.common.repository.player.OfflinePlayerTable
 import world.neptuns.core.base.common.repository.player.OnlinePlayerCache
 import world.neptuns.core.base.common.repository.player.OnlinePlayerRepository
 import world.neptuns.streamline.api.NeptunStreamlineProvider

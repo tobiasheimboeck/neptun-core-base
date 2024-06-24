@@ -1,21 +1,18 @@
 package world.neptuns.core.base.common.api.language.properties
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
+import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import org.jetbrains.exposed.sql.update
 import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.color.LanguageColor
 import world.neptuns.core.base.api.language.color.LanguageColorRegistry
 import world.neptuns.core.base.api.language.properties.LanguageProperties
 import world.neptuns.core.base.api.language.properties.LanguagePropertiesService
+import world.neptuns.core.base.common.database.properties.LanguagePropertiesTable
+import world.neptuns.core.base.common.database.properties.dao.LanguagePropertiesEntity
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesCache
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesRepository
-import world.neptuns.core.base.common.repository.language.LanguagePropertiesTable
 import world.neptuns.streamline.api.NeptunStreamlineProvider
 import java.util.*
 
@@ -38,51 +35,68 @@ class LanguagePropertiesServiceImpl : LanguagePropertiesService {
         return this.languagePropertiesCache.get(uuid) ?: this.languagePropertiesRepository.get(uuid).await()
     }
 
-    override suspend fun createOrLoadEntry(key: UUID, defaultValue: LanguageProperties?, vararg data: Any) {
+    override suspend fun createLanguageProperties(uuid: UUID) {
+        val langKey = LangKey.defaultKey()
+        val primaryColor = LanguageColorRegistry.Default.GOLD
+        val secondaryColor = LanguageColorRegistry.Default.WHITE
+        val separatorColor = LanguageColorRegistry.Default.GRAY
+
         newSuspendedTransaction {
-            val resultRow = LanguagePropertiesTable.selectAll().where { LanguagePropertiesTable.uuid eq key }.limit(1).firstOrNull()
-            val loadedProperties: LanguageProperties
-
-            if (resultRow == null && defaultValue != null) {
-                LanguagePropertiesTable.insert {
-                    it[this.uuid] = key
-                    it[this.languageKey] = defaultValue.langKey.asString()
-                    it[this.primaryColor] = defaultValue.primaryColor.hexFormat
-                    it[this.secondaryColor] = defaultValue.secondaryColor.hexFormat
-                    it[this.separatorColor] = defaultValue.separatorColor.hexFormat
-                }
-
-                loadedProperties = defaultValue
-            } else {
-                loadedProperties = constructEntry(resultRow!!)
+            LanguagePropertiesEntity.new {
+                this.uuid = uuid
+                this.languageKey = langKey.asString()
+                this.primaryColor = primaryColor.hexFormat
+                this.secondaryColor = secondaryColor.hexFormat
+                this.separatorColor = separatorColor.hexFormat
             }
+        }
 
-            cacheEntry(key, loadedProperties)
-            languagePropertiesRepository.insert(key, loadedProperties)
+        val languageProperties = LanguagePropertiesImpl(
+            uuid,
+            langKey,
+            primaryColor,
+            secondaryColor,
+            separatorColor
+        )
+
+        cacheLanguageProperties(uuid, languageProperties)
+        this.languagePropertiesRepository.insert(uuid, languageProperties)
+    }
+
+    override suspend fun loadLanguageProperties(uuid: UUID): Deferred<LanguageProperties?> = withContext(Dispatchers.IO) {
+        suspendedTransactionAsync {
+            val existingLanguageProperties = LanguagePropertiesEntity.find { LanguagePropertiesTable.uuid eq uuid }.firstOrNull()
+
+            if (existingLanguageProperties == null) {
+                null
+            } else {
+                val languageProperties = LanguagePropertiesImpl(
+                    uuid,
+                    LangKey.fromString(existingLanguageProperties.languageKey),
+                    LanguageColorRegistry.Default.of(existingLanguageProperties.primaryColor)!!,
+                    LanguageColorRegistry.Default.of(existingLanguageProperties.secondaryColor)!!,
+                    LanguageColorRegistry.Default.of(existingLanguageProperties.separatorColor)!!
+                )
+
+                cacheLanguageProperties(uuid, languageProperties)
+                languagePropertiesRepository.insert(uuid, languageProperties)
+
+                languageProperties
+            }
         }
     }
 
-    override suspend fun unloadEntry(key: UUID) {
-        this.languagePropertiesRepository.delete(key)
-        this.languagePropertiesCache.delete(key)
+    override suspend fun unloadLanguageProperties(uuid: UUID) {
+        this.languagePropertiesRepository.delete(uuid)
+        this.languagePropertiesCache.delete(uuid)
     }
 
-    override fun constructEntry(resultRow: ResultRow): LanguageProperties {
-        return LanguagePropertiesImpl(
-            resultRow[LanguagePropertiesTable.uuid],
-            LangKey.fromString(resultRow[LanguagePropertiesTable.languageKey]),
-            LanguageColorRegistry.Default.of(resultRow[LanguagePropertiesTable.primaryColor])!!,
-            LanguageColorRegistry.Default.of(resultRow[LanguagePropertiesTable.secondaryColor])!!,
-            LanguageColorRegistry.Default.of(resultRow[LanguagePropertiesTable.separatorColor])!!
-        )
+    override suspend fun cacheLanguageProperties(uuid: UUID, languageProperties: LanguageProperties) {
+        this.languagePropertiesCache.insert(uuid, languageProperties)
     }
 
-    override fun cacheEntry(key: UUID, value: LanguageProperties) {
-        this.languagePropertiesCache.insert(key, value)
-    }
-
-    override fun removeEntryFromCache(key: UUID) {
-        this.languagePropertiesCache.delete(key)
+    override suspend fun removeLanguageProperties(uuid: UUID) {
+        this.languagePropertiesCache.delete(uuid)
     }
 
     override suspend fun bulkUpdateEntry(updateType: LanguageProperties.Update, key: UUID, newValue: Any, updateCache: Boolean, result: (Unit) -> Unit) {
