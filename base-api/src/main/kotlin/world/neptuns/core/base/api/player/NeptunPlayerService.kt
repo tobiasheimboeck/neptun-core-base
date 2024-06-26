@@ -14,8 +14,10 @@ interface NeptunPlayerService : Updatable<UUID, NeptunOfflinePlayer.Update, Any>
 
     suspend fun getOnlinePlayersFromService(neptunService: NeptunService): List<NeptunOfflinePlayer>
     suspend fun getOnlinePlayers(): List<NeptunOnlinePlayer>
+    suspend fun getOnlinePlayerNames(): List<String>
 
     suspend fun getOfflinePlayerAsync(uuid: UUID): Deferred<NeptunOfflinePlayer?>
+    suspend fun getOfflinePlayerAsync(name: String): Deferred<NeptunOfflinePlayer?>
 
     suspend fun getGloballyRegisteredPlayersAmount(): Deferred<Int>
 

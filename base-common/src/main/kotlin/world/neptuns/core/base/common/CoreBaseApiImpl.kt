@@ -38,6 +38,7 @@ import world.neptuns.core.base.common.repository.color.LanguageColorRepository
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesCache
 import world.neptuns.core.base.common.repository.language.LanguagePropertiesRepository
 import world.neptuns.core.base.common.repository.player.OnlinePlayerCache
+import world.neptuns.core.base.common.repository.player.OnlinePlayerNameRepository
 import world.neptuns.core.base.common.repository.player.OnlinePlayerRepository
 import world.neptuns.streamline.api.NeptunStreamlineProvider
 import java.nio.file.Path
@@ -66,6 +67,7 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
 
         val repositoryLoader = NeptunStreamlineProvider.api.repositoryLoader
         repositoryLoader.register(OnlinePlayerRepository(redissonClient))
+        repositoryLoader.register(OnlinePlayerNameRepository(redissonClient))
         repositoryLoader.register(LanguagePropertiesRepository(redissonClient))
         repositoryLoader.register(LanguageColorRepository(redissonClient))
 

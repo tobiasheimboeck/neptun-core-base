@@ -25,6 +25,7 @@ internal class PacketListener(private val proxyServer: ProxyServer) {
                 placeholders.add(tagResolver)
             }
 
+            println(packet.key)
             playerAdapter.sendMessage(player, LineKey.key(packet.key), *placeholders.toTypedArray())
         }
 

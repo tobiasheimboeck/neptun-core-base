@@ -13,6 +13,7 @@ import world.neptuns.core.base.common.api.skin.SkinProfileImpl
 import world.neptuns.core.base.common.database.player.OfflinePlayerTable
 import world.neptuns.core.base.common.database.player.dao.OfflinePlayerEntity
 import world.neptuns.core.base.common.repository.player.OnlinePlayerCache
+import world.neptuns.core.base.common.repository.player.OnlinePlayerNameRepository
 import world.neptuns.core.base.common.repository.player.OnlinePlayerRepository
 import world.neptuns.streamline.api.NeptunStreamlineProvider
 import java.util.*
@@ -20,6 +21,7 @@ import java.util.*
 @Suppress("OPT_IN_USAGE")
 class NeptunPlayerServiceImpl : NeptunPlayerService {
 
+    private val onlinePlayerNameRepository = NeptunStreamlineProvider.api.repositoryLoader.get(OnlinePlayerNameRepository::class.java)!!
     private val onlinePlayerRepository = NeptunStreamlineProvider.api.repositoryLoader.get(OnlinePlayerRepository::class.java)!!
     private val onlinePlayerCache = NeptunStreamlineProvider.api.cacheLoader.get(OnlinePlayerCache::class.java)!!
 
@@ -53,9 +55,32 @@ class NeptunPlayerServiceImpl : NeptunPlayerService {
         return this.onlinePlayerCache.getAll().ifEmpty { this.onlinePlayerRepository.getAll().await() }
     }
 
+    override suspend fun getOnlinePlayerNames(): List<String> {
+        return this.onlinePlayerNameRepository.getAll().await()
+    }
+
     override suspend fun getOfflinePlayerAsync(uuid: UUID): Deferred<NeptunOfflinePlayer?> {
         return suspendedTransactionAsync(Dispatchers.IO) {
             val playerEntity = OfflinePlayerEntity.find { OfflinePlayerTable.uuid eq uuid }.firstOrNull()
+                ?: return@suspendedTransactionAsync null
+
+            NeptunOfflinePlayerImpl(
+                playerEntity.uuid,
+                playerEntity.name,
+                playerEntity.firstLoginTimestamp,
+                playerEntity.lastLoginTimestamp,
+                playerEntity.lastLogoutTimestamp,
+                playerEntity.onlineTime,
+                SkinProfileImpl(playerEntity.skinValue, playerEntity.skinSignature),
+                playerEntity.crystals,
+                playerEntity.shards
+            )
+        }
+    }
+
+    override suspend fun getOfflinePlayerAsync(name: String): Deferred<NeptunOfflinePlayer?> {
+        return suspendedTransactionAsync(Dispatchers.IO) {
+            val playerEntity = OfflinePlayerEntity.find { OfflinePlayerTable.name eq name }.firstOrNull()
                 ?: return@suspendedTransactionAsync null
 
             NeptunOfflinePlayerImpl(

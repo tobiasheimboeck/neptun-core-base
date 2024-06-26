@@ -14,12 +14,16 @@ import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.properties.LanguagePropertiesService
 import world.neptuns.core.base.api.player.NeptunPlayerService
+import world.neptuns.core.base.common.repository.player.OnlinePlayerNameRepository
+import world.neptuns.streamline.api.NeptunStreamlineProvider
 
 
 class VelocityPlayerListener(
     private val playerService: NeptunPlayerService,
     private val languagePropertiesService: LanguagePropertiesService,
 ) {
+
+    private val onlineNameNameRepo = NeptunStreamlineProvider.api.repositoryLoader.get(OnlinePlayerNameRepository::class.java)!!
 
     @Subscribe
     suspend fun onServerListPing(event: ProxyPingEvent) {
@@ -54,6 +58,11 @@ class VelocityPlayerListener(
             return
         }
 
+        if (!this.onlineNameNameRepo.contains(player.username).await()) {
+            @Suppress("DeferredResultUnused")
+            this.onlineNameNameRepo.insert(player.username)
+        }
+
         val onlinePlayer = this.playerService.loadOnlinePlayer(player.uniqueId, player.username, property.value, property.signature, podName).await()
 
         if (onlinePlayer == null)
@@ -75,6 +84,7 @@ class VelocityPlayerListener(
             onlinePlayer.updateOnlineTime()
         }
 
+        this.onlineNameNameRepo.delete(player.username)
         this.playerService.unloadOnlinePlayer(player.uniqueId)
         this.languagePropertiesService.unloadLanguageProperties(player.uniqueId)
     }
