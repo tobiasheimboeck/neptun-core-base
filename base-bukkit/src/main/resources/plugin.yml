@@ -1,6 +1,6 @@
 name: neptun_core_base
 version: 1.0
-api-version: "1.20"
+api-version: "1.21"
 main: world.neptuns.core.base.bukkit.NeptunBukkitPlugin
 author: TGamings
 depend:

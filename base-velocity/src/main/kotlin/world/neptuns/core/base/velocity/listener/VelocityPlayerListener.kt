@@ -46,7 +46,7 @@ class VelocityPlayerListener(
 
         val defaultLanguage = NeptunCoreProvider.api.languageController.getLanguage(LangKey.key("en", "US")) ?: return
 
-        if (player.protocolVersion != ProtocolVersion.MINECRAFT_1_20_3) {
+        if (player.protocolVersion != ProtocolVersion.MINECRAFT_1_21) {
             player.disconnect(defaultLanguage.line(CoreBaseApi.defaultLangProperties, LineKey.key("core.base.proxy.protocol.wrong_version")))
             return
         }
