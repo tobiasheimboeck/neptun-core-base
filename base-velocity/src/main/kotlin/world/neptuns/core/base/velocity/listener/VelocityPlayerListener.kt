@@ -1,6 +1,7 @@
 package world.neptuns.core.base.velocity.listener
 
 import com.velocitypowered.api.event.PostOrder
+import com.velocitypowered.api.event.ResultedEvent
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.connection.DisconnectEvent
 import com.velocitypowered.api.event.connection.LoginEvent
@@ -54,7 +55,7 @@ class VelocityPlayerListener(
         val serverGroup = NeptunControllerProvider.api.serviceGroupController.getServiceGroup("proxy") ?: return
 
         if (serverGroup.inMaintenance && !player.hasPermission("core.maintenance.bypass")) {
-            player.disconnect(defaultLanguage.line(CoreBaseApi.defaultLangProperties, LineKey.key("core.base.proxy.maintenance.forbidden")))
+            event.result = ResultedEvent.ComponentResult.denied(defaultLanguage.line(CoreBaseApi.defaultLangProperties, LineKey.key("core.base.proxy.maintenance.forbidden")))
             return
         }
 
