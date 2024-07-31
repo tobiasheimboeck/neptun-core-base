@@ -20,6 +20,8 @@ class NeptunBukkitPlugin : SuspendingJavaPlugin(), NeptunPlugin {
     override lateinit var namespace: LangNamespace
 
     override suspend fun onEnableAsync() {
+        instance = this
+
         val coreBaseApi = CoreBaseApiImpl(minecraftDispatcher, this.dataFolder.toPath())
         NeptunCoreProvider.api = coreBaseApi
 
@@ -36,6 +38,12 @@ class NeptunBukkitPlugin : SuspendingJavaPlugin(), NeptunPlugin {
         NeptunCoreBukkitProvider.api = coreBaseBukkitApi
 
         this.server.pluginManager.registerSuspendingEvents(BukkitPlayerListener(this, coreBaseApi.playerService, coreBaseApi.languagePropertiesService), this)
+    }
+
+    companion object {
+        @JvmStatic
+        lateinit var instance: NeptunBukkitPlugin
+            private set
     }
 
 }

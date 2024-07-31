@@ -29,6 +29,7 @@ interface CoreBaseApi {
     val languageColorService: LanguageColorService
     val playerService: NeptunPlayerService
 
+    var commandExecutorClass: Class<*>
     val commandController: NeptunCommandController
 
     fun newLanguageKey(countryCode: String, languageCode: String): LangKey

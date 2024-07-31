@@ -1,13 +1,8 @@
 package world.neptuns.core.base.bukkit.command
 
-import com.github.shynixn.mccoroutine.bukkit.SuspendingCommandExecutor
-import com.github.shynixn.mccoroutine.bukkit.SuspendingTabCompleter
-import com.github.shynixn.mccoroutine.bukkit.setSuspendingExecutor
-import com.github.shynixn.mccoroutine.bukkit.setSuspendingTabCompleter
-import org.bukkit.Bukkit
+import com.github.shynixn.mccoroutine.bukkit.*
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
-import org.bukkit.command.PluginCommand
 import world.neptuns.core.base.api.CoreBaseApi
 import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.command.NeptunCommand
@@ -15,21 +10,22 @@ import world.neptuns.core.base.api.command.NeptunCommandSender
 import world.neptuns.core.base.api.command.subcommand.NeptunSubCommand
 import world.neptuns.core.base.api.language.LineKey
 
-class BukkitCommandExecutorAsync(private val neptunCommand: NeptunCommand) : SuspendingCommandExecutor, SuspendingTabCompleter {
+class BukkitCommandExecutorAsync(private val neptunCommand: NeptunCommand, private val plugin: SuspendingJavaPlugin) : SuspendingCommandExecutor, SuspendingTabCompleter {
 
-    private val neptunCommandInitializer = NeptunCoreProvider.api.commandController.getCommandInitializer(this.neptunCommand.name)!!
+    private val mainCommandExecutor = NeptunCoreProvider.api.commandController.getCommandInitializer(this.neptunCommand.name)!!
 
     init {
-        val server = Bukkit.getServer()
-        val pluginCommand: PluginCommand? = server.getPluginCommand(this.neptunCommand.name)
-        pluginCommand?.setSuspendingExecutor(this)
-        pluginCommand?.setSuspendingTabCompleter(this)
-        pluginCommand?.setAliases(this.neptunCommand.aliases.toList())
-        pluginCommand?.permission = this.neptunCommand.permission
-        server.commandMap.register("", pluginCommand!!)
+        val pluginCommand = this.plugin.getCommand(this.neptunCommand.name)
+            ?: throw NullPointerException("Command ${this.neptunCommand.name} is not registered in the plugin.yml of plugin ${this.plugin.name}")
+
+        pluginCommand.setSuspendingExecutor(this)
+        pluginCommand.setSuspendingTabCompleter(this)
+        pluginCommand.setAliases(this.neptunCommand.aliases.toList())
+        pluginCommand.permission = this.neptunCommand.permission
+        this.plugin.server.commandMap.register("", pluginCommand)
     }
 
-    override suspend fun onCommand(sender: CommandSender, command: Command, label: String, arguments: Array<out String>): Boolean {
+    override suspend fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         val neptunCommandSender = BukkitCommandSender(sender)
 
         if (!checkPermission(neptunCommandSender, sender, this.neptunCommand.permission)) {
@@ -42,19 +38,19 @@ class BukkitCommandExecutorAsync(private val neptunCommand: NeptunCommand) : Sus
             return false
         }
 
-        val args = arguments.toList()
+        val arguments = args.toList()
 
-        if (args.isEmpty()){
-            this.neptunCommandInitializer.defaultExecute(neptunCommandSender)
+        if (arguments.isEmpty()) {
+            this.mainCommandExecutor.defaultExecute(neptunCommandSender)
             return true
         }
 
         // subCommandParts removes the first element from a command: /perms group Admin info => group Admin info, because 'perms' is the main command!
-        val subCommandParts = args.drop(0)
-        val neptunSubCommandData = this.neptunCommandInitializer.findValidSubCommandData(subCommandParts)
+        val subCommandParts = arguments.drop(0)
+        val neptunSubCommandData = this.mainCommandExecutor.findValidSubCommandData(subCommandParts)
 
         if (neptunSubCommandData == null) {
-            this.neptunCommandInitializer.defaultExecute(neptunCommandSender)
+            this.mainCommandExecutor.defaultExecute(neptunCommandSender)
             return true
         }
 
@@ -68,22 +64,22 @@ class BukkitCommandExecutorAsync(private val neptunCommand: NeptunCommand) : Sus
         return true
     }
 
-    override suspend fun onTabComplete(sender: CommandSender, command: Command, alias: String, arguments: Array<out String>): List<String> {
+    override suspend fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String> {
         val neptunCommandSender = BukkitCommandSender(sender)
 
         if (checkPermission(neptunCommandSender, sender, this.neptunCommand.permission)) return emptyList()
 
-        val args = arguments.toList()
+        val arguments = args.toList()
 
-        if (args.isEmpty() || args.size == 1)
-            return this.neptunCommandInitializer.onDefaultTabComplete(neptunCommandSender, args.toList())
+        if (arguments.isEmpty() || arguments.size == 1)
+            return this.mainCommandExecutor.onDefaultTabComplete(neptunCommandSender, arguments.toList())
 
         // subCommandParts removes the first element from a command: /perms group Admin info => group Admin info, because 'perms' is the main command!
-        val subCommandArgs = args.drop(0)
+        val subCommandArgs = arguments.drop(0)
 
         val suggestions = mutableListOf<String>()
 
-        for (subCommandExecutor in this.neptunCommandInitializer.subCommandExecutors) {
+        for (subCommandExecutor in this.mainCommandExecutor.subCommandExecutors) {
             val subCommandAnnotation = subCommandExecutor::class.java.getAnnotation(NeptunSubCommand::class.java)!!
             if (!checkPermission(neptunCommandSender, sender, subCommandAnnotation.permission)) return emptyList()
 

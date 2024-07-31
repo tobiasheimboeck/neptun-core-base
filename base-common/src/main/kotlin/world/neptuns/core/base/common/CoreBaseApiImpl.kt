@@ -55,8 +55,8 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
 
     private lateinit var playerAdapter: PlayerAdapter
 
+    override lateinit var commandExecutorClass: Class<*>
     override val commandController: NeptunCommandController = NeptunCommandControllerImpl()
-    private lateinit var commandExecutorClass: Class<*>
 
     init {
         val redissonClient = NeptunControllerProvider.api.redissonClient
