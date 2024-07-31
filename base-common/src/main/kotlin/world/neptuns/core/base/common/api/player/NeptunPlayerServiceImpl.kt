@@ -4,7 +4,6 @@ import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
-import org.jetbrains.exposed.sql.update
 import world.neptuns.controller.api.service.NeptunService
 import world.neptuns.core.base.api.player.NeptunOfflinePlayer
 import world.neptuns.core.base.api.player.NeptunOnlinePlayer
@@ -197,33 +196,78 @@ class NeptunPlayerServiceImpl : NeptunPlayerService {
 
     override suspend fun bulkUpdateEntry(updateType: NeptunOfflinePlayer.Update, key: UUID, newValue: Any, updateCache: Boolean, result: (Unit) -> Unit) {
         newSuspendedTransaction(Dispatchers.IO) {
-            OfflinePlayerTable.update({ OfflinePlayerTable.uuid eq key }) {
-                when (updateType) {
-                    NeptunOfflinePlayer.Update.ALL -> {
-                        if (newValue !is NeptunOfflinePlayer)
-                            throw UnsupportedOperationException("Object has to be an NeptunOfflinePlayer instance!")
+            val existingOfflinePlayer = OfflinePlayerEntity.find { OfflinePlayerTable.uuid eq key }.firstOrNull()
 
-                        it[name] = newValue.name
-                        it[lastLoginTimestamp] = newValue.lastLoginTimestamp
-                        it[lastLogoutTimestamp] = newValue.lastLogoutTimestamp
-                        it[onlineTime] = newValue.onlineTime
-                        it[skinValue] = newValue.skinProfile.value
-                        it[skinSignature] = newValue.skinProfile.signature
-                        it[crystals] = newValue.crystals
-                        it[shards] = newValue.shards
+            when (updateType) {
+                NeptunOfflinePlayer.Update.ALL -> {
+                    if (newValue !is NeptunOfflinePlayer)
+                        throw UnsupportedOperationException("'newValue' has to be an NeptunOfflinePlayer instance!")
+
+                    existingOfflinePlayer?.apply {
+                        this.name = newValue.name
+                        this.firstLoginTimestamp = newValue.firstLoginTimestamp
+                        this.lastLoginTimestamp = newValue.lastLoginTimestamp
+                        this.lastLogoutTimestamp = newValue.lastLogoutTimestamp
+                        this.onlineTime = newValue.onlineTime
+                        this.skinValue = newValue.skinProfile.value
+                        this.skinSignature = newValue.skinProfile.signature
+                        this.crystals = newValue.crystals
+                        this.shards = newValue.shards
                     }
-
-                    NeptunOfflinePlayer.Update.NAME -> it[name] = newValue as String
-                    NeptunOfflinePlayer.Update.LAST_LOGIN_TIMESTAMP -> it[lastLoginTimestamp] = newValue as Long
-                    NeptunOfflinePlayer.Update.LAST_LOGOUT_TIMESTAMP -> it[lastLogoutTimestamp] = newValue as Long
-                    NeptunOfflinePlayer.Update.ONLINE_TIME -> it[onlineTime] = newValue as Long
-                    NeptunOfflinePlayer.Update.SKIN_VALUE -> it[skinValue] = newValue as String
-                    NeptunOfflinePlayer.Update.SKIN_SIGNATURE -> it[skinSignature] = newValue as String
-                    NeptunOfflinePlayer.Update.CRYSTALS -> it[crystals] = newValue as Long
-                    NeptunOfflinePlayer.Update.SHARDS -> it[shards] = newValue as Long
-                    NeptunOfflinePlayer.Update.CURRENT_SERVICE -> {}
                 }
+
+                NeptunOfflinePlayer.Update.NAME -> {
+                    existingOfflinePlayer?.apply {
+                        this.name = newValue as String
+                    }
+                }
+
+                NeptunOfflinePlayer.Update.LAST_LOGIN_TIMESTAMP -> {
+                    existingOfflinePlayer?.apply {
+                        this.lastLoginTimestamp = newValue as Long
+                    }
+                }
+
+                NeptunOfflinePlayer.Update.LAST_LOGOUT_TIMESTAMP -> {
+                    existingOfflinePlayer?.apply {
+                        this.lastLogoutTimestamp = newValue as Long
+                    }
+                }
+
+                NeptunOfflinePlayer.Update.ONLINE_TIME -> {
+                    existingOfflinePlayer?.apply {
+                        this.onlineTime = newValue as Long
+                    }
+                }
+
+                NeptunOfflinePlayer.Update.SKIN_VALUE -> {
+                    existingOfflinePlayer?.apply {
+                        this.skinValue = newValue as String
+                    }
+                }
+
+                NeptunOfflinePlayer.Update.SKIN_SIGNATURE -> {
+                    existingOfflinePlayer?.apply {
+                        this.skinSignature = newValue as String
+                    }
+                }
+
+                NeptunOfflinePlayer.Update.CRYSTALS -> {
+                    existingOfflinePlayer?.apply {
+                        this.crystals = newValue as Long
+                    }
+                }
+
+                NeptunOfflinePlayer.Update.SHARDS -> {
+                    existingOfflinePlayer?.apply {
+                        this.shards = newValue as Long
+                    }
+                }
+
+                NeptunOfflinePlayer.Update.CURRENT_SERVICE -> TODO("Unimplemented because offline players have no current service!")
             }
+
+            commit()
         }
 
         if (updateCache) updateCachedEntry(updateType, key, newValue, result)

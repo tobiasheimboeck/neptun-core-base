@@ -14,7 +14,9 @@ import world.neptuns.core.base.api.NeptunCoreProvider
 import world.neptuns.core.base.api.language.LangKey
 import world.neptuns.core.base.api.language.LineKey
 import world.neptuns.core.base.api.language.properties.LanguagePropertiesService
+import world.neptuns.core.base.api.player.NeptunOfflinePlayer
 import world.neptuns.core.base.api.player.NeptunPlayerService
+import world.neptuns.core.base.common.packet.PlayerDisconnectFromProxyPacket
 import world.neptuns.core.base.common.repository.player.OnlinePlayerNameRepository
 import world.neptuns.streamline.api.NeptunStreamlineProvider
 
@@ -24,7 +26,7 @@ class VelocityPlayerListener(
     private val languagePropertiesService: LanguagePropertiesService,
 ) {
 
-    private val onlineNameNameRepo = NeptunStreamlineProvider.api.repositoryLoader.get(OnlinePlayerNameRepository::class.java)!!
+    private val onlineNameRepo = NeptunStreamlineProvider.api.repositoryLoader.get(OnlinePlayerNameRepository::class.java)!!
 
     @Subscribe
     suspend fun onServerListPing(event: ProxyPingEvent) {
@@ -59,9 +61,9 @@ class VelocityPlayerListener(
             return
         }
 
-        if (!this.onlineNameNameRepo.contains(player.username).await()) {
+        if (!this.onlineNameRepo.contains(player.username).await()) {
             @Suppress("DeferredResultUnused")
-            this.onlineNameNameRepo.insert(player.username)
+            this.onlineNameRepo.insert(player.username)
         }
 
         val onlinePlayer = this.playerService.loadOnlinePlayer(player.uniqueId, player.username, property.value, property.signature, podName).await()
@@ -78,14 +80,15 @@ class VelocityPlayerListener(
     @Subscribe(order = PostOrder.LATE)
     suspend fun onPlayerDisconnect(event: DisconnectEvent) {
         val player = event.player
-        val onlinePlayer = NeptunCoreProvider.api.playerService.getOnlinePlayer(player.uniqueId)
 
-        if (onlinePlayer != null) {
-            onlinePlayer.lastLogoutTimestamp = System.currentTimeMillis()
-            onlinePlayer.updateOnlineTime()
-        }
+        NeptunStreamlineProvider.api.packetController.sendPacket(PlayerDisconnectFromProxyPacket(player.uniqueId))
+        this.onlineNameRepo.delete(player.username)
 
-        this.onlineNameNameRepo.delete(player.username)
+        val onlinePlayer = NeptunCoreProvider.api.playerService.getOnlinePlayer(player.uniqueId) ?: return
+        onlinePlayer.lastLogoutTimestamp = System.currentTimeMillis()
+        onlinePlayer.updateOnlineTime()
+
+        this.playerService.bulkUpdateEntry(NeptunOfflinePlayer.Update.ALL, onlinePlayer.uuid, onlinePlayer, false)
         this.playerService.unloadOnlinePlayer(player.uniqueId)
         this.languagePropertiesService.unloadLanguageProperties(player.uniqueId)
     }
