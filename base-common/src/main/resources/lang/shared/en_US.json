@@ -10,6 +10,7 @@
   "core.base.usage.title": "<gold>Command Overview <gray>(<title>)",
   "core.base.usage": "<blue>► <white>/<command>",
 
+  "core.base.element_list.no_elements": "<prefix> <gray>No elements found...",
   "core.base.element_list.title": "<prefix> <gray>All loaded elements:",
   "core.base.element_list": "<blue>► <white><string>"
 }

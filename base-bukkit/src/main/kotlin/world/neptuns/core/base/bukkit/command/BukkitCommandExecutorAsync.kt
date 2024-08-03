@@ -22,6 +22,7 @@ class BukkitCommandExecutorAsync(private val neptunCommand: NeptunCommand, priva
         pluginCommand.setSuspendingTabCompleter(this)
         pluginCommand.setAliases(this.neptunCommand.aliases.toList())
         pluginCommand.permission = this.neptunCommand.permission
+
         this.plugin.server.commandMap.register("", pluginCommand)
     }
 
@@ -57,7 +58,7 @@ class BukkitCommandExecutorAsync(private val neptunCommand: NeptunCommand, priva
         val neptunSubCommandExecutor = neptunSubCommandData.first
         val neptunSubCommand = neptunSubCommandData.second
 
-        if (checkPermission(neptunCommandSender, sender, neptunSubCommand.permission))
+        if (!checkPermission(neptunCommandSender, sender, neptunSubCommand.permission))
             return false
 
         neptunSubCommandExecutor.execute(neptunCommandSender, subCommandParts)
@@ -66,8 +67,7 @@ class BukkitCommandExecutorAsync(private val neptunCommand: NeptunCommand, priva
 
     override suspend fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String> {
         val neptunCommandSender = BukkitCommandSender(sender)
-
-        if (checkPermission(neptunCommandSender, sender, this.neptunCommand.permission)) return emptyList()
+        if (!checkPermission(neptunCommandSender, sender, this.neptunCommand.permission)) return emptyList()
 
         val arguments = args.toList()
 

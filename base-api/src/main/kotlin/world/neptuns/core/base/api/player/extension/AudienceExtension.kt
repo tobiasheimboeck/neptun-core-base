@@ -38,15 +38,16 @@ suspend fun Audience.getLanguage(): Language {
 }
 
 suspend fun Audience.getLanguageProperties(): LanguageProperties {
-    val languageProperties = toOnlinePlayer().getLanguageProperties() ?: return CoreBaseApi.defaultLangProperties
-    return languageProperties
+    return toOnlinePlayer().getLanguageProperties() ?: return CoreBaseApi.defaultLangProperties
 }
 
 suspend fun <T> Audience.sendElementList(elements: Collection<T>, stringProvider: (T) -> String) {
-    val language = getLanguage()
-    val properties = getLanguageProperties()
+    if (elements.isEmpty()) {
+        sendMessage(LineKey.key("core.base.element_list.no_elements"))
+        return
+    }
 
-    val pair = language.elementList(properties, elements, stringProvider)
+    val pair = getLanguage().elementList(getLanguageProperties(), elements, stringProvider)
     sendMessage(pair.first)
     pair.second.forEach { sendMessage(it) }
 }
