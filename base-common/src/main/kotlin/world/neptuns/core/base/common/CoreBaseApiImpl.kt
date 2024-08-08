@@ -1,5 +1,6 @@
 package world.neptuns.core.base.common
 
+import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 import world.neptuns.controller.api.NeptunControllerProvider
@@ -44,7 +45,7 @@ import world.neptuns.streamline.api.NeptunStreamlineProvider
 import java.nio.file.Path
 import kotlin.coroutines.CoroutineContext
 
-class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, override val dataFolder: Path) : CoreBaseApi {
+class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, override val dataFolder: Path, vararg tables: IntIdTable) : CoreBaseApi {
 
     override val fileService: FileService = FileControllerImpl()
     override val languageController: LanguageController = LanguageControllerImpl()
@@ -62,7 +63,7 @@ class CoreBaseApiImpl(override val minecraftDispatcher: CoroutineContext, overri
         val redissonClient = NeptunControllerProvider.api.redissonClient
 
         transaction {
-            SchemaUtils.create(LanguageColorTable, LanguagePropertiesTable, OfflinePlayerTable)
+            SchemaUtils.create(LanguageColorTable, LanguagePropertiesTable, OfflinePlayerTable, *tables)
         }
 
         val repositoryLoader = NeptunStreamlineProvider.api.repositoryLoader

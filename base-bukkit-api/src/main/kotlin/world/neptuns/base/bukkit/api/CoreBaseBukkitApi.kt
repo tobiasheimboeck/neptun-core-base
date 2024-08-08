@@ -4,6 +4,7 @@ import org.bukkit.entity.Player
 import world.neptuns.base.bukkit.api.bossbar.BossbarController
 import world.neptuns.base.bukkit.api.hotbar.HotbarController
 import world.neptuns.base.bukkit.api.item.ItemDataController
+import world.neptuns.base.bukkit.api.location.WorldLocationService
 import world.neptuns.base.bukkit.api.metadata.MetadataController
 import world.neptuns.base.bukkit.api.metadata.PersistentDataController
 import world.neptuns.base.bukkit.api.scoreboard.SidebarBuilder
@@ -19,6 +20,8 @@ interface CoreBaseBukkitApi {
 
     val hotbarController: HotbarController
     val sidebarController: SidebarController
+
+    val locationService: WorldLocationService
 
     fun newSidebar(viewer: Player): SidebarBuilder
 
